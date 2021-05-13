@@ -19,7 +19,8 @@ import os
 def time_to_string(t):
     return t.strftime("%Y.%m.%d/%H.%M.%S")
 
-def make_dirs(odir='saved-files', folder_name=''): 
-    saving_directory = os.path.join(odir, folder_name) 
-    os.makedirs(saving_directory, exist_ok=True) 
-    return saving_directory
+def make_dir(base_dir='saved_files', directory_name=''): 
+    directory = os.path.join(base_dir, directory_name) 
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    

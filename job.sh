@@ -13,8 +13,6 @@
 
 #========================================================
 
-export HDF5_USE_FILE_LOCKING='FALSE'  # for exporting hd5 files
-
 python main.py \
 --data_path './data.pickle' \
 --pid 360 \

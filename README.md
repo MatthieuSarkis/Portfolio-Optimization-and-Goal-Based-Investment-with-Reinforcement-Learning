@@ -1,15 +1,15 @@
 ## Notes
-
-* [Video d'explication du projet](https://challengedata.ens.fr/participants/challenges/60/)
-* Recurrent (maybe variational?) autoencoder for dimensionality reduction? Followed by dense layers.
-* Simple dimensional reduction with PCA, Isomap?
-* For the recurrent autoencoder, first extract the 2d time sequence. Then join the output of the autoencoder together with the 2 unknown quantities and feed them into a dense neural network.
-* Think of using boosting as cfm did.
-
-
 ## Requirements
 
 * Python 3.8+
+* numpy
+* pandas
+* jupyter
+* sklearn
+* matplotlib
+* seaborn
+* pytorch
+* yfinance
 
 ```shell
 pip install -r requirements.txt

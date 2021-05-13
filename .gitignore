@@ -1,6 +1,6 @@
 .vscode/
 .DS_Store
 .env/
-data.pickle
+data/
 saved_files/
 __pycache__/

@@ -1,7 +1,8 @@
-tensorflow
 numpy
 pandas
 jupyter
+sklearn
 matplotlib
 seaborn
-sklearn
+torch
+yfinance
