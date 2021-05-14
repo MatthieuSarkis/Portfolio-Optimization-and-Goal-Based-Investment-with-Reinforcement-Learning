@@ -1,8 +1,25 @@
+# -*- coding: utf-8 -*-
+#
+# Written by Matthieu Sarkis, https://github.com/MatthieuSarkis
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
+#***********************************************************************************#
+
 import numpy as np
 import itertools
 
-class MultiStockEnv:
-    def __init__(self, data, initial_investment=20000):
+class Environment:
+    def __init__(self, 
+                 data, 
+                 initial_investment=20000):
+        
         self.stock_price_history = data
         self.n_step, self.n_stock = self.stock_price_history.shape
         
@@ -18,13 +35,16 @@ class MultiStockEnv:
         self.reset()
         
     def reset(self):
+        
         self.cur_step = 0
         self.stock_owned = np.zeros(self.n_stock)
         self.stock_price = self.stock_price_history[self.cur_step]
         self.cash_in_hand = self.initial_investment
         return self._get_obs()
     
-    def step(self, action):
+    def step(self, 
+             action):
+        
         assert action in self.action_space
         prev_val = self._get_val()
         self.cur_step += 1
@@ -38,6 +58,7 @@ class MultiStockEnv:
         return self._get_obs(), reward, done, info
     
     def _get_obs(self):
+        
         obs = np.empty(self.state_dim)
         obs[:self.n_stock] = self.stock_owned
         obs[self.n_stock:2*self.n_stock] = self.stock_price
@@ -45,9 +66,12 @@ class MultiStockEnv:
         return obs
     
     def _get_val(self):
+        
         return self.stock_owned.dot(self.stock_price) + self.cash_in_hand
         
-    def _trade(self, action):
+    def _trade(self, 
+               action):
+        
         action_vec = self.action_list[action]
         sell_index = []
         buy_index = []

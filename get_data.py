@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-#***********************************************************************************
+#***********************************************************************************#
 
 import yfinance as yf
 import os
@@ -18,7 +18,7 @@ import pandas as pd
 from glob import glob
 from utilities import make_dir
 
-#***********************************************************************************
+#***********************************************************************************#
 
 symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
     'AMG','AFL','A','APD','AKAM','ALK','ALB','ARE','ALXN','ALGN','ALLE',
@@ -27,7 +27,7 @@ symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
     'ANSS','ANTM','AON','AOS','APA','AIV','AAPL','AMAT','APTV','ADM','ARNC',
     'AJG','AIZ','T','ADSK','ADP','AZO','AVB','AVY','BHGE','BLL','BAC','BK',
     'BAX','BBT','BDX','BRK.B','BBY','BIIB','BLK','HRB','BA','BWA','BXP','BSX',
-    'BHF','BMY','AVGO','BF.B','CHRW','CA','COG','CDNS','CPB','COF','CAH','CBOE',
+    'BHF','BMY','AVGO','Btorch.nn.functional.B','CHRW','CA','COG','CDNS','CPB','COF','CAH','CBOE',
     'KMX','CCL','CAT','CBG','CBS','CELG','CNC','CNP','CTL','CERN','CF','SCHW',
     'CHTR','CHK','CVX','CMG','CB','CHD','CI','XEC','CINF','CTAS','CSCO','C','CFG',
     'CTXS','CLX','CME','CMS','KO','CTSH','CL','CMCSA','CMA','CAG','CXO','COP',
@@ -60,7 +60,9 @@ symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
     'VMC','WMT','WBA','DIS','WM','WAT','WEC','WFC','HCN','WDC','WU','WRK','WY','WHR','WMB',
     'WLTW','WYN','WYNN','XEL','XRX','XLNX','XL','XYL','YUM','ZBH','ZION','ZTS']
 
-def fetch_data(stocks=symbols, start="2010-01-01", end="2018-12-31"):
+def fetch_data(stocks=symbols, 
+               start="2010-01-01", 
+               end="2018-12-31"):
     
     make_dir(base_dir='.', directory_name='data')
 
@@ -75,6 +77,7 @@ def fetch_data(stocks=symbols, start="2010-01-01", end="2018-12-31"):
                     
 
 def merge_data(directory='data'):
+    
     path = os.path.join(directory, '*.csv')
     files = glob(path)
     final_df = None

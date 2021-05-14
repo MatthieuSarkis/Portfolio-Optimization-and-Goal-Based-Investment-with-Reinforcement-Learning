@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*-
+#
+# Written by Matthieu Sarkis, https://github.com/MatthieuSarkis
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
+#***********************************************************************************#
+
 import argparse 
 # import os
 import numpy as np
@@ -21,13 +35,13 @@ def main(args):
                              epsilon=args.eps, 
                              lr=args.lr, 
                              input_dims=env.observation_space.shape,
-                             n_actions=env.action_space.n,
-                             mem_size=args.max_mem, 
+                             action_space_dim=env.action_space.n,
+                             size=args.max_mem, 
                              eps_min=args.eps_min, 
                              batch_size=args.bs, 
                              replace=args.replace, 
                              eps_dec=args.eps_dec, 
-                             chkpt_dir=args.path, 
+                             checkpoint_directory=args.path, 
                              algo=args.algo, 
                              env_name=args.env)
     
@@ -56,7 +70,7 @@ def main(args):
             score += reward
             #env.render()
             if not args.load_checkpoint:
-                agent.store_transition(observation, action, reward, observation, int(done))
+                agent.store_memory(observation, action, reward, observation, int(done))
                 agent.learn()
                 
             observation = observation_

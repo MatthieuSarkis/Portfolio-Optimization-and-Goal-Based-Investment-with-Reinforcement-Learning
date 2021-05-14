@@ -1,9 +1,7 @@
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
-class NeuralNet(nn.Module):
+class NeuralNet(torch.nn.Module):
     def __init__(self,
                  n_inputs,
                  n_action,
@@ -14,13 +12,13 @@ class NeuralNet(nn.Module):
         M = n_inputs
         self.layers = []
         for _ in range(n_hidden_layers):
-            layer = nn.Linear(M, hidden_dim)
+            layer = torch.nn.Linear(M, hidden_dim)
             M = hidden_dim
             self.layers.append(layer)
-            self.layers.append(nn.ReLU())
+            self.layers.append(torch.nn.ReLU())
             
-        self.layers.append(nn.Linear(M, n_action))
-        self.layers = nn.Sequential(*self.layers)
+        self.layers.append(torch.nn.Linear(M, n_action))
+        self.layers = torch.nn.Sequential(*self.layers)
         
     def forward(self, X):
         return self.layers(X)

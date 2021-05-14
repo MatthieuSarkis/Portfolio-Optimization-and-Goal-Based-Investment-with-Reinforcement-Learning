@@ -1,4 +1,8 @@
 ## Notes
+
+* Scaling the data
+
+
 ## Requirements
 
 * Python 3.8+
