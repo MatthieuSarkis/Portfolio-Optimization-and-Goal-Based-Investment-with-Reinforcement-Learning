@@ -20,7 +20,7 @@ class ReplayBuffer:
         self.ptr = (self.ptr + 1) % self.size
         self.size = min(self.size + 1, self.size)
     
-    def sample_batch(self, batch_size=32):
+    def sample_memories(self, batch_size=32):
         idxs = np.random.randint(0, self.size, size=batch_size)
         return {'s': self.obs1_buf[idxs],
                 's2': self.obs2_buf[idxs],

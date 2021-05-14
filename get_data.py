@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-#***********************************************************************************#
+
 
 import yfinance as yf
 import os
@@ -18,9 +18,9 @@ import pandas as pd
 from glob import glob
 from utilities import make_dir
 
-#***********************************************************************************#
 
-symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
+
+stocks = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
     'AMG','AFL','A','APD','AKAM','ALK','ALB','ARE','ALXN','ALGN','ALLE',
     'AGN','ADS','LNT','ALL','GOOGL','GOOG','MO','AMZN','AEE','AAL','AEP',
     'AXP','AIG','AMT','AWK','AMP','ABC','AME','AMGN','APH','APC','ADI','ANDV',
@@ -60,9 +60,9 @@ symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
     'VMC','WMT','WBA','DIS','WM','WAT','WEC','WFC','HCN','WDC','WU','WRK','WY','WHR','WMB',
     'WLTW','WYN','WYNN','XEL','XRX','XLNX','XL','XYL','YUM','ZBH','ZION','ZTS']
 
-def fetch_data(stocks=symbols, 
-               start="2010-01-01", 
-               end="2018-12-31"):
+def fetch_data(stocks: list = stocks, 
+               start: str = "2010-01-01", 
+               end: str = "2018-12-31") -> None:
     
     make_dir(base_dir='.', directory_name='data')
 
@@ -76,8 +76,7 @@ def fetch_data(stocks=symbols,
                     os.system(f"rm data/{stock}.csv")
                     
 
-def merge_data(directory='data'):
-    
+def merge_data(directory: str = 'data') -> None:    
     path = os.path.join(directory, '*.csv')
     files = glob(path)
     final_df = None

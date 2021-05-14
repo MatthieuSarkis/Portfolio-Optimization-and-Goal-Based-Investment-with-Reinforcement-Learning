@@ -5,7 +5,7 @@ class Critic(torch.nn.Module):
     
     def __init__(self, 
                  eta1, 
-                 input_dims, 
+                 input_shape, 
                  layer1_neurons, 
                  layer2_neurons, 
                  action_space_dim, 
@@ -13,7 +13,7 @@ class Critic(torch.nn.Module):
                  checkpoint_directory='saved_files/networks'):
         
         super(Critic, self).__init__()
-        self.input_dims = input_dims
+        self.input_shape = input_shape
         self.layer1_neurons = layer1_neurons
         self.layer2_neurons = layer2_neurons
         self.action_space_dim = action_space_dim
@@ -21,7 +21,7 @@ class Critic(torch.nn.Module):
         self.checkpoint_dir = checkpoint_directory
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name + 'SAC')
         
-        self.layer1 = torch.nn.Linear(self.input_dims[0] + action_space_dim, self.layer1_neurons)
+        self.layer1 = torch.nn.Linear(self.input_shape[0] + action_space_dim, self.layer1_neurons)
         self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
         self.Q = torch.nn.Linear(self.layer2_neurons, 1)
         
@@ -41,10 +41,10 @@ class Critic(torch.nn.Module):
         
         return action_value
 
-    def save_checkpoint(self):
+    def save_net_weights(self):
         torch.save(self.state_dict(), self.checkpoint_file)
         
-    def load_checkpoint(self):
+    def load_net_weights(self):
         self.load_state_dict(torch.load(self.checkpoint_file))
         
         
@@ -52,7 +52,7 @@ class Actor(torch.nn.Module):
     
     def __init__(self, 
                  eta2, 
-                 input_dims, 
+                 input_shape, 
                  layer1_neurons, 
                  layer2_neurons, 
                  max_actions, 
@@ -61,7 +61,7 @@ class Actor(torch.nn.Module):
                  checkpoint_directory='saved_files/networks'):
         
         super(Actor, self).__init__()
-        self.input_dims = input_dims
+        self.input_shape = input_shape
         self.layer1_neurons = layer1_neurons
         self.layer2_neurons = layer2_neurons
         self.action_space_dim = action_space_dim
@@ -71,7 +71,7 @@ class Actor(torch.nn.Module):
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name + '_sac')
         self.reparam_noise = 1e-6 # for the clamping of the standard deviation in the forward() function
         
-        self.layer1 = torch.nn.Linear(*self.input_dims, self.layer1_neurons)
+        self.layer1 = torch.nn.Linear(*self.input_shape, self.layer1_neurons)
         self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
         self.mu = torch.nn.Linear(self.layer2_neurons, self.action_space_dim)
         self.sigma = torch.nn.Linear(self.layer2_neurons, self.action_space_dim)
@@ -113,10 +113,10 @@ class Actor(torch.nn.Module):
         
         return action, log_probs
     
-    def save_checkpoint(self):
+    def save_net_weights(self):
         torch.save(self.state_dict(), self.checkpoint_file)
         
-    def load_checkpoint(self):
+    def load_net_weights(self):
         self.load_state_dict(torch.load(self.checkpoint_file))
         
         
@@ -124,21 +124,21 @@ class Value(torch.nn.Module):
     
     def __init__(self, 
                  eta1, 
-                 input_dims, 
+                 input_shape, 
                  layer1_neurons, 
                  layer2_neurons, 
                  name, 
                  checkpoint_directory='saved_files/networks'):
         
         super(Value, self).__init__()
-        self.input_dims = input_dims
+        self.input_shape = input_shape
         self.layer1_neurons = layer1_neurons
         self.layer2_neurons = layer2_neurons
         self.name = name
         self.checkpoint_dir = checkpoint_directory
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name + '_sac')
         
-        self.layer1 = torch.nn.Linear(*self.input_dims, self.layer1_neurons)
+        self.layer1 = torch.nn.Linear(*self.input_shape, self.layer1_neurons)
         self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
         self.V = torch.nn.Linear(self.layer2_neurons, 1)
         
@@ -158,8 +158,8 @@ class Value(torch.nn.Module):
         
         return value
         
-    def save_checkpoint(self):
+    def save_net_weights(self):
         torch.save(self.state_dict(), self.checkpoint_file)
         
-    def load_checkpoint(self):
+    def load_net_weights(self):
         self.load_state_dict(torch.load(self.checkpoint_file))

@@ -5,14 +5,14 @@ from sac_agent import Agent
 from utilities import plot_learning_curve
 
 if __name__ == '__main__':
-    env_id = 'InvertedPendulumBulletEnv-v0'
-    env = gym.make(env_id)
+    env_name = 'InvertedPendulumBulletEnv-v0'
+    env = gym.make(env_name)
     
     agent = Agent(eta2=0.0003, 
                   eta1=0.0003, 
                   temperature=2, 
-                  env_id=env_id, 
-                  input_dims=env.observation_space.shape, 
+                  env_name=env_name, 
+                  input_shape=env.observation_space.shape, 
                   tau=0.005,
                   env=env, 
                   batch_size=256, 
@@ -21,15 +21,15 @@ if __name__ == '__main__':
                   action_space_dim=env.action_space.shape[0])
     
     n_games = 250
-    filename = env_id + '_' + str(n_games) + 'games_temperature' + str(agent.temperature) + '.png'
+    filename = env_name + '_' + str(n_games) + 'games_temperature' + str(agent.temperature) + '.png'
     figure_file = 'plots/' + filename
 
     best_score = env.reward_range[0]
     score_history = []
-    load_checkpoint = True
+    load_net_weights = True
 
-    if load_checkpoint:
-        agent.load_models()
+    if load_net_weights:
+        agent.load_networks()
         env.render(mode='human')
         
     steps = 0
@@ -46,7 +46,7 @@ if __name__ == '__main__':
             steps += 1
             score += reward
             agent.remember(observation, action, reward, observation_, done)
-            if not load_checkpoint:
+            if not load_net_weights:
                 agent.learn()
             observation = observation_
         score_history.append(score)
@@ -54,10 +54,10 @@ if __name__ == '__main__':
         
         if avg_score > best_score:
             best_score = avg_score
-            if not load_checkpoint:
-                agent.save_models()
+            if not load_net_weights:
+                agent.save_networks()
         print('episode ', i, 'score %.1f' % score, 'trailing 100 games average %.1f' % avg_score,
-              'step %d' % steps, env_id, 'temperature', agent.temperature)
-    if not load_checkpoint:
+              'step %d' % steps, env_name, 'temperature', agent.temperature)
+    if not load_net_weights:
         x = [i+1 for i in range(n_games)]
         plot_learning_curve(x, score_history, figure_file)

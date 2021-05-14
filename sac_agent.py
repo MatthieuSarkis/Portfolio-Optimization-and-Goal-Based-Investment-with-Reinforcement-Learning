@@ -1,6 +1,16 @@
-import os
+# -*- coding: utf-8 -*-
+#
+# Written by Matthieu Sarkis, https://github.com/MatthieuSarkis
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
 import torch
-import numpy as np
 from buffer import ReplayBuffer
 from sac_networks import Actor, Critic, Value
 
@@ -8,10 +18,10 @@ class Agent():
     def __init__(self, 
                  eta2, 
                  eta1, 
-                 input_dims, 
+                 input_shape, 
                  tau, 
                  env, 
-                 env_id, 
+                 env_name, 
                  gamma=0.99, 
                  action_space_dim=2, 
                  size=1000000,
@@ -22,43 +32,43 @@ class Agent():
         
         self.gamma = gamma
         self.tau = tau
-        self.memory = ReplayBuffer(size, input_dims, action_space_dim)
+        self.memory = ReplayBuffer(size, input_shape, action_space_dim)
         self.batch_size = batch_size
         self.action_space_dim = action_space_dim
 
         self.actor = Actor(eta2, 
-                           input_dims, 
+                           input_shape, 
                            layer1_size,
                            layer2_size, 
                            action_space_dim=action_space_dim, 
-                           name=env_id+'_actor',
+                           name=env_name+'_actor',
                            max_actions=env.action_space.high)
         
         self.critic_1 = Critic(eta1, 
-                               input_dims, 
+                               input_shape, 
                                layer1_size,
                                layer2_size, 
                                action_space_dim=action_space_dim, 
-                               name=env_id+'_critic1')
+                               name=env_name+'_critic1')
         
         self.critic_2 = Critic(eta1, 
-                               input_dims, 
+                               input_shape, 
                                layer1_size,
                                layer2_size, 
                                action_space_dim=action_space_dim, 
-                               name=env_id+'_critic2')
+                               name=env_name+'_critic2')
         
         self.value = Value(eta1, 
-                           input_dims, 
+                           input_shape, 
                            layer1_size,
                            layer2_size, 
-                           name=env_id+'_value')
+                           name=env_name+'_value')
         
         self.target_value = Value(eta1, 
-                                  input_dims, 
+                                  input_shape, 
                                   layer1_size,
                                   layer2_size, 
-                                  name=env_id+'_target_value')
+                                  name=env_name+'_target_value')
         
         self.temperature = temperature
         self.update_target_network(tau=1)
@@ -97,23 +107,23 @@ class Agent():
             
         self.target_value.load_state_dict(value_state_dict)
         
-    def save_models(self):
+    def save_networks(self):
         
         print(' ... saving models ... ')
-        self.actor.save_checkpoint()
-        self.value.save_checkpoint()
-        self.target_value.save_checkpoint()
-        self.critic_1.save_checkpoint()
-        self.critic_2.save_checkpoint()
+        self.actor.save_net_weights()
+        self.value.save_net_weights()
+        self.target_value.save_net_weights()
+        self.critic_1.save_net_weights()
+        self.critic_2.save_net_weights()
         
-    def load_models(self):
+    def load_networks(self):
         
         print(' ... loading models ... ')
-        self.actor.load_checkpoint()
-        self.value.load_checkpoint()
-        self.target_value.load_checkpoint()
-        self.critic_1.load_checkpoint()
-        self.critic_2.load_checkpoint()
+        self.actor.load_net_weights()
+        self.value.load_net_weights()
+        self.target_value.load_net_weights()
+        self.critic_1.load_net_weights()
+        self.critic_2.load_net_weights()
         
     def learn(self):
         

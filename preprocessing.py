@@ -10,12 +10,12 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-#***********************************************************************************#
+
 
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
-#***********************************************************************************#
+
 
 def __handle_missing_values(X, y):
     temp = pd.concat([X.fillna(method='ffill', axis=1).fillna(method='bfill', axis=1), y['target']], axis=1).dropna()
