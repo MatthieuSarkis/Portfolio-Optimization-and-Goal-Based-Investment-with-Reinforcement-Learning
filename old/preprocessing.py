@@ -10,12 +10,8 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-
-
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-
-
 
 def __handle_missing_values(X, y):
     temp = pd.concat([X.fillna(method='ffill', axis=1).fillna(method='bfill', axis=1), y['target']], axis=1).dropna()
@@ -24,10 +20,10 @@ def __handle_missing_values(X, y):
     return X, y
 
 def __standardize_data(X_train, X_test):
-    temperaturer = StandardScaler()
-    temperaturer.fit(X_train)
-    temperaturer.transform(X_train)
-    temperaturer.transform(X_test)
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    scaler.transform(X_train)
+    scaler.transform(X_test)
 
 def __extract_2d_timeSequence(X):
     return X[['abs_ret{}'.format(i) for i in range(0, 61)] + ['rel_vol{}'.format(i) for i in range(0, 61)]].copy().values.reshape(-1, 61, 2)

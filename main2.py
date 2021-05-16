@@ -10,8 +10,6 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-
-
 import argparse 
 # import os
 import numpy as np
@@ -19,7 +17,7 @@ import agents as Agents
 # from gym import wrappers
 from util import plot_learning_curve, make_env
 
-#-----------------------------------------------------------------------------------#
+
 
 def main(args):
     
@@ -35,7 +33,7 @@ def main(args):
                              epsilon=args.eps, 
                              lr=args.lr, 
                              input_shape=env.observation_space.shape,
-                             action_space_dim=env.action_space.n,
+                             action_space_dimension=env.action_space.n,
                              size=args.max_mem, 
                              eps_min=args.eps_min, 
                              batch_size=args.bs, 
@@ -45,7 +43,7 @@ def main(args):
                              algo=args.algo, 
                              env_name=args.env)
     
-    if args.load_net_weights:
+    if args.load_network_weights:
         agent.load_networks()
         
     # env = wrappers.Monitor(env, 
@@ -69,7 +67,7 @@ def main(args):
             observation_, reward, done, info = env.step(action)
             score += reward
             #env.render()
-            if not args.load_net_weights:
+            if not args.load_network_weights:
                 agent.store_memory(observation, action, reward, observation, int(done))
                 agent.learn()
                 
@@ -82,7 +80,7 @@ def main(args):
         print('episode ', i, 'score: ', score, 'average score %.1f best score %.1f epsilon %.2f' % (avg_score, best_score, agent.epsilon), 'steps ', n_steps)
 
         if avg_score > best_score:
-            if not args.load_net_weights:
+            if not args.load_network_weights:
                 agent.save_networks()
             best_score = avg_score
             
@@ -90,7 +88,6 @@ def main(args):
         
     plot_learning_curve(steps_array, scores, eps_history, figure_file)
 
-#-----------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
     
@@ -113,7 +110,7 @@ if __name__ == '__main__':
                                                                               EnduroNoFrameskip-v4\n \
                                                                               AtlantisNoFrameskip-v4')
     #parser.add_argument('-gpu', type=str, default='0', help='GPU: 0 or 1')
-    parser.add_argument('-load_net_weights', type=bool, default=False, help='load model chakpoint')
+    parser.add_argument('-load_network_weights', type=bool, default=False, help='load model chakpoint')
     parser.add_argument('-path', type=str, default='tmp/', help='path for model saving/loading')
     parser.add_argument('-algo', type=str, default='DQNAgent', help='DQNAgent/DDQNAgent/DuelingDQNAgent/DuelingDDQNAgent')
     

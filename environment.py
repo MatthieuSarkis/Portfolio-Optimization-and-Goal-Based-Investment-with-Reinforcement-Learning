@@ -1,97 +1,96 @@
-# -*- coding: utf-8 -*-
-#
-# Written by Matthieu Sarkis, https://github.com/MatthieuSarkis
-#
-# This code is licensed under the Apache License, Version 2.0. You may
-# obtain a copy of this license in the LICENSE.txt file in the root directory
-# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
-#
-# Any modifications or derivative works of this code must retain this
-# copyright notice, and modified files need to carry a notice indicating
-# that they have been altered from the originals.
-
-
-
 import numpy as np
-import itertools
+import pandas as pd
+import gym
 
-class Environment:
+class Environment(gym.Env):
+
     def __init__(self, 
-                 data, 
-                 initial_investment=20000):
+                 df: pd.DataFrame, 
+                 stock_space_dimension: int,                
+                 initial_cash_in_bank: float,
+                 buy_rate: float,
+                 sell_rate: float,
+                 sac_temperature: float,
+                 state_space_dimension: int,
+                 action_space_dimension: int,
+                 action_scale: float = 50,
+                 ) -> None:
         
-        self.stock_price_history = data
-        self.n_step, self.n_stock = self.stock_price_history.shape
+        super(Environment, self).__init__()
         
-        self.initial_investment = initial_investment
-        self.cur_step = None
-        self.stock_owned = None
-        self.stock_price = None
-        self.cash_in_hand = None
+        self.df = df
+        self.stock_space_dimension = stock_space_dimension
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(state_space_dimension,))
+        self.action_space = gym.spaces.Box(low=-1, high=1, shape=(action_space_dimension,)) 
+        self.action_scale = action_scale
+        self.initial_cash_in_bank = initial_cash_in_bank
+        self.buy_rate = buy_rate
+        self.sell_rate = sell_rate
+        self.sac_temperature = sac_temperature
+        
+        self.current_step = None
+        self.data = None
+        self.state = None
+        self.reward = None
 
-        self.action_space = np.arange(3**self.n_stock)
-        self.action_list = list(itertools.product([0, 1, 2], repeat=self.n_stock))
-        self.state_dim = self.n_stock * 2 + 1
         self.reset()
+    
+    def reset(self) -> list[float]:  
         
-    def reset(self):
-        
-        self.cur_step = 0
-        self.stock_owned = np.zeros(self.n_stock)
-        self.stock_price = self.stock_price_history[self.cur_step]
-        self.cash_in_hand = self.initial_investment
-        return self._get_obs()
+        self.state = [self.initial_cash_in_bank] + self.data.Close.values.tolist() + [0] * self.stock_space_dimension
+        self.current_step = 0
+        self.data = self.df.loc[self.current_step,:]
+        self.reward = 0
+        return self.state
     
     def step(self, 
-             action):
+             actions: np.array) -> tuple[list[float], float, bool, dict]:
         
-        assert action in self.action_space
-        prev_val = self._get_val()
-        self.cur_step += 1
-        self.stock_price = self.stock_price_history[self.cur_step]
-        self._trade(action)
-        cur_val = self._get_val()
-        reward = cur_val - prev_val
-        done = self.cur_step == self.n_step - 1
-        info = {'cur_val': cur_val}
+        done = self.current_step == len(self.df.index.unique()) - 1
+        self.current_step += 1
         
-        return self._get_obs(), reward, done, info
+        actions = (actions * self.action_scale).astype(int)
+        sorted_indices = np.argsort(actions)
+        
+        initial_value_portfolio = self.state[0] + sum(np.array(self.state[1:(self.stock_space_dimension+1)]) * np.array(self.state[(self.stock_space_dimension+1):(self.stock_space_dimension*2+1)]))
+        
+        sell_idx = sorted_indices[:np.where(actions < 0)[0].shape[0]]
+        buy_idx = sorted_indices[::-1][:np.where(actions > 0)[0].shape[0]]
+
+        for idx in sell_idx:  
+            self._sell(idx, actions[idx])
+            
+        for idx in buy_idx: 
+            self._buy(idx, actions[idx])
+
+        self.data = self.df.loc[self.current_step, :]    
+        self.state = [self.state[0]] + self.data.Close.values.tolist() + list(self.state[(self.stock_space_dimension+1):(self.stock_space_dimension*2+1)])
+                        
+        value_portfolio = self.state[0] + sum(np.array(self.state[1:(self.stock_space_dimension+1)]) * np.array(self.state[(self.stock_space_dimension+1):(self.stock_space_dimension*2+1)]))
+        info = {'value_portfolio': value_portfolio}
+        
+        self.reward = (value_portfolio - initial_value_portfolio) * self.sac_temperature         
+
+        return self.state, self.reward, done, info
+        
+    def _sell(self, 
+              idx: int, 
+              action: int) -> None:
     
-    def _get_obs(self):
+        if self.state[idx+self.stock_space_dimension+1] <= 0:
+            return
+         
+        n_stocks_to_sell = min(-action, self.state[idx+self.stock_space_dimension+1])
+        money_inflow = self.state[idx+1] * n_stocks_to_sell * (1 - self.sell_rate)
+        self.state[0] += money_inflow
+        self.state[idx+self.stock_space_dimension+1] -= n_stocks_to_sell
+            
+    def _buy(self, 
+             idx: int, 
+             action: int) -> None:
         
-        obs = np.empty(self.state_dim)
-        obs[:self.n_stock] = self.stock_owned
-        obs[self.n_stock:2*self.n_stock] = self.stock_price
-        obs[-1] = self.cash_in_hand
-        return obs
-    
-    def _get_val(self):
+        n_stocks_to_buy = min(action, self.state[0] // self.state[idx+1])
+        money_outflow = self.state[idx+1] * n_stocks_to_buy * (1 + self.buy_rate)
+        self.state[0] -= money_outflow
+        self.state[idx+self.stock_space_dimension+1] += n_stocks_to_buy   
         
-        return self.stock_owned.dot(self.stock_price) + self.cash_in_hand
-        
-    def _trade(self, 
-               action):
-        
-        action_vec = self.action_list[action]
-        sell_index = []
-        buy_index = []
-        for i, a in enumerate(action_vec):
-            if a == 0:
-                sell_index.append(i)
-            elif a == 2:
-                buy_index.append(i)
-                
-        if sell_index:
-            for i in sell_index:
-                self.cash_in_hand += self.stock_price[i] * self.stock_owned[i]
-                self.stock_owned[i] = 0
-                
-        if buy_index:
-            can_buy = True
-            while can_buy:
-                for i in buy_index:
-                    if self.cash_in_hand > self.stock_price[i]:
-                        self.stock_owned[i] += 1
-                        self.cash_in_hand -= self.stock_price[i]
-                    else:
-                        can_buy = False

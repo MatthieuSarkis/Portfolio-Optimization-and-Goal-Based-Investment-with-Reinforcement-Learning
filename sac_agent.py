@@ -10,37 +10,39 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import numpy as np
 import torch
 from buffer import ReplayBuffer
 from sac_networks import Actor, Critic, Value
+import gym
 
 class Agent():
     def __init__(self, 
-                 eta2, 
-                 eta1, 
-                 input_shape, 
-                 tau, 
-                 env, 
-                 env_name, 
-                 gamma=0.99, 
-                 action_space_dim=2, 
-                 size=1000000,
-                 layer1_size=256, 
-                 layer2_size=256, 
-                 batch_size=100, 
-                 temperature=2):
+                 eta2: float, 
+                 eta1: float, 
+                 input_shape: tuple, 
+                 tau: float, 
+                 env: gym.Env, 
+                 env_name: str, 
+                 gamma: float = 0.99, 
+                 action_space_dimension: int = 2, 
+                 size: int = 1000000,
+                 layer1_size: int = 256, 
+                 layer2_size: int = 256, 
+                 batch_size: int = 100, 
+                 temperature: int = 2) -> None:
         
         self.gamma = gamma
         self.tau = tau
-        self.memory = ReplayBuffer(size, input_shape, action_space_dim)
+        self.memory = ReplayBuffer(size, input_shape, action_space_dimension)
         self.batch_size = batch_size
-        self.action_space_dim = action_space_dim
+        self.action_space_dimension = action_space_dimension
 
         self.actor = Actor(eta2, 
                            input_shape, 
                            layer1_size,
                            layer2_size, 
-                           action_space_dim=action_space_dim, 
+                           action_space_dimension=action_space_dimension, 
                            name=env_name+'_actor',
                            max_actions=env.action_space.high)
         
@@ -48,14 +50,14 @@ class Agent():
                                input_shape, 
                                layer1_size,
                                layer2_size, 
-                               action_space_dim=action_space_dim, 
+                               action_space_dimension=action_space_dimension, 
                                name=env_name+'_critic1')
         
         self.critic_2 = Critic(eta1, 
                                input_shape, 
                                layer1_size,
                                layer2_size, 
-                               action_space_dim=action_space_dim, 
+                               action_space_dimension=action_space_dimension, 
                                name=env_name+'_critic2')
         
         self.value = Value(eta1, 
@@ -74,7 +76,7 @@ class Agent():
         self.update_target_network(tau=1)
         
     def choose_action(self, 
-                      observation):
+                      observation: list[float]) -> np.array:
         
         state = torch.Tensor([observation]).to(self.actor.device)
         actions, _ = self.actor.sample_normal(state, reparameterize=False)
@@ -82,16 +84,16 @@ class Agent():
         return actions.cpu().detach().numpy()[0]
     
     def remember(self, 
-                 state, 
-                 action, 
-                 reward, 
-                 new_state, 
-                 done):
+                 state: list[float], 
+                 action: np.array, 
+                 reward: float, 
+                 new_state: list[float], 
+                 done: bool) -> None:
         
         self.memory.store_memory(state, action, reward, new_state, done)
         
     def update_target_network(self, 
-                              tau=None):
+                              tau: float = None) -> None:
         
         if tau is None:
             tau = self.tau
@@ -107,25 +109,25 @@ class Agent():
             
         self.target_value.load_state_dict(value_state_dict)
         
-    def save_networks(self):
+    def save_networks(self) -> None:
         
         print(' ... saving models ... ')
-        self.actor.save_net_weights()
-        self.value.save_net_weights()
-        self.target_value.save_net_weights()
-        self.critic_1.save_net_weights()
-        self.critic_2.save_net_weights()
+        self.actor.save_network_weights()
+        self.value.save_network_weights()
+        self.target_value.save_network_weights()
+        self.critic_1.save_network_weights()
+        self.critic_2.save_network_weights()
         
-    def load_networks(self):
+    def load_networks(self) -> None:
         
         print(' ... loading models ... ')
-        self.actor.load_net_weights()
-        self.value.load_net_weights()
-        self.target_value.load_net_weights()
-        self.critic_1.load_net_weights()
-        self.critic_2.load_net_weights()
+        self.actor.load_network_weights()
+        self.value.load_network_weights()
+        self.target_value.load_network_weights()
+        self.critic_1.load_network_weights()
+        self.critic_2.load_network_weights()
         
-    def learn(self):
+    def learn(self) -> None:
         
         if self.memory.pointer < self.batch_size:
             return

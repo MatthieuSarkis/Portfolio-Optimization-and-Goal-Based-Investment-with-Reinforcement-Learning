@@ -10,34 +10,30 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-
-
 import numpy as np
-
-
 
 class ReplayBuffer():
     
     def __init__(self, 
-                 size, 
-                 input_shape, 
-                 action_space_dim):
+                 size: int, 
+                 input_shape: tuple, 
+                 action_space_dimension: int) -> None:
         
         self.size = size
         self.pointer = 0
         
         self.state_buffer = np.zeros((self.size, *input_shape))
         self.new_state_buffer = np.zeros((self.size, *input_shape))
-        self.action_buffer = np.zeros((self.size, action_space_dim))
+        self.action_buffer = np.zeros((self.size, action_space_dimension))
         self.reward_buffer = np.zeros(self.size)
         self.done_buffer = np.zeros(self.size, dtype=np.bool)
         
     def store_memory(self, 
-                     state, 
-                     action, 
-                     reward, 
-                     new_state, 
-                     done):
+                     state: list[float], 
+                     action: np.array, 
+                     reward: float, 
+                     new_state: list[float], 
+                     done: bool) -> None:
         
         index = self.pointer % self.size
         self.state_buffer[index] = state
@@ -49,7 +45,7 @@ class ReplayBuffer():
         self.pointer += 1
         
     def sample_memories(self, 
-                        batch_size):
+                        batch_size: int = 32) -> tuple[np.array, np.array, np.array, np.array, np.array]:
         
         size = min(self.pointer, self.size)
         batch = np.random.choice(size, batch_size)

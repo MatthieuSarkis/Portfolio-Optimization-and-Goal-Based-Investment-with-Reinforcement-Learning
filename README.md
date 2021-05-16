@@ -1,11 +1,10 @@
 ## Notes
 
-* Scaling the data
-
+* Scaling the data?
 
 ## Requirements
 
-* Python 3.8+
+* Python 3.9+
 * numpy
 * pandas
 * jupyter
@@ -14,6 +13,7 @@
 * seaborn
 * pytorch
 * yfinance
+* gym
 
 ```shell
 pip install -r requirements.txt

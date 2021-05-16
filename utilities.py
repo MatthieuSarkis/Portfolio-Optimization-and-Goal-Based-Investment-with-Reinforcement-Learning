@@ -10,12 +10,9 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-
-
 import os
 import matplotlib.pyplot as plt
-
-
+import numpy as np
 
 def time_to_string(t):
     return t.strftime("%Y.%m.%d/%H.%M.%S")
@@ -24,9 +21,7 @@ def make_dir(base_dir='saved_files', directory_name=''):
     directory = os.path.join(base_dir, directory_name) 
     if not os.path.exists(directory):
         os.makedirs(directory)
-        
-        
-        
+            
 def plot_learning_curve(x, scores, epsilons, filename):
     fig = plt.figure()
     ax = fig.add_subplot(111, label="1")
@@ -51,9 +46,7 @@ def plot_learning_curve(x, scores, epsilons, filename):
     ax2.tick_params(axis='y', colors='C1')
     
     plt.savefig(filename)
-    
-    
-    
+       
 def plot_learning_curve(x, scores, figure_file):
     running_avg = np.zeros(len(scores))
     for i in range(len(running_avg)):
@@ -61,4 +54,17 @@ def plot_learning_curve(x, scores, figure_file):
     plt.plot(x, running_avg)
     plt.title('Running average of previous 100 scores')
     plt.savefig(figure_file)
+     
+def plot(mode):
+    images_folder = 'rl_trader_images'
+    make_dir(images_folder)
     
+    a = np.load('rl_trader_rewards/{}.npy'.format(mode))
+    
+    if mode == 'train':
+        plt.plot(a)
+    else:
+        plt.hist(a, bins=20)
+        
+    plt.title(mode)
+    plt.savefig('{}/{}.png'.format(images_folder, mode))
