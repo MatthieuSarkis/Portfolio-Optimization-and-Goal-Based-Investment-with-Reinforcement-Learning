@@ -2,6 +2,6 @@
 .DS_Store
 .env/
 data/
-old/
+plots/
 saved_files/
 __pycache__/

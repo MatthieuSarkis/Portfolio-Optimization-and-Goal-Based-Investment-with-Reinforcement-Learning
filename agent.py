@@ -13,7 +13,7 @@
 import numpy as np
 import torch
 from buffer import ReplayBuffer
-from sac_networks import Actor, Critic, Value
+from networks import Actor, Critic, Value
 import gym
 
 class Agent():
@@ -30,7 +30,6 @@ class Agent():
                  layer1_size: int = 256, 
                  layer2_size: int = 256, 
                  batch_size: int = 100, 
-                 #temperature: int = 2
                  ) -> None:
         
         self.gamma = gamma
@@ -73,11 +72,10 @@ class Agent():
                                   layer2_size, 
                                   name=env_name+'_target_value')
         
-        #self.temperature = temperature
         self.update_target_network(tau=1)
         
     def choose_action(self, 
-                      observation: list[float]) -> np.array:
+                      observation: np.array) -> np.array:
         
         state = torch.Tensor([observation]).to(self.actor.device)
         actions, _ = self.actor.sample_normal(state, reparameterize=False)
@@ -85,10 +83,10 @@ class Agent():
         return actions.cpu().detach().numpy()[0]
     
     def remember(self, 
-                 state: list[float], 
+                 state: np.array, 
                  action: np.array, 
                  reward: float, 
-                 new_state: list[float], 
+                 new_state: np.array, 
                  done: bool) -> None:
         
         self.memory.store_memory(state, action, reward, new_state, done)

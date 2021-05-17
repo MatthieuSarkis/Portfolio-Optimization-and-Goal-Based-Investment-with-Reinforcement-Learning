@@ -14,20 +14,16 @@
 #========================================================
 
 python main.py \
---data_path './data.pickle' \
---pid 360 \
---odir 'saved_files' \
---random_state 42 \
---test_size 0.2 \
---patience 10 \
---epochs 100 \
+--initial_cash 10000 \
+--buy_rate 0.01 \
+--sell_rate 0.01 \
+--sac_temperature 2.0 \
+--action_scale 50 \
+--eta1 0.003 \
+--eta2 0.003 \
+--tau 0.005 \
 --batch_size 32 \
---n_layers 5 \
---dropout_rate 0.3 \
---n_gpus 4 \
---specific_stock \
---dumped_data \
---preprocess \
-# --only_rev_vol \
-# --specific_stock \
-# --for_RNN
+--layer1_size 256 \
+--layer1_size 256 \
+--n_episodes 10 
+

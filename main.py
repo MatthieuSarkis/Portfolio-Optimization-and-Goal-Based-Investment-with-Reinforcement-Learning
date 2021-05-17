@@ -12,11 +12,10 @@
 
 from environment import Environment
 import numpy as np
-from sac_agent import Agent
+from agent import Agent
 from utilities import make_dir, plot_learning_curve
 from get_data import DataFetcher, Preprocessor
-
-
+from argparse import ArgumentParser
 
 stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
                   'AMG','AFL','A','APD','AKAM','ALK','ALB','ARE','ALXN','ALGN','ALLE',
@@ -58,17 +57,12 @@ stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES'
                   'VMC','WMT','WBA','DIS','WM','WAT','WEC','WFC','HCN','WDC','WU','WRK','WY','WHR','WMB',
                   'WLTW','WYN','WYNN','XEL','XRX','XLNX','XL','XYL','YUM','ZBH','ZION','ZTS']
 
-stocks_symbols_temp = ['MMM','ABT']
+stocks_symbols_temp = ['MMM','ABT','ABBV','ACN']
 
-
-
-
-
-
-
-def main():
+def main(args):
     
-    # import data here
+    #os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+    #os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     
     fetcher = DataFetcher(stock_symbols=stocks_symbols_temp,
                           start_date="2010-01-01",
@@ -82,42 +76,39 @@ def main():
     
     df = preprocessor.collect_close_prices()
     df = preprocessor.handle_missing_values()
-    
-    # end import data
-    
+    #df = df.iloc[:50]
+
     env_name = 'stock_trading'
-    env = Environment(stock_market_history=df,
-                      initial_cash_in_bank=10000,
-                      buy_rate=0.1,
-                      sell_rate=0.1,
-                      sac_temperature=2,
-                      action_scale=50)
     
-    agent = Agent(eta2=0.0003, 
-                  eta1=0.0003, 
-                  temperature=2, 
+    env = Environment(stock_market_history=df,
+                      initial_cash_in_bank=args.initial_cash,
+                      buy_rate=args.buy_rate,
+                      sell_rate=args.sell_rate,
+                      sac_temperature=args.sac_temperature,
+                      action_scale=args.action_scale)
+    
+    agent = Agent(eta2=args.eta2, 
+                  eta1=args.eta1,  
                   env_name=env_name, 
                   input_shape=env.observation_space.shape, 
-                  tau=0.005,
+                  tau=args.tau,
                   env=env, 
-                  batch_size=256, 
-                  layer1_size=256, 
-                  layer2_size=156,
+                  batch_size=args.batch_size, 
+                  layer1_size=args.layer1_size, 
+                  layer2_size=args.layer2_size,
                   action_space_dimension=env.action_space.shape[0])
     
-    n_episodes = 5
-    filename = str(n_episodes) + 'episodes_temperature' + str(agent.temperature) + '.png'
+    
+    n_episodes = args.n_episodes
+    filename = str(n_episodes) + 'episodes_temperature' + str(env.sac_temperature) + '.png'
     make_dir('plots')
     figure_file = 'plots/' + filename
-
+    
     best_reward = float('-Inf')
     reward_history = []
-    
-    load_network_weights = False
 
-    if load_network_weights:
+    if args.test_mode:
         agent.load_networks()
-        env.render(mode='human')
         
     steps = 0
     
@@ -129,30 +120,48 @@ def main():
         
         while not done:
             action = agent.choose_action(observation)
-            observation_, reward, done, _ =  env.step(action)
+            observation_, reward, done, _ = env.step(action)
             steps += 1
             reward += reward
             agent.remember(observation, action, reward, observation_, done)
-            if not load_network_weights:
+            if not args.test_mode:
                 agent.learn()
             observation = observation_
+            
         reward_history.append(reward)
         avg_reward = np.mean(reward_history[-100:])
         
         if avg_reward > best_reward:
             best_reward = avg_reward
-            if not load_network_weights:
+            if not args.test_mode:
                 agent.save_networks()
-        print('episode ', i, 'reward %.1f' % reward, 'trailing 100 episodes average %.1f' % avg_reward,
-              'step %d' % steps, env_name, 'temperature', agent.temperature)
-    if not load_network_weights:
+        print('episode ', i, 'reward %.1f' % reward, 
+              'trailing 100 episodes average %.1f' % avg_reward,
+              'step %d' % steps, env_name, 'temperature', env.sac_temperature)
+    if not args.test_mode:
         x = [i+1 for i in range(n_episodes)]
         plot_learning_curve(x, reward_history, figure_file)
 
-
-
 if __name__ == '__main__':
     
-    main()
+    parser = ArgumentParser()
+
+    parser.add_argument('--initial_cash', type=float, default=10000)
+    parser.add_argument('--buy_rate', type=float, default=0.1)
+    parser.add_argument('--sell_rate', type=float, default=0.1)
+    parser.add_argument('--sac_temperature', type=float, default=2.0)
+    parser.add_argument('--action_scale', type=int, default=50)
+    parser.add_argument('--eta1', type=float, default=0.0003)
+    parser.add_argument('--eta2', type=float, default=0.0003)
+    parser.add_argument('--tau', type=float, default=0.005)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--layer1_size', type=int, default=256)
+    parser.add_argument('--layer2_size', type=int, default=256)
+    parser.add_argument('--n_episodes', type=int, default=1)
+    parser.add_argument('--test_mode', action='store_true', default=False)
+    parser.add_argument('-gpu', type=str, default='0', help='GPU: 0 or 1')
+    
+    args = parser.parse_args()
+    main(args)
     
     

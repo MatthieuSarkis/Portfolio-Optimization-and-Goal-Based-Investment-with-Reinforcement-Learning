@@ -14,7 +14,7 @@ from pandas.core.frame import DataFrame
 import yfinance as yf
 import os
 import pandas as pd
-from glob import glob
+#from glob import glob
 from utilities import make_dir
 
 class DataFetcher():
@@ -96,7 +96,6 @@ class DataFetcher():
         
         return final_df
     
-
 class Preprocessor():
     
     def __init__(self,
