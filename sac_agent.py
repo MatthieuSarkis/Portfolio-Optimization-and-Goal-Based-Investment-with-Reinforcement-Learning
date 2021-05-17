@@ -30,7 +30,8 @@ class Agent():
                  layer1_size: int = 256, 
                  layer2_size: int = 256, 
                  batch_size: int = 100, 
-                 temperature: int = 2) -> None:
+                 #temperature: int = 2
+                 ) -> None:
         
         self.gamma = gamma
         self.tau = tau
@@ -72,7 +73,7 @@ class Agent():
                                   layer2_size, 
                                   name=env_name+'_target_value')
         
-        self.temperature = temperature
+        #self.temperature = temperature
         self.update_target_network(tau=1)
         
     def choose_action(self, 
@@ -170,7 +171,8 @@ class Agent():
         actor_loss.backward(retain_graph=True)
         self.actor.optimizer.step()
         
-        q_hat = self.temperature * reward + self.gamma * value_
+        #q_hat = self.temperature * reward + self.gamma * value_
+        q_hat = reward + self.gamma * value_
         q1_old_policy = self.critic_1.forward(state, action).view(-1)
         q2_old_policy = self.critic_2.forward(state, action).view(-1)
         critic_1_loss = 0.5 * torch.nn.functional.mse_loss(q1_old_policy, q_hat)

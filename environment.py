@@ -42,7 +42,7 @@ class Environment(gym.Env):
         
         self.current_step = 0
         self.cash_in_bank = self.initial_cash_in_bank
-        self.stock_prices = self.stock_market_history[self.current_step]
+        self.stock_prices = self.stock_market_history.iloc[self.current_step]
         self.number_of_shares = np.zeros(self.stock_space_dimension)
         
         return self._get_observation()
@@ -52,6 +52,10 @@ class Environment(gym.Env):
         
         self.current_step += 1
         done = (self.current_step == self.time_horizon - 1)
+        
+        if done:
+            print('Time horizon reached already')
+            return
         
         actions = (actions * self.action_scale).astype(int)
         sorted_indices = np.argsort(actions)
@@ -69,7 +73,9 @@ class Environment(gym.Env):
                    
         new_value_portfolio = self._get_portfolio_value()
         info = {'value_portfolio': new_value_portfolio}
-        reward = (new_value_portfolio - initial_value_portfolio) * self.sac_temperature         
+        reward = (new_value_portfolio - initial_value_portfolio) * self.sac_temperature    
+        
+        self.stock_prices = self.stock_market_history.iloc[self.current_step]    
 
         return self._get_observation(), reward, done, info
         
@@ -108,3 +114,25 @@ class Environment(gym.Env):
         portfolio_value = self.cash_in_bank + self.number_of_shares.dot(self.stock_prices)
         return portfolio_value
         
+        
+if __name__ == '__main__':
+    
+    df = pd.DataFrame([[1,2],[3,4]])
+    
+    env = Environment(stock_market_history=df,
+                      initial_cash_in_bank=10000,
+                      buy_rate=0.0,
+                      sell_rate=0.0,
+                      sac_temperature=1.0,
+                      action_scale=50)
+    
+    
+    env.step(np.array([1.0, 1.0]))
+    #env.step(np.array([1.0, 1.0]))
+    #env.step(np.array([1.0, 1.0]))
+    #env.step(np.array([1.0, -1.0]))
+    #env.step(np.array([1.0, -1.0]))
+    obs = env._get_observation()
+    value = env._get_portfolio_value()
+    
+    print(value)
