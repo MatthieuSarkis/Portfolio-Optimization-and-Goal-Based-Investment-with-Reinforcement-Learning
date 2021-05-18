@@ -25,7 +25,7 @@ class DataFetcher():
                  end_date: str = "2018-12-31",
                  directory_path: str = "data") -> None:
         
-        make_dir(base_dir='.', directory_name=directory_path)
+        make_dir(directory_name=directory_path)
         
         self.stock_symbols = stock_symbols
         self.start_date = start_date
