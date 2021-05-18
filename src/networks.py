@@ -11,7 +11,7 @@
 # that they have been altered from the originals.
 
 import os
-from utilities import make_dir
+from src.utilities import make_dir
 import torch
 import numpy as np
 
@@ -24,7 +24,7 @@ class Critic(torch.nn.Module):
                  layer2_neurons: int, 
                  action_space_dimension: tuple, 
                  name: str, 
-                 checkpoint_directory: str = 'saved_files/networks') -> None:
+                 checkpoint_directory: str = 'saved_networks') -> None:
         
         super(Critic, self).__init__()
         self.input_shape = input_shape
@@ -34,7 +34,7 @@ class Critic(torch.nn.Module):
         self.name = name
         self.checkpoint_dir = checkpoint_directory
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name + 'SAC')
-        make_dir(checkpoint_directory)
+        make_dir(directory_name=checkpoint_directory)
         
         self.layer1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer1_neurons)
         self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
@@ -73,7 +73,7 @@ class Actor(torch.nn.Module):
                  max_actions: np.array, 
                  action_space_dimension: tuple, 
                  name: str, 
-                 checkpoint_directory: str = 'saved_files/networks') -> None:
+                 checkpoint_directory: str = 'saved_networks') -> None:
         
         super(Actor, self).__init__()
         self.input_shape = input_shape
@@ -84,7 +84,7 @@ class Actor(torch.nn.Module):
         self.max_actions = max_actions
         self.checkpoint_dir = checkpoint_directory
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name + '_sac')
-        make_dir(checkpoint_directory)
+        make_dir(directory_name=checkpoint_directory)
         self.reparam_noise = 1e-6 # for the clamping of the standard deviation in the forward() function
         
         self.layer1 = torch.nn.Linear(*self.input_shape, self.layer1_neurons)
@@ -144,7 +144,7 @@ class Value(torch.nn.Module):
                  layer1_neurons: int, 
                  layer2_neurons: int, 
                  name: str, 
-                 checkpoint_directory: str = 'saved_files/networks') -> None:
+                 checkpoint_directory: str = 'saved_networks') -> None:
         
         super(Value, self).__init__()
         self.input_shape = input_shape
@@ -153,7 +153,7 @@ class Value(torch.nn.Module):
         self.name = name
         self.checkpoint_dir = checkpoint_directory
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name + '_sac')
-        make_dir(checkpoint_directory)
+        make_dir(directory_name=checkpoint_directory)
         
         self.layer1 = torch.nn.Linear(*self.input_shape, self.layer1_neurons)
         self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)

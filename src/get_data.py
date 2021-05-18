@@ -15,7 +15,7 @@ import yfinance as yf
 import os
 import pandas as pd
 #from glob import glob
-from utilities import make_dir
+from src.utilities import make_dir
 
 class DataFetcher():
     

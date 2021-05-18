@@ -12,8 +12,8 @@
 
 import numpy as np
 import torch
-from buffer import ReplayBuffer
-from networks import Actor, Critic, Value
+from src.buffer import ReplayBuffer
+from src.networks import Actor, Critic, Value
 import gym
 
 class Agent():

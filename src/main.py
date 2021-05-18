@@ -10,11 +10,11 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-from environment import Environment
+from src.environment import Environment
 import numpy as np
-from agent import Agent
-from utilities import make_dir, plot_learning_curve
-from get_data import DataFetcher, Preprocessor
+from src.agent import Agent
+from src.utilities import make_dir, plot_learning_curve
+from src.get_data import DataFetcher, Preprocessor
 from argparse import ArgumentParser
 
 stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
@@ -76,7 +76,7 @@ def main(args):
     
     df = preprocessor.collect_close_prices()
     df = preprocessor.handle_missing_values()
-    #df = df.iloc[:50]
+    df = df.iloc[:50]
 
     env_name = 'stock_trading'
     

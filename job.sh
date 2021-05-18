@@ -13,7 +13,7 @@
 
 #========================================================
 
-python main.py \
+python src/main.py \
 --initial_cash 10000 \
 --buy_rate 0.01 \
 --sell_rate 0.01 \
@@ -25,5 +25,5 @@ python main.py \
 --batch_size 32 \
 --layer1_size 256 \
 --layer1_size 256 \
---n_episodes 10 
+--n_episodes 1 
 

@@ -3,5 +3,5 @@
 .env/
 data/
 plots/
-saved_files/
+saved_networks/
 __pycache__/

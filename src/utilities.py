@@ -17,10 +17,9 @@ import numpy as np
 def time_to_string(t):
     return t.strftime("%Y.%m.%d/%H.%M.%S")
 
-def make_dir(base_dir='saved_files', directory_name=''): 
-    directory = os.path.join(base_dir, directory_name) 
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+def make_dir(directory_name=''): 
+    if not os.path.exists(directory_name):
+        os.makedirs(directory_name)
             
 def plot_learning_curve(x, scores, epsilons, filename):
     fig = plt.figure()
