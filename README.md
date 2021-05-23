@@ -27,7 +27,7 @@ python main.py \
 --buy_rate 0.01 \
 --sell_rate 0.01 \
 --sac_temperature 2.0 \
---action_scale 50 \
+--limit_n_stocks 50 \
 --eta1 0.003 \
 --eta2 0.003 \
 --tau 0.005 \

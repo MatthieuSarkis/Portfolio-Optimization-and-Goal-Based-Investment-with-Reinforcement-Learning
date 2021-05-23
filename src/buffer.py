@@ -11,7 +11,6 @@
 # that they have been altered from the originals.
 
 import numpy as np
-
 class ReplayBuffer():
     
     def __init__(self, 
@@ -28,12 +27,12 @@ class ReplayBuffer():
         self.reward_buffer = np.zeros(self.size)
         self.done_buffer = np.zeros(self.size, dtype=np.bool)
         
-    def store_memory(self, 
-                     state: list[float], 
-                     action: np.array, 
-                     reward: float, 
-                     new_state: list[float], 
-                     done: bool) -> None:
+    def push(self, 
+             state: list[float], 
+             action: np.array, 
+             reward: float, 
+             new_state: list[float], 
+             done: bool) -> None:
         
         index = self.pointer % self.size
         self.state_buffer[index] = state
@@ -44,8 +43,8 @@ class ReplayBuffer():
         
         self.pointer += 1
         
-    def sample_memories(self, 
-                        batch_size: int = 32) -> tuple[np.array, np.array, np.array, np.array, np.array]:
+    def sample(self, 
+               batch_size: int = 32) -> tuple[np.array, np.array, np.array, np.array, np.array]:
         
         size = min(self.pointer, self.size)
         batch = np.random.choice(size, batch_size)

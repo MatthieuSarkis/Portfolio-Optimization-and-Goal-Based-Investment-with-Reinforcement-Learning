@@ -22,7 +22,7 @@ class Environment(gym.Env):
                  buy_rate: float,
                  sell_rate: float,
                  sac_temperature: float,
-                 action_scale: float = 50,
+                 limit_n_stocks: float = 50,
                  ) -> None:
         
         super(Environment, self).__init__()
@@ -35,7 +35,7 @@ class Environment(gym.Env):
         
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_space_dimension,))
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(self.action_space_dimension,)) 
-        self.action_scale = action_scale
+        self.limit_n_stocks = limit_n_stocks
         
         self.initial_cash_in_bank = initial_cash_in_bank
         
@@ -65,7 +65,7 @@ class Environment(gym.Env):
         done = self.current_step == (self.time_horizon - 1)
         self.current_step += 1
 
-        actions = (actions * self.action_scale).astype(int)
+        actions = (actions * self.limit_n_stocks).astype(int)
         sorted_indices = np.argsort(actions)
                 
         initial_value_portfolio = self._get_portfolio_value()
@@ -136,7 +136,7 @@ if __name__ == '__main__':
                       buy_rate=0.0,
                       sell_rate=0.0,
                       sac_temperature=1.0,
-                      action_scale=50)
+                      limit_n_stocks=50)
     
     env.step(np.array([1.0, 1.0]))
     #env.step(np.array([1.0, 1.0]))
