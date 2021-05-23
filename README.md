@@ -1,6 +1,7 @@
 ## Notes
 
 * Scaling the data?
+* Use multiple seeds for testing
 
 ## Requirements
 
