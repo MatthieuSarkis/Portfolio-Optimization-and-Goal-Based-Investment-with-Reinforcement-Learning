@@ -87,8 +87,8 @@ def main(args):
                       sac_temperature=args.sac_temperature,
                       limit_n_stocks=args.limit_n_stocks)
     
-    agent = Agent(eta2=args.eta2, 
-                  eta1=args.eta1,  
+    agent = Agent(lr_pi=args.lr_pi, 
+                  lr_Q=args.lr_Q,  
                   env_name=env_name, 
                   input_shape=env.observation_space.shape, 
                   tau=args.tau,
@@ -151,8 +151,8 @@ if __name__ == '__main__':
     parser.add_argument('--sell_rate', type=float, default=0.1)
     parser.add_argument('--sac_temperature', type=float, default=2.0)
     parser.add_argument('--limit_n_stocks', type=int, default=50)
-    parser.add_argument('--eta1', type=float, default=0.0003)
-    parser.add_argument('--eta2', type=float, default=0.0003)
+    parser.add_argument('--lr_Q', type=float, default=0.0003)
+    parser.add_argument('--lr_pi', type=float, default=0.0003)
     parser.add_argument('--tau', type=float, default=0.005)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--layer1_size', type=int, default=256)

@@ -18,7 +18,7 @@ import numpy as np
 class Critic(torch.nn.Module):
     
     def __init__(self, 
-                 eta1: float, 
+                 lr_Q: float, 
                  input_shape: tuple, 
                  layer1_neurons: int, 
                  layer2_neurons: int, 
@@ -40,7 +40,7 @@ class Critic(torch.nn.Module):
         self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
         self.Q = torch.nn.Linear(self.layer2_neurons, 1)
         
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=eta1)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
         
@@ -66,7 +66,7 @@ class Critic(torch.nn.Module):
 class Actor(torch.nn.Module):
     
     def __init__(self, 
-                 eta2: float, 
+                 lr_pi: float, 
                  input_shape: tuple, 
                  layer1_neurons: int, 
                  layer2_neurons: int, 
@@ -92,7 +92,7 @@ class Actor(torch.nn.Module):
         self.mu = torch.nn.Linear(self.layer2_neurons, self.action_space_dimension)
         self.sigma = torch.nn.Linear(self.layer2_neurons, self.action_space_dimension)
         
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=eta2)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
         
@@ -123,11 +123,11 @@ class Actor(torch.nn.Module):
             actions = probabilities.sample()
             
         action = torch.tanh(actions) * torch.tensor(self.max_actions).to(self.device)
-        log_probs = probabilities.log_prob(actions)
-        log_probs -= torch.log(1-action.pow(2) + self.reparam_noise)
-        log_probs = log_probs.sum(1, keepdim=True)
+        log_probabilities = probabilities.log_prob(actions)
+        log_probabilities -= torch.log(1-action.pow(2) + self.reparam_noise)
+        log_probabilities = log_probabilities.sum(1, keepdim=True)
         
-        return action, log_probs
+        return action, log_probabilities
     
     def save_network_weights(self):
         torch.save(self.state_dict(), self.checkpoint_file)
@@ -139,7 +139,7 @@ class Actor(torch.nn.Module):
 class Value(torch.nn.Module):
     
     def __init__(self, 
-                 eta1: float, 
+                 lr_Q: float, 
                  input_shape: tuple, 
                  layer1_neurons: int, 
                  layer2_neurons: int, 
@@ -159,7 +159,7 @@ class Value(torch.nn.Module):
         self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
         self.V = torch.nn.Linear(self.layer2_neurons, 1)
         
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=eta1)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
         

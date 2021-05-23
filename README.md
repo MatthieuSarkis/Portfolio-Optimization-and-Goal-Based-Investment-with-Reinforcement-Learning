@@ -29,8 +29,8 @@ python main.py \
 --sell_rate 0.01 \
 --sac_temperature 2.0 \
 --limit_n_stocks 50 \
---eta1 0.003 \
---eta2 0.003 \
+--lr_Q 0.003 \
+--lr_pi 0.003 \
 --tau 0.005 \
 --batch_size 32 \
 --layer1_size 256 \
