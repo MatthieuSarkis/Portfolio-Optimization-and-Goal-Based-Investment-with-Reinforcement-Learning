@@ -16,6 +16,7 @@ from src.agent import Agent
 from src.utilities import make_dir, plot_learning_curve
 from src.get_data import DataFetcher, Preprocessor
 from argparse import ArgumentParser
+import torch
 
 stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
                   'AMG','AFL','A','APD','AKAM','ALK','ALB','ARE','ALXN','ALGN','ALLE',
@@ -61,9 +62,9 @@ stocks_symbols_temp = ['MMM','ABT','ABBV','ACN']
 
 def main(args):
     
-    #os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-    #os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-    
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+      
     fetcher = DataFetcher(stock_symbols=stocks_symbols_temp,
                           start_date="2010-01-01",
                           end_date="2018-12-31",
@@ -89,7 +90,7 @@ def main(args):
     
     agent = Agent(lr_pi=args.lr_pi, 
                   lr_Q=args.lr_Q,  
-                  env_name=env_name, 
+                  agent_name=env_name, 
                   input_shape=env.observation_space.shape, 
                   tau=args.tau,
                   env=env, 
@@ -100,7 +101,7 @@ def main(args):
     
     
     n_episodes = args.n_episodes
-    filename = str(n_episodes) + 'episodes_temperature' + str(env.sac_temperature) + '.png'
+    filename = str(n_episodes) + 'episodes' + '.png'
     make_dir('plots')
     figure_file = 'plots/' + filename
     
@@ -138,6 +139,7 @@ def main(args):
         print('episode ', i, 'reward %.1f' % reward, 
               'trailing 100 episodes average %.1f' % avg_reward,
               'step %d' % steps, env_name, 'temperature', env.sac_temperature)
+        
     if not args.test_mode:
         x = [i+1 for i in range(n_episodes)]
         plot_learning_curve(x, reward_history, figure_file)
@@ -160,6 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_episodes', type=int, default=1)
     parser.add_argument('--test_mode', action='store_true', default=False)
     parser.add_argument('-gpu', type=str, default='0', help='GPU: 0 or 1')
+    parser.add_argument('--seed', type=int, default='42')
     
     args = parser.parse_args()
     main(args)

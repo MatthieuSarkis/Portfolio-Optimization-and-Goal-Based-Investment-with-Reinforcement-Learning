@@ -22,7 +22,7 @@ class Environment(gym.Env):
                  buy_rate: float,
                  sell_rate: float,
                  sac_temperature: float,
-                 limit_n_stocks: float = 50,
+                 limit_n_stocks: float = 200,
                  ) -> None:
         
         super(Environment, self).__init__()
@@ -126,24 +126,3 @@ class Environment(gym.Env):
         portfolio_value = self.cash_in_bank + self.number_of_shares.dot(self.stock_prices)
         return portfolio_value
         
-        
-if __name__ == '__main__':
-    
-    df = pd.DataFrame([[1,2],[3,4]])
-    
-    env = Environment(stock_market_history=df,
-                      initial_cash_in_bank=10000,
-                      buy_rate=0.0,
-                      sell_rate=0.0,
-                      sac_temperature=1.0,
-                      limit_n_stocks=50)
-    
-    env.step(np.array([1.0, 1.0]))
-    #env.step(np.array([1.0, 1.0]))
-    #env.step(np.array([1.0, 1.0]))
-    #env.step(np.array([1.0, -1.0]))
-    #env.step(np.array([1.0, -1.0]))
-    obs = env._get_observation()
-    value = env._get_portfolio_value()
-    
-    print(value)

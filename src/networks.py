@@ -85,7 +85,7 @@ class Actor(torch.nn.Module):
         self.checkpoint_dir = checkpoint_directory
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name + '_sac')
         make_dir(directory_name=checkpoint_directory)
-        self.reparam_noise = 1e-6 # for the clamping of the standard deviation in the forward() function
+        self.reparam_noise = 1e-6
         
         self.layer1 = torch.nn.Linear(*self.input_shape, self.layer1_neurons)
         self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)

@@ -74,6 +74,14 @@ class Agent():
         
         self._update_target_network(tau=1)
         
+        if torch.cuda.device_count() > 1:
+            print("We are using", torch.cuda.device_count(), "GPUs.")
+            self = torch.nn.DataParallel(self)
+            self.to(self.critic_1.device)
+            
+        else:
+            print("No multiple GPUs available...")
+        
     def choose_action(self, 
                       observation: np.array) -> np.array:
         
@@ -273,6 +281,14 @@ class Agent_AutomaticTemperature():
         self.log_alpha = torch.zeros(1, requires_grad=True).to(self.critic_1.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
+        if torch.cuda.device_count() > 1:
+            print("We are using", torch.cuda.device_count(), "GPUs.")
+            self = torch.nn.DataParallel(self)
+            self.to(self.critic_1.device)
+            
+        else:
+            print("No multiple GPUs available...")
+        
     def _initialize_weights(net: torch.nn.Module) -> None:
         
         if type(net) == torch.nn.Linear:
@@ -295,50 +311,6 @@ class Agent_AutomaticTemperature():
                  done: bool) -> None:
         
         self.memory.push(state, action, reward, new_state, done)
-        
-    def _update_target_networks(self, 
-                                tau: float = None) -> None:
-    
-        if tau is None:
-            tau = self.tau
-
-        target_critic_1_params = self.target_critic_1.named_parameters()
-        target_critic_2_params = self.target_critic_2.named_parameters()
-        critic_1_params = self.critic_1.named_parameters()
-        critic_2_params = self.critic_2.named_parameters()
-        
-        target_critic_1_state_dict = dict(target_critic_1_params)
-        target_critic_2_state_dict = dict(target_critic_2_params)
-        critic_1_state_dict = dict(critic_1_params)
-        critic_2_state_dict = dict(critic_2_params)
-        
-        for name in critic_1_state_dict:
-            critic_1_state_dict[name] = tau * critic_1_state_dict[name].clone() + (1 - tau) * target_critic_1_state_dict[name].clone()
-        for name in critic_2_state_dict:
-            critic_2_state_dict[name] = tau * critic_2_state_dict[name].clone() + (1 - tau) * target_critic_2_state_dict[name].clone()
-            
-        self.target_critic_1.load_state_dict(critic_1_state_dict)
-        self.target_critic_2.load_state_dict(critic_2_state_dict)
-        
-    def save_models(self) -> None:
-        
-        print(' ... saving models ... ')
-        
-        self.actor.save_network_weights()
-        self.critic_1.save_network_weights()
-        self.critic_2.save_network_weights()
-        self.target_critic_1.save_network_weights()
-        self.target_critic_2.save_network_weights()
-        
-    def load_models(self) -> None:
-        
-        print(' ... loading models ... ')
-        
-        self.actor.load_network_weights()
-        self.critic_1.load_network_weights()
-        self.critic_2.load_network_weights()
-        self.target_critic_1.load_network_weights()
-        self.target_critic_2.load_network_weights()
         
     def learn(self) -> None:
         
@@ -406,4 +378,47 @@ class Agent_AutomaticTemperature():
         
         # EXPONENTIALLY SMOOTHED COPY TO THE TARGET CRITIC NETWORKS
         self._update_target_networks()
+     
+    def _update_target_networks(self, 
+                                tau: float = None) -> None:
+    
+        if tau is None:
+            tau = self.tau
+
+        target_critic_1_params = self.target_critic_1.named_parameters()
+        target_critic_2_params = self.target_critic_2.named_parameters()
+        critic_1_params = self.critic_1.named_parameters()
+        critic_2_params = self.critic_2.named_parameters()
         
+        target_critic_1_state_dict = dict(target_critic_1_params)
+        target_critic_2_state_dict = dict(target_critic_2_params)
+        critic_1_state_dict = dict(critic_1_params)
+        critic_2_state_dict = dict(critic_2_params)
+        
+        for name in critic_1_state_dict:
+            critic_1_state_dict[name] = tau * critic_1_state_dict[name].clone() + (1 - tau) * target_critic_1_state_dict[name].clone()
+        for name in critic_2_state_dict:
+            critic_2_state_dict[name] = tau * critic_2_state_dict[name].clone() + (1 - tau) * target_critic_2_state_dict[name].clone()
+            
+        self.target_critic_1.load_state_dict(critic_1_state_dict)
+        self.target_critic_2.load_state_dict(critic_2_state_dict)
+        
+    def save_models(self) -> None:
+        
+        print(' ... saving models ... ')
+        
+        self.actor.save_network_weights()
+        self.critic_1.save_network_weights()
+        self.critic_2.save_network_weights()
+        self.target_critic_1.save_network_weights()
+        self.target_critic_2.save_network_weights()
+        
+    def load_models(self) -> None:
+        
+        print(' ... loading models ... ')
+        
+        self.actor.load_network_weights()
+        self.critic_1.load_network_weights()
+        self.critic_2.load_network_weights()
+        self.target_critic_1.load_network_weights()
+        self.target_critic_2.load_network_weights()

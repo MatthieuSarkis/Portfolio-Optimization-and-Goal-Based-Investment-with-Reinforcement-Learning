@@ -131,22 +131,4 @@ class Preprocessor():
         
         return self.df
 
-if __name__ == '__main__':
-    
-    fetcher = DataFetcher(stock_symbols=stocks_symbols_temp,
-                          start_date="2010-01-01",
-                          end_date="2018-12-31",
-                          directory_path="data")
-    
-    df = fetcher.fetch_and_merge_data()
-    
-    preprocessor = Preprocessor(df=df,
-                                df_directory='data')
-    
-    df = preprocessor.collect_close_prices()
-    df = preprocessor.handle_missing_values()
-            
-    print(preprocessor.df.head(10))
-    
-
            
