@@ -31,10 +31,11 @@ python main.py \
 --lr_Q 0.003 \
 --lr_pi 0.003 \
 --tau 0.005 \
---batch_size 32 \
+--batch_size 256 \
 --layer1_size 256 \
 --layer1_size 256 \
---n_episodes 10 
+--n_episodes 10 \
+--seed 42 
 ```
 ## License
 [Apache License 2.0](https://github.com/MatthieuSarkis/stock/blob/master/LICENSE)

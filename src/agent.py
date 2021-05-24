@@ -75,9 +75,8 @@ class Agent():
         self._update_target_network(tau=1)
         
         if torch.cuda.device_count() > 1:
-            print("We are using", torch.cuda.device_count(), "GPUs.")
-            self = torch.nn.DataParallel(self)
-            
+            print("Number of GPU used:", torch.cuda.device_count())
+            self = torch.nn.DataParallel(self) 
         else:
             print("No multiple GPUs available...")
             
@@ -283,9 +282,8 @@ class Agent_AutomaticTemperature():
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
         if torch.cuda.device_count() > 1:
-            print("We are using", torch.cuda.device_count(), "GPUs.")
-            self = torch.nn.DataParallel(self)
-            
+            print("Number of GPU used:", torch.cuda.device_count())
+            self = torch.nn.DataParallel(self)  
         else:
             print("No multiple GPUs available...")
             

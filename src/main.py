@@ -99,7 +99,6 @@ def main(args):
                   layer2_size=args.layer2_size,
                   action_space_dimension=env.action_space.shape[0])
     
-    
     n_episodes = args.n_episodes
     filename = str(n_episodes) + 'episodes' + '.png'
     make_dir('plots')
