@@ -77,10 +77,11 @@ class Agent():
         if torch.cuda.device_count() > 1:
             print("We are using", torch.cuda.device_count(), "GPUs.")
             self = torch.nn.DataParallel(self)
-            self.to(self.critic_1.device)
             
         else:
             print("No multiple GPUs available...")
+            
+        self.to(self.critic_1.device)
         
     def choose_action(self, 
                       observation: np.array) -> np.array:
@@ -284,10 +285,11 @@ class Agent_AutomaticTemperature():
         if torch.cuda.device_count() > 1:
             print("We are using", torch.cuda.device_count(), "GPUs.")
             self = torch.nn.DataParallel(self)
-            self.to(self.critic_1.device)
             
         else:
             print("No multiple GPUs available...")
+            
+        self.to(self.critic_1.device)
         
     def _initialize_weights(net: torch.nn.Module) -> None:
         
