@@ -74,14 +74,6 @@ class Agent():
         
         self._update_target_network(tau=1)
         
-        if torch.cuda.device_count() > 1:
-            print("Number of GPU used:", torch.cuda.device_count())
-            self = torch.nn.DataParallel(self) 
-        else:
-            print("No multiple GPUs available...")
-            
-        self.to(self.critic_1.device)
-        
     def choose_action(self, 
                       observation: np.array) -> np.array:
         
@@ -280,14 +272,6 @@ class Agent_AutomaticTemperature():
         self.target_entropy = -torch.prod(torch.Tensor(action_space_dimension).to(self.critic_1.device)).item()
         self.log_alpha = torch.zeros(1, requires_grad=True).to(self.critic_1.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
-        
-        if torch.cuda.device_count() > 1:
-            print("Number of GPU used:", torch.cuda.device_count())
-            self = torch.nn.DataParallel(self)  
-        else:
-            print("No multiple GPUs available...")
-            
-        self.to(self.critic_1.device)
         
     def _initialize_weights(net: torch.nn.Module) -> None:
         

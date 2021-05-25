@@ -42,6 +42,12 @@ class Critic(torch.nn.Module):
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        
+        if torch.cuda.device_count() > 1:
+            print("Number of GPU used:", torch.cuda.device_count())
+            self = torch.nn.DataParallel(self)  
+        else:
+            print("No multiple GPUs available...")
         self.to(self.device)
         
     def forward(self, 
@@ -93,7 +99,10 @@ class Actor(torch.nn.Module):
         self.sigma = torch.nn.Linear(self.layer2_neurons, self.action_space_dimension)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
+        
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        if torch.cuda.device_count() > 1:
+            self = torch.nn.DataParallel(self)  
         self.to(self.device)
         
     def forward(self, 
@@ -160,7 +169,10 @@ class Value(torch.nn.Module):
         self.V = torch.nn.Linear(self.layer2_neurons, 1)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
+        
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        if torch.cuda.device_count() > 1:
+            self = torch.nn.DataParallel(self)  
         self.to(self.device)
         
     def forward(self, 
