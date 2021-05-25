@@ -1,0 +1,9 @@
+numpy
+pandas
+jupyter
+sklearn
+matplotlib
+seaborn
+torch
+yfinance
+gym
