@@ -10,11 +10,9 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-from pandas.core.frame import DataFrame
 import yfinance as yf
 import os
 import pandas as pd
-#from glob import glob
 from src.utilities import make_dir
 
 class DataFetcher():
