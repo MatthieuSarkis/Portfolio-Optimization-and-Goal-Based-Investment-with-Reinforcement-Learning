@@ -29,7 +29,7 @@ class Agent():
                  size: int = 1000000,
                  layer1_size: int = 256, 
                  layer2_size: int = 256, 
-                 batch_size: int = 100, 
+                 batch_size: int = 256, 
                  ) -> None:
         
         self.gamma = gamma
@@ -110,7 +110,7 @@ class Agent():
         
     def save_networks(self) -> None:
         
-        print(' ... saving models ... ')
+        print(' ... saving networks ... ')
         
         self.actor.save_network_weights()
         self.value.save_network_weights()
@@ -120,7 +120,7 @@ class Agent():
         
     def load_networks(self) -> None:
         
-        print(' ... loading models ... ')
+        print(' ... loading networks ... ')
         
         self.actor.load_network_weights()
         self.value.load_network_weights()
@@ -181,7 +181,7 @@ class Agent():
         self.actor.optimizer.step()
         
         # CRITIC UPDATE
-        q_target = rewards+ self.gamma * value_
+        q_target = rewards + self.gamma * value_
         
         q1 = self.critic_1.forward(states, actions).view(-1)
         q2 = self.critic_2.forward(states, actions).view(-1)
@@ -216,7 +216,7 @@ class Agent_AutomaticTemperature():
                  size: int = 1000000,
                  layer1_size: int = 256, 
                  layer2_size: int = 256, 
-                 batch_size: int = 100, 
+                 batch_size: int = 256, 
                  alpha: float = 1.0
                  ) -> None:
         
@@ -230,7 +230,7 @@ class Agent_AutomaticTemperature():
                            input_shape, 
                            layer1_size,
                            layer2_size, 
-                           n_actions=action_space_dimension, 
+                           action_space_dimension=action_space_dimension, 
                            name=agent_name+'_actor',
                            max_actions=env.action_space.high)
         
@@ -238,28 +238,28 @@ class Agent_AutomaticTemperature():
                                input_shape, 
                                layer1_size,
                                layer2_size, 
-                               n_actions=action_space_dimension, 
+                               action_space_dimension=action_space_dimension, 
                                name=agent_name+'_critic1')
         
         self.critic_2 = Critic(lr_Q, 
                                input_shape, 
                                layer1_size,
                                layer2_size, 
-                               n_actions=action_space_dimension, 
+                               action_space_dimension=action_space_dimension, 
                                name=agent_name+'_critic2')
         
         self.target_critic_1 = Critic(lr_Q, 
                                       input_shape, 
                                       layer1_size,
                                       layer2_size, 
-                                      n_actions=action_space_dimension, 
+                                      action_space_dimension=action_space_dimension, 
                                       name=agent_name+'_target_critic1')
         
         self.target_critic_2 = Critic(lr_Q, 
                                       input_shape, 
                                       layer1_size,
                                       layer2_size, 
-                                      n_actions=action_space_dimension, 
+                                      action_space_dimension=action_space_dimension, 
                                       name=agent_name+'_target_critic2')
         
         self.actor.apply(self._initialize_weights)
@@ -272,11 +272,12 @@ class Agent_AutomaticTemperature():
         self.target_entropy = -torch.prod(torch.Tensor(action_space_dimension).to(self.critic_1.device)).item()
         self.log_alpha = torch.zeros(1, requires_grad=True).to(self.critic_1.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
-        
+     
+    @staticmethod   
     def _initialize_weights(net: torch.nn.Module) -> None:
         
         if type(net) == torch.nn.Linear:
-            torch.nn.init.xavier_uniform(net.weight)
+            torch.nn.init.xavier_uniform_(net.weight)
             net.bias.data.fill_(1e-2)
         
     def choose_action(self, 
@@ -387,9 +388,9 @@ class Agent_AutomaticTemperature():
         self.target_critic_1.load_state_dict(critic_1_state_dict)
         self.target_critic_2.load_state_dict(critic_2_state_dict)
         
-    def save_models(self) -> None:
+    def save_networks(self) -> None:
         
-        print(' ... saving models ... ')
+        print(' ... saving networks ... ')
         
         self.actor.save_network_weights()
         self.critic_1.save_network_weights()
@@ -397,9 +398,9 @@ class Agent_AutomaticTemperature():
         self.target_critic_1.save_network_weights()
         self.target_critic_2.save_network_weights()
         
-    def load_models(self) -> None:
+    def load_networks(self) -> None:
         
-        print(' ... loading models ... ')
+        print(' ... loading networks ... ')
         
         self.actor.load_network_weights()
         self.critic_1.load_network_weights()

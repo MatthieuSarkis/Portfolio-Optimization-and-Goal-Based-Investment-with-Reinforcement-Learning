@@ -44,10 +44,7 @@ class Critic(torch.nn.Module):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         
         if torch.cuda.device_count() > 1:
-            print("Number of GPU used:", torch.cuda.device_count())
             self = torch.nn.DataParallel(self)  
-        else:
-            print("No multiple GPUs available...")
         self.to(self.device)
         
     def forward(self, 

@@ -10,13 +10,15 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import os
 from src.environment import Environment
 import numpy as np
-from src.agent import Agent
+from src.agent import Agent, Agent_AutomaticTemperature
 from src.utilities import make_dir, plot_learning_curve
 from src.get_data import DataFetcher, Preprocessor
 from argparse import ArgumentParser
 import torch
+import gym
 
 stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
                   'AMG','AFL','A','APD','AKAM','ALK','ALB','ARE','ALXN','ALGN','ALLE',
@@ -65,39 +67,60 @@ def main(args):
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
       
-    fetcher = DataFetcher(stock_symbols=stocks_symbols_temp,
-                          start_date="2010-01-01",
-                          end_date="2018-12-31",
-                          directory_path="data")
+    if not os.path.exists('data/'):
+      
+        fetcher = DataFetcher(stock_symbols=stocks_symbols_temp,
+                            start_date="2010-01-01",
+                            end_date="2020-12-31",
+                            directory_path="data")
+        
+        fetcher.fetch_and_merge_data()
     
-    df = fetcher.fetch_and_merge_data()
-    
-    preprocessor = Preprocessor(df=df,
-                                df_directory='data')
+    preprocessor = Preprocessor(df_directory='data',
+                                file_name='stocks.csv')
     
     df = preprocessor.collect_close_prices()
     df = preprocessor.handle_missing_values()
     df = df.iloc[:50]
-
-    env_name = 'stock_trading'
     
     env = Environment(stock_market_history=df,
                       initial_cash_in_bank=args.initial_cash,
                       buy_rate=args.buy_rate,
                       sell_rate=args.sell_rate,
-                      sac_temperature=args.sac_temperature,
                       limit_n_stocks=args.limit_n_stocks)
     
-    agent = Agent(lr_pi=args.lr_pi, 
-                  lr_Q=args.lr_Q,  
-                  agent_name=env_name, 
-                  input_shape=env.observation_space.shape, 
-                  tau=args.tau,
-                  env=env, 
-                  batch_size=args.batch_size, 
-                  layer1_size=args.layer1_size, 
-                  layer2_size=args.layer2_size,
-                  action_space_dimension=env.action_space.shape[0])
+    if args.auto_temperature:
+        agent_name = 'auto_temperature'
+        
+        agent = Agent_AutomaticTemperature(lr_Q=args.lr_Q,
+                                           lr_pi=args.lr_pi, 
+                                           lr_alpha=args.lr_alpha,  
+                                           agent_name=agent_name, 
+                                           input_shape=env.observation_space.shape, 
+                                           tau=args.tau,
+                                           env=env, 
+                                           size=args.memory_size,
+                                           batch_size=args.batch_size, 
+                                           layer1_size=args.layer1_size, 
+                                           layer2_size=args.layer2_size,
+                                           action_space_dimension=env.action_space.shape[0],
+                                           alpha=args.alpha)
+    
+    else:
+        agent_name = 'manual_temperature'
+        
+        agent = Agent(lr_pi=args.lr_pi, 
+                      lr_Q=args.lr_Q, 
+                      gamma=args.gamma, 
+                      agent_name=agent_name, 
+                      input_shape=env.observation_space.shape, 
+                      tau=args.tau,
+                      env=env, 
+                      size=args.memory_size,
+                      batch_size=args.batch_size, 
+                      layer1_size=args.layer1_size, 
+                      layer2_size=args.layer2_size,
+                      action_space_dimension=env.action_space.shape[0])
     
     n_episodes = args.n_episodes
     filename = str(n_episodes) + 'episodes' + '.png'
@@ -121,6 +144,8 @@ def main(args):
         while not done:
             action = agent.choose_action(observation)
             observation_, reward, done, _ = env.step(action)
+            if not args.auto_temperature:
+                reward *= args.sac_temperature
             steps += 1
             reward += reward
             agent.remember(observation, action, reward, observation_, done)
@@ -135,9 +160,16 @@ def main(args):
             best_reward = avg_reward
             if not args.test_mode:
                 agent.save_networks()
-        print('episode ', i, 'reward %.1f' % reward, 
-              'trailing 100 episodes average %.1f' % avg_reward,
-              'step %d' % steps, env_name, 'temperature', env.sac_temperature)
+                
+        if args.auto_temperature:
+            print('episode ', i, 'reward %.1f' % reward, 
+                  'running average (100 episodes) %.1f' % avg_reward,
+                  'step %d' % steps, agent_name)
+    
+        else: 
+            print('episode ', i, 'reward %.1f' % reward, 
+                  'running average (100 episodes) %.1f' % avg_reward,
+                  'step %d' % steps, agent_name, 'temperature', env.sac_temperature)
         
     if not args.test_mode:
         x = [i+1 for i in range(n_episodes)]
@@ -154,15 +186,20 @@ if __name__ == '__main__':
     parser.add_argument('--limit_n_stocks', type=int, default=50)
     parser.add_argument('--lr_Q', type=float, default=0.0003)
     parser.add_argument('--lr_pi', type=float, default=0.0003)
+    parser.add_argument('--lr_alpha', type=float, default=0.0003)
     parser.add_argument('--tau', type=float, default=0.005)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--layer1_size', type=int, default=256)
     parser.add_argument('--layer2_size', type=int, default=256)
     parser.add_argument('--n_episodes', type=int, default=1)
     parser.add_argument('--test_mode', action='store_true', default=False)
-    parser.add_argument('-gpu', type=str, default='0', help='GPU: 0 or 1')
+    parser.add_argument('--gpu', type=str, default='0', help='GPU: 0 or 1')
     parser.add_argument('--seed', type=int, default='42')
-    
+    parser.add_argument('--auto_temperature', action='store_true', default=False)
+    parser.add_argument('--gamma', type=float, default=0.99)
+    parser.add_argument('--memory_size', type=int, default=1000000)
+    parser.add_argument('--alpha', type=float, default=1.0)
+
     args = parser.parse_args()
     main(args)
     

@@ -5,3 +5,4 @@ data/
 plots/
 saved_networks/
 __pycache__/
+*egg-info/

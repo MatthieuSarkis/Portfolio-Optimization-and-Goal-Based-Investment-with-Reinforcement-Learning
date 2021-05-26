@@ -22,7 +22,7 @@ class DataFetcher():
     def __init__(self,
                  stock_symbols: list[str],
                  start_date: str = "2010-01-01",
-                 end_date: str = "2018-12-31",
+                 end_date: str = "2020-12-31",
                  directory_path: str = "data") -> None:
         
         make_dir(directory_name=directory_path)
@@ -66,7 +66,7 @@ class DataFetcher():
         final_df.to_csv(path, index=False)
     """
     
-    def fetch_and_merge_data(self) -> pd.DataFrame:
+    def fetch_and_merge_data(self) -> None:
         
         final_df = None
         
@@ -93,17 +93,16 @@ class DataFetcher():
                 
         path = os.path.join(self.directory_path, 'stocks.csv')
         final_df.to_csv(path, index=False)
-        
-        return final_df
     
 class Preprocessor():
     
     def __init__(self,
-                 df: pd.DataFrame,
-                 df_directory: str = 'data') -> None:
-        
-        self.df = df    
-        self.df_directory = df_directory  
+                 df_directory: str = 'data',
+                 file_name: str = 'stock.csv') -> None:
+            
+        self.df_directory = df_directory
+        path = os.path.join(df_directory, file_name)
+        self.df = pd.read_csv(path) 
         
     def collect_close_prices(self) -> pd.DataFrame:
         
@@ -116,10 +115,6 @@ class Preprocessor():
             df_temp = self.df[self.df['Name'] == stock]
             df_temp2 = pd.DataFrame(data=df_temp['Close'].to_numpy(), index=df_temp['Date'], columns=[stock])
             close_prices = pd.concat([close_prices, df_temp2], axis=1)  
-
-        #close_prices_path = os.path.join(self.df_directory, "close_prices.csv")
-        #close_prices.to_csv(close_prices_path)
-        
         self.df = close_prices
         return close_prices
         
@@ -128,7 +123,7 @@ class Preprocessor():
         self.df.dropna(axis=0, how='all', inplace=True)
         self.df.fillna(method='ffill', inplace=True)
         self.df.fillna(method='bfill', inplace=True)
-        
+        self.df.to_csv(os.path.join(self.df_directory, 'close.csv'))
         return self.df
 
            

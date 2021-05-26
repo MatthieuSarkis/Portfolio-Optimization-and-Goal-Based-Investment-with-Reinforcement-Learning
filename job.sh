@@ -21,10 +21,13 @@ python src/main.py \
 --limit_n_stocks 200 \
 --lr_Q 0.0003 \
 --lr_pi 0.0003 \
+--gamma 0.99 \
 --tau 0.005 \
 --batch_size 256 \
 --layer1_size 256 \
 --layer1_size 256 \
 --n_episodes 2 \
---seed 42
+--seed 42 \
+--memory_size 1000000 \
+--auto_temperature \
 
