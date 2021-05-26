@@ -38,7 +38,7 @@ class Environment(gym.Env):
         
         self.initial_cash_in_bank = initial_cash_in_bank
         
-        self.buy_rate = buy_rate
+        self.buy_rate = buy_rate  # 0.1%
         self.sell_rate = sell_rate
         
         self.current_step = None
@@ -58,7 +58,7 @@ class Environment(gym.Env):
         return self._get_observation()
         
     def step(self, 
-             actions: np.array) -> tuple[np.array, float, bool, dict]:
+             actions: np.array) -> tuple[np.array, float, bool, dict]: # sinon from typing import Tuple pour python<3.9
         
         done = self.current_step == (self.time_horizon - 1)
         self.current_step += 1

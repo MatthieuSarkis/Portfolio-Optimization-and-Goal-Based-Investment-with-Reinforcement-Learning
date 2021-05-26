@@ -1,6 +1,9 @@
 ## Notes
 
 * Scaling the data?
+* Donnees fondamentales?
+* Leverage, lower bound on bank account
+* tests unitaires
 
 ## Requirements
 

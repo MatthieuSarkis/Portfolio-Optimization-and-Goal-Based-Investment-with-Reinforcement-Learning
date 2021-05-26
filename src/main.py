@@ -60,7 +60,7 @@ stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES'
                   'VMC','WMT','WBA','DIS','WM','WAT','WEC','WFC','HCN','WDC','WU','WRK','WY','WHR','WMB',
                   'WLTW','WYN','WYNN','XEL','XRX','XLNX','XL','XYL','YUM','ZBH','ZION','ZTS']
 
-stocks_symbols_temp = ['MMM','ABT','ABBV','ACN']
+stocks_symbols_temp = ['MMM','ABT','ABBV']
 
 def main(args):
     
