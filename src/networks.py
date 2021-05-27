@@ -104,7 +104,7 @@ class Actor(torch.nn.Module):
         self.to(self.device)
         
     def forward(self, 
-                state: List[float]) -> List[torch.tensor, torch.tensor]:
+                state: List[float]) -> List[torch.tensor]:
         
         x = self.layer1(state)
         x = torch.nn.functional.relu(x)

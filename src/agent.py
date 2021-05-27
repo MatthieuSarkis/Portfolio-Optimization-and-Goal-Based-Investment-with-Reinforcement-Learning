@@ -17,27 +17,33 @@ from src.networks import Actor, Critic, Value
 import gym
 from typing import Tuple
    
-class Agent_ManualTemperature():
-    def __init__(self, 
+class Agent():
+    
+    def __init__(self,
                  lr_Q: float, 
                  lr_pi: float, 
                  input_shape: Tuple, 
                  tau: float, 
                  env: gym.Env, 
                  agent_name: str, 
-                 action_space_dimension: int,
-                 gamma: float = 0.99,  
+                 action_space_dimension: int, 
+                 gamma: float = 0.99, 
                  size: int = 1000000,
                  layer1_size: int = 256, 
                  layer2_size: int = 256, 
-                 batch_size: int = 256, 
-                 ) -> None:
+                 batch_size: int = 256):
         
         self.gamma = gamma
         self.tau = tau
         self.memory = ReplayBuffer(size, input_shape, action_space_dimension)
         self.batch_size = batch_size
         self.action_space_dimension = action_space_dimension
+        self.lr_Q = lr_Q
+        self.lr_pi = lr_pi
+        self.env = env
+        self.agent_name = agent_name
+        self.layer1_size = layer1_size
+        self.layer2_size = layer2_size
 
         self.actor = Actor(lr_pi, 
                            input_shape, 
@@ -47,41 +53,22 @@ class Agent_ManualTemperature():
                            name=agent_name+'_actor',
                            max_actions=env.action_space.high)
         
-        self.critic_1 = Critic(lr_Q, 
-                               input_shape, 
-                               layer1_size,
-                               layer2_size, 
-                               action_space_dimension=action_space_dimension, 
-                               name=agent_name+'_critic1')
+        self.critic_1 = Critic(self.lr_Q, 
+                               self.input_shape, 
+                               self.layer1_size,
+                               self.layer2_size, 
+                               action_space_dimension=self.action_space_dimension, 
+                               name=self.agent_name+'_critic1')
         
-        self.critic_2 = Critic(lr_Q, 
-                               input_shape, 
-                               layer1_size,
-                               layer2_size, 
-                               action_space_dimension=action_space_dimension, 
-                               name=agent_name+'_critic2')
+        self.critic_2 = Critic(self.lr_Q, 
+                               self.input_shape, 
+                               self.layer1_size,
+                               self.layer2_size, 
+                               action_space_dimension=self.action_space_dimension, 
+                               name=self.agent_name+'_critic2')
         
-        self.value = Value(lr_Q, 
-                           input_shape, 
-                           layer1_size,
-                           layer2_size, 
-                           name=agent_name+'_value')
-        
-        self.target_value = Value(lr_Q, 
-                                  input_shape, 
-                                  layer1_size,
-                                  layer2_size, 
-                                  name=agent_name+'_target_value')
-        
-        self._update_target_networks(tau=1)
-        
-    def choose_action(self, 
-                      observation: np.array) -> np.array:
-        
-        state = torch.Tensor([observation]).to(self.actor.device)
-        actions, _ = self.actor.sample_normal(state, reparameterize=False)
-        
-        return actions.cpu().detach().numpy()[0]
+        self.network_list = [self.actor, self.critic_1, self.critic_2]
+        self.targeted_network_list = []
     
     def remember(self, 
                  state: np.array, 
@@ -91,44 +78,81 @@ class Agent_ManualTemperature():
                  done: bool) -> None:
         
         self.memory.push(state, action, reward, new_state, done)
+            
+    @staticmethod   
+    def _initialize_weights(net: torch.nn.Module) -> None:
         
+        if type(net) == torch.nn.Linear:
+            torch.nn.init.xavier_uniform_(net.weight)
+            net.bias.data.fill_(1e-2)
+    
     def _update_target_networks(self, 
                                 tau: float = None) -> None:
-        
+    
         if tau is None:
             tau = self.tau
 
-        target_value_params = self.target_value.named_parameters()
-        value_params = self.value.named_parameters()
-        
-        target_value_state_dict = dict(target_value_params)
-        value_state_dict = dict(value_params)
-        
-        for name in value_state_dict:
-            value_state_dict[name] = tau * value_state_dict[name].clone() + (1 - tau) * target_value_state_dict[name].clone()
+        shift = len(self.targeted_network_list) // 2
+
+        for i in range(shift):
             
-        self.target_value.load_state_dict(value_state_dict)
+            target_params = self.targeted_network_list[i+shift].named_parameters()
+            params = self.targeted_network_list[i].named_parameters()
+            
+            target_params = dict(target_params)
+            params = dict(params)
+            
+            for name in params:
+                params[name] = tau * params[name].clone() + (1 - tau) * target_params[name].clone()
+                
+            self.targeted_network_list[i+shift].load_state_dict(params)
+
+    def choose_action(self, 
+                      observation: np.array) -> np.array:
         
+        state = torch.Tensor([observation]).to(self.actor.device)
+        actions, _ = self.actor.sample_normal(state, reparameterize=False)
+        
+        return actions.cpu().detach().numpy()[0]
+
     def save_networks(self) -> None:
         
-        print(' ... saving networks ... ')
-        
-        self.actor.save_network_weights()
-        self.value.save_network_weights()
-        self.target_value.save_network_weights()
-        self.critic_1.save_network_weights()
-        self.critic_2.save_network_weights()
+        print(' ... saving networks ... ')    
+        for network in self.network_list:
+            network.save_network_weights()
         
     def load_networks(self) -> None:
         
         print(' ... loading networks ... ')
+        for network in self.network_list:
+            network.load_network_weights()
+   
+class Agent_ManualTemperature(Agent):
+    
+    def __init__(self) -> None:
         
-        self.actor.load_network_weights()
-        self.value.load_network_weights()
-        self.target_value.load_network_weights()
-        self.critic_1.load_network_weights()
-        self.critic_2.load_network_weights()
+        super(Agent_ManualTemperature, self).__init__()
         
+        self.value = Value(self.lr_Q, 
+                           self.input_shape, 
+                           self.layer1_size,
+                           self.layer2_size, 
+                           name=self.agent_name+'_value')
+        
+        self.target_value = Value(self.lr_Q, 
+                                  self.input_shape, 
+                                  self.layer1_size,
+                                  self.layer2_size, 
+                                  name=self.agent_name+'_target_value')
+        
+        self.network_list += [self.value, self.target_value]
+        self.targeted_network_list += [self.value, self.target_value]
+        
+        for network in self.network_list:
+            network.apply(self._initialize_weights) 
+        
+        self._update_target_networks(tau=1)
+ 
     def learn(self) -> None:
         
         if self.memory.pointer < self.batch_size:
@@ -202,101 +226,40 @@ class Agent_ManualTemperature():
         # EXPONENTIALLY SMOOTHED COPY TO THE TARGET VALUE NETWORK
         self._update_target_network()
            
-class Agent_AutomaticTemperature():
+class Agent_AutomaticTemperature(Agent):
     
     def __init__(self, 
-                 lr_Q: float, 
-                 lr_pi: float, 
                  lr_alpha: float,
-                 input_shape: Tuple, 
-                 tau: float, 
-                 env: gym.Env, 
-                 agent_name: str, 
-                 action_space_dimension: int, 
-                 gamma: float = 0.99, 
-                 size: int = 1000000,
-                 layer1_size: int = 256, 
-                 layer2_size: int = 256, 
-                 batch_size: int = 256, 
-                 alpha: float = 1.0
-                 ) -> None:
+                 alpha: float = 1.0) -> None:
         
-        self.gamma = gamma
-        self.tau = tau
-        self.memory = ReplayBuffer(size, input_shape, action_space_dimension)
-        self.batch_size = batch_size
-        self.action_space_dimension = action_space_dimension
-
-        self.actor = Actor(lr_pi, 
-                           input_shape, 
-                           layer1_size,
-                           layer2_size, 
-                           action_space_dimension=action_space_dimension, 
-                           name=agent_name+'_actor',
-                           max_actions=env.action_space.high)
-        
-        self.critic_1 = Critic(lr_Q, 
-                               input_shape, 
-                               layer1_size,
-                               layer2_size, 
-                               action_space_dimension=action_space_dimension, 
-                               name=agent_name+'_critic1')
-        
-        self.critic_2 = Critic(lr_Q, 
-                               input_shape, 
-                               layer1_size,
-                               layer2_size, 
-                               action_space_dimension=action_space_dimension, 
-                               name=agent_name+'_critic2')
-        
-        self.target_critic_1 = Critic(lr_Q, 
-                                      input_shape, 
-                                      layer1_size,
-                                      layer2_size, 
-                                      action_space_dimension=action_space_dimension, 
-                                      name=agent_name+'_target_critic1')
-        
-        self.target_critic_2 = Critic(lr_Q, 
-                                      input_shape, 
-                                      layer1_size,
-                                      layer2_size, 
-                                      action_space_dimension=action_space_dimension, 
-                                      name=agent_name+'_target_critic2')
-        
-        self.actor.apply(self._initialize_weights)
-        self.critic_1.apply(self._initialize_weights)
-        self.critic_2.apply(self._initialize_weights)
-        
-        self._update_target_networks(tau=1)
+        super(Agent_AutomaticTemperature, self).__init__()
         
         self.alpha = alpha
-        self.target_entropy = -torch.prod(torch.Tensor(action_space_dimension).to(self.critic_1.device)).item()
+        self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.critic_1.device)).item()
         self.log_alpha = torch.zeros(1, requires_grad=True).to(self.critic_1.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
-     
-    @staticmethod   
-    def _initialize_weights(net: torch.nn.Module) -> None:
         
-        if type(net) == torch.nn.Linear:
-            torch.nn.init.xavier_uniform_(net.weight)
-            net.bias.data.fill_(1e-2)
+        self.target_critic_1 = Critic(self.lr_Q, 
+                                      self.input_shape, 
+                                      self.layer1_size,
+                                      self.layer2_size, 
+                                      action_space_dimension=self.action_space_dimension, 
+                                      name=self.agent_name+'_target_critic1')
         
-    def choose_action(self, 
-                      observation: np.array) -> np.array:
+        self.target_critic_2 = Critic(self.lr_Q, 
+                                      self.input_shape, 
+                                      self.layer1_size,
+                                      self.layer2_size, 
+                                      action_space_dimension=self.action_space_dimension, 
+                                      name=self.agent_name+'_target_critic2')
         
-        state = torch.Tensor([observation]).to(self.actor.device)
-        actions, _ = self.actor.sample_normal(state, reparameterize=False)
+        self.network_list += [self.target_critic_1, self.target_critic_2]
+        self.targeted_network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]
         
-        return actions.cpu().detach().numpy()[0]
-    
-    def remember(self, 
-                 state: np.array, 
-                 action: np.array, 
-                 reward: float, 
-                 new_state: np.array, 
-                 done: bool) -> None:
+        for network in self.network_list:
+            network.apply(self._initialize_weights) 
         
-        self.memory.push(state, action, reward, new_state, done)
+        self._update_target_networks(tau=1)
         
     def learn(self) -> None:
         
@@ -364,47 +327,3 @@ class Agent_AutomaticTemperature():
         
         # EXPONENTIALLY SMOOTHED COPY TO THE TARGET CRITIC NETWORKS
         self._update_target_networks()
-     
-    def _update_target_networks(self, 
-                                tau: float = None) -> None:
-    
-        if tau is None:
-            tau = self.tau
-
-        target_critic_1_params = self.target_critic_1.named_parameters()
-        target_critic_2_params = self.target_critic_2.named_parameters()
-        critic_1_params = self.critic_1.named_parameters()
-        critic_2_params = self.critic_2.named_parameters()
-        
-        target_critic_1_state_dict = dict(target_critic_1_params)
-        target_critic_2_state_dict = dict(target_critic_2_params)
-        critic_1_state_dict = dict(critic_1_params)
-        critic_2_state_dict = dict(critic_2_params)
-        
-        for name in critic_1_state_dict:
-            critic_1_state_dict[name] = tau * critic_1_state_dict[name].clone() + (1 - tau) * target_critic_1_state_dict[name].clone()
-        for name in critic_2_state_dict:
-            critic_2_state_dict[name] = tau * critic_2_state_dict[name].clone() + (1 - tau) * target_critic_2_state_dict[name].clone()
-            
-        self.target_critic_1.load_state_dict(critic_1_state_dict)
-        self.target_critic_2.load_state_dict(critic_2_state_dict)
-        
-    def save_networks(self) -> None:
-        
-        print(' ... saving networks ... ')
-        
-        self.actor.save_network_weights()
-        self.critic_1.save_network_weights()
-        self.critic_2.save_network_weights()
-        self.target_critic_1.save_network_weights()
-        self.target_critic_2.save_network_weights()
-        
-    def load_networks(self) -> None:
-        
-        print(' ... loading networks ... ')
-        
-        self.actor.load_network_weights()
-        self.critic_1.load_network_weights()
-        self.critic_2.load_network_weights()
-        self.target_critic_1.load_network_weights()
-        self.target_critic_2.load_network_weights()
