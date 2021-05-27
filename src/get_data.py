@@ -14,11 +14,12 @@ import yfinance as yf
 import os
 import pandas as pd
 from src.utilities import make_dir
+from typing import List
 
 class DataFetcher():
     
     def __init__(self,
-                 stock_symbols: list[str],
+                 stock_symbols: List[str],
                  start_date: str = "2010-01-01",
                  end_date: str = "2020-12-31",
                  directory_path: str = "data") -> None:

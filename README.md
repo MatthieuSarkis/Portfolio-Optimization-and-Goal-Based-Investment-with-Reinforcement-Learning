@@ -1,13 +1,15 @@
-## Notes
+## Notes / To do
 
 * Scaling the data?
 * Donnees fondamentales?
 * Leverage, lower bound on bank account
 * tests unitaires
+* typical buy_rate and sell_rate = 0.1%
+* Class Agent, from which inherit the others
 
 ## Requirements
 
-* Python 3.9+
+* Python>=3.6
 * numpy
 * pandas
 * jupyter

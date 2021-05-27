@@ -15,12 +15,15 @@ import torch
 from src.buffer import ReplayBuffer
 from src.networks import Actor, Critic, Value
 import gym
+from typing import Tuple
+
+
 
 class Agent():
     def __init__(self, 
                  lr_Q: float, 
                  lr_pi: float, 
-                 input_shape: tuple, 
+                 input_shape: Tuple, 
                  tau: float, 
                  env: gym.Env, 
                  agent_name: str, 
@@ -207,7 +210,7 @@ class Agent_AutomaticTemperature():
                  lr_Q: float, 
                  lr_pi: float, 
                  lr_alpha: float,
-                 input_shape: tuple, 
+                 input_shape: Tuple, 
                  tau: float, 
                  env: gym.Env, 
                  agent_name: str, 

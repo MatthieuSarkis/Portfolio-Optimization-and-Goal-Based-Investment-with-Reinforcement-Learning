@@ -18,7 +18,6 @@ from src.utilities import make_dir, plot_learning_curve
 from src.get_data import DataFetcher, Preprocessor
 from argparse import ArgumentParser
 import torch
-import gym
 
 stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
                   'AMG','AFL','A','APD','AKAM','ALK','ALB','ARE','ALXN','ALGN','ALLE',

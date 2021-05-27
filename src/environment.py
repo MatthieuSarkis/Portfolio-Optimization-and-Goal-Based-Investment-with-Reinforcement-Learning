@@ -13,6 +13,7 @@
 import numpy as np
 import pandas as pd
 import gym
+from typing import Tuple
 
 class Environment(gym.Env):
 
@@ -22,12 +23,14 @@ class Environment(gym.Env):
                  buy_rate: float,
                  sell_rate: float,
                  limit_n_stocks: float = 200,
+                 buy_rule: str = 'most_first',
                  ) -> None:
         
         super(Environment, self).__init__()
         
         self.stock_market_history = stock_market_history
         self.time_horizon, self.stock_space_dimension = stock_market_history.shape
+        self.buy_rule = buy_rule
         
         self.state_space_dimension = 2 * self.stock_space_dimension + 1
         self.action_space_dimension = self.stock_space_dimension
@@ -38,7 +41,7 @@ class Environment(gym.Env):
         
         self.initial_cash_in_bank = initial_cash_in_bank
         
-        self.buy_rate = buy_rate  # 0.1%
+        self.buy_rate = buy_rate
         self.sell_rate = sell_rate
         
         self.current_step = None
@@ -58,7 +61,7 @@ class Environment(gym.Env):
         return self._get_observation()
         
     def step(self, 
-             actions: np.array) -> tuple[np.array, float, bool, dict]: # sinon from typing import Tuple pour python<3.9
+             actions: np.array) -> Tuple[np.array, float, bool, dict]:
         
         done = self.current_step == (self.time_horizon - 1)
         self.current_step += 1
@@ -68,14 +71,15 @@ class Environment(gym.Env):
                 
         initial_value_portfolio = self._get_portfolio_value()
         
-        sell_idx = sorted_indices[ : np.where(actions < 0)[0].shape[0]]
-        buy_idx = sorted_indices[::-1][ : np.where(actions > 0)[0].shape[0]]
+        sell_idx = sorted_indices[ : np.where(actions<0)[0].size]
+        buy_idx = sorted_indices[::-1][ : np.where(actions>0)[0].size]
 
         for idx in sell_idx:  
             self._sell(idx, actions[idx])
-            
-        for idx in buy_idx: 
-            self._buy(idx, actions[idx])
+        
+        if self.buy_rule == 'most_first':
+            for idx in buy_idx: 
+                self._buy(idx, actions[idx])
                    
         new_value_portfolio = self._get_portfolio_value()
         info = {'value_portfolio': new_value_portfolio}

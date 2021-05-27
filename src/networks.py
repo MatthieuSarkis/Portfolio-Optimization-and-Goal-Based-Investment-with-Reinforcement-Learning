@@ -14,15 +14,16 @@ import os
 from src.utilities import make_dir
 import torch
 import numpy as np
+from typing import Tuple, List
 
 class Critic(torch.nn.Module):
     
     def __init__(self, 
                  lr_Q: float, 
-                 input_shape: tuple, 
+                 input_shape: Tuple, 
                  layer1_neurons: int, 
                  layer2_neurons: int, 
-                 action_space_dimension: tuple, 
+                 action_space_dimension: Tuple, 
                  name: str, 
                  checkpoint_directory: str = 'saved_networks') -> None:
         
@@ -48,7 +49,7 @@ class Critic(torch.nn.Module):
         self.to(self.device)
         
     def forward(self, 
-                state: list[float], 
+                state: List[float], 
                 action: np.array) -> torch.tensor:
         
         x = self.layer1(torch.cat([state, action], dim=1))
@@ -70,11 +71,11 @@ class Actor(torch.nn.Module):
     
     def __init__(self, 
                  lr_pi: float, 
-                 input_shape: tuple, 
+                 input_shape: Tuple, 
                  layer1_neurons: int, 
                  layer2_neurons: int, 
                  max_actions: np.array, 
-                 action_space_dimension: tuple, 
+                 action_space_dimension: Tuple, 
                  name: str, 
                  checkpoint_directory: str = 'saved_networks') -> None:
         
@@ -103,7 +104,7 @@ class Actor(torch.nn.Module):
         self.to(self.device)
         
     def forward(self, 
-                state: list[float]) -> list[torch.tensor, torch.tensor]:
+                state: List[float]) -> List[torch.tensor, torch.tensor]:
         
         x = self.layer1(state)
         x = torch.nn.functional.relu(x)
@@ -117,8 +118,8 @@ class Actor(torch.nn.Module):
         return mu, sigma
     
     def sample_normal(self, 
-                      state: list[float], 
-                      reparameterize: bool = True) -> tuple[torch.tensor, torch.tensor]:
+                      state: List[float], 
+                      reparameterize: bool = True) -> Tuple[torch.tensor, torch.tensor]:
         
         mu, sigma = self.forward(state)
         probabilities = torch.distributions.Normal(mu, sigma)
@@ -146,7 +147,7 @@ class Value(torch.nn.Module):
     
     def __init__(self, 
                  lr_Q: float, 
-                 input_shape: tuple, 
+                 input_shape: Tuple, 
                  layer1_neurons: int, 
                  layer2_neurons: int, 
                  name: str, 
@@ -173,7 +174,7 @@ class Value(torch.nn.Module):
         self.to(self.device)
         
     def forward(self, 
-                state: list[float]) -> torch.tensor:
+                state: List[float]) -> torch.tensor:
         
         x = self.layer1(state)
         x = torch.nn.functional.relu(x)
