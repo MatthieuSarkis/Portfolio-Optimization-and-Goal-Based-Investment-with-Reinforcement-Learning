@@ -16,10 +16,8 @@ from src.buffer import ReplayBuffer
 from src.networks import Actor, Critic, Value
 import gym
 from typing import Tuple
-
-
-
-class Agent():
+   
+class Agent_ManualTemperature():
     def __init__(self, 
                  lr_Q: float, 
                  lr_pi: float, 
@@ -75,7 +73,7 @@ class Agent():
                                   layer2_size, 
                                   name=agent_name+'_target_value')
         
-        self._update_target_network(tau=1)
+        self._update_target_networks(tau=1)
         
     def choose_action(self, 
                       observation: np.array) -> np.array:
@@ -94,8 +92,8 @@ class Agent():
         
         self.memory.push(state, action, reward, new_state, done)
         
-    def _update_target_network(self, 
-                               tau: float = None) -> None:
+    def _update_target_networks(self, 
+                                tau: float = None) -> None:
         
         if tau is None:
             tau = self.tau
