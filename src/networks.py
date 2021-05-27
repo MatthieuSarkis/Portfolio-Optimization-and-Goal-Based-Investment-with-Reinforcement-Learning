@@ -119,7 +119,7 @@ class Actor(torch.nn.Module):
     
     def sample_normal(self, 
                       state: List[float], 
-                      reparameterize: bool = True) -> Tuple[torch.tensor, torch.tensor]:
+                      reparameterize: bool = True) -> Tuple[torch.tensor]:
         
         mu, sigma = self.forward(state)
         probabilities = torch.distributions.Normal(mu, sigma)
