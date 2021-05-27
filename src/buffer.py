@@ -11,11 +11,12 @@
 # that they have been altered from the originals.
 
 import numpy as np
+from typing import Tuple, List
 class ReplayBuffer():
     
     def __init__(self, 
                  size: int, 
-                 input_shape: tuple, 
+                 input_shape: Tuple, 
                  action_space_dimension: int) -> None:
         
         self.size = size
@@ -28,10 +29,10 @@ class ReplayBuffer():
         self.done_buffer = np.zeros(self.size, dtype=np.bool)
         
     def push(self, 
-             state: list[float], 
+             state: List[float], 
              action: np.array, 
              reward: float, 
-             new_state: list[float], 
+             new_state: List[float], 
              done: bool) -> None:
         
         index = self.pointer % self.size
@@ -44,7 +45,7 @@ class ReplayBuffer():
         self.pointer += 1
         
     def sample(self, 
-               batch_size: int = 32) -> tuple[np.array, np.array, np.array, np.array, np.array]:
+               batch_size: int = 32) -> Tuple[np.array, np.array, np.array, np.array, np.array]:
         
         size = min(self.pointer, self.size)
         batch = np.random.choice(size, batch_size)
