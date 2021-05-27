@@ -30,11 +30,10 @@ def main(args):
     with open('src/tickers.txt') as f:
         stocks_symbols = f.read().splitlines()
       
-      
     if not os.path.exists('data/'):  
         fetcher = DataFetcher(stock_symbols=stocks_symbols[:3],
-                              start_date="2010-01-01",
-                              end_date="2020-12-31",
+                              start_date=args.initial_date,
+                              end_date=args.final_date,
                               directory_path="data")
         
         fetcher.fetch_and_merge_data()
@@ -55,6 +54,7 @@ def main(args):
     if args.auto_temperature:
         
         agent_name = 'auto_temperature'
+        filename = str(args.n_episodes) + 'episodes_AutoTemperature' + '.png'
         agent = Agent_AutomaticTemperature(lr_Q=args.lr_Q,
                                            lr_pi=args.lr_pi, 
                                            lr_alpha=args.lr_alpha,  
@@ -72,6 +72,7 @@ def main(args):
     else:
         
         agent_name = 'manual_temperature'
+        filename = str(args.n_episodes) + 'episodes_ManualTemperature_{}'.format(args.sac_temperature) + '.png'
         agent = Agent_ManualTemperature(lr_pi=args.lr_pi, 
                                         lr_Q=args.lr_Q, 
                                         gamma=args.gamma, 
@@ -85,7 +86,6 @@ def main(args):
                                         layer2_size=args.layer2_size,
                                         action_space_dimension=env.action_space.shape[0])
     
-    filename = str(args.n_episodes) + 'episodes' + '.png'
     make_dir('plots')
     figure_file = 'plots/' + filename
     
@@ -98,6 +98,7 @@ def main(args):
               figure_file=figure_file)
     
     run.run()
+    run.plot()
     
 
 if __name__ == '__main__':
@@ -124,6 +125,8 @@ if __name__ == '__main__':
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--memory_size', type=int, default=1000000)
     parser.add_argument('--alpha', type=float, default=1.0)
+    parser.add_argument('--initial_date', type=str, default='2010-01-01')
+    parser.add_argument('--final_date', type=str, default='2020-12-31')
 
     args = parser.parse_args()
     main(args)

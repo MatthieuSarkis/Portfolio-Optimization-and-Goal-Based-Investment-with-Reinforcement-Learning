@@ -64,32 +64,32 @@ class Run():
                 observation_, reward, done, _ = self.env.step(action)
                 if not self.auto_temperature:
                     reward *= self.sac_temperature
-                self.steps += 1
+                self.step += 1
                 reward += reward
                 self.agent.remember(observation, action, reward, observation_, done)
                 if not self.test_mode:
-                    self.learn()
+                    self.agent.learn()
                 observation = observation_
                 
             self.reward_history.append(reward)
-            avg_reward = np.mean(self.reward_history[-100:])
+            average_reward = np.mean(self.reward_history[-100:])
             
-            if avg_reward > best_reward:
-                best_reward = avg_reward
+            if average_reward > self.best_reward:
+                self.best_reward = average_reward
                 if not self.test_mode:
                     self.agent.save_networks()
                     
             if self.auto_temperature:
                 print('episode:', i, 
                       'reward: %.1f' % reward, 
-                      'running_average_100_episodes: %.1f' % avg_reward,
-                      'step: %d' % self.steps, self.agent.agent_name)
+                      'running_average_100_episodes: %.1f' % average_reward,
+                      'step: %d' % self.step, self.agent.agent_name)
         
             else: 
                 print('episode:', i, 
                       'reward: %.1f' % reward, 
-                      'running_average_100: %.1f' % avg_reward,
-                      'step: %d' % self.steps, self.agent.agent_name, 
+                      'running_average_100: %.1f' % average_reward,
+                      'step: %d' % self.step, self.agent.agent_name, 
                       'temperature:', self.sac_temperature)
             
     def plot(self) -> None:

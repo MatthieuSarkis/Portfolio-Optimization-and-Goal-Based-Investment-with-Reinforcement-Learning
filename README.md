@@ -5,7 +5,6 @@
 * Leverage, lower bound on bank account
 * tests unitaires
 * typical buy_rate and sell_rate = 0.1%
-* Class Agent, from which inherit the others
 
 ## Requirements
 

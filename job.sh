@@ -29,5 +29,7 @@ python src/main.py \
 --n_episodes 2 \
 --seed 42 \
 --memory_size 1000000 \
+--initial_date 2010-01-01 \
+--final_date 2020-12-31 \
 --auto_temperature \
 
