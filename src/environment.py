@@ -10,11 +10,10 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import gym
 import numpy as np
 import pandas as pd
-import gym
 from typing import Tuple
-
 class Environment(gym.Env):
 
     def __init__(self, 

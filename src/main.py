@@ -10,14 +10,16 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-import os
-from src.environment import Environment
-import numpy as np
-from src.agent import Agent_ManualTemperature, Agent_AutomaticTemperature
-from src.utilities import make_dir, plot_learning_curve
-from src.get_data import DataFetcher, Preprocessor
 from argparse import ArgumentParser
+import numpy as np
+import os
 import torch
+
+from src.agents import Agent_ManualTemperature, Agent_AutomaticTemperature
+from src.environment import Environment
+from src.get_data import DataFetcher, Preprocessor
+from src.utilities import make_dir, plot_learning_curve
+
 
 stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES','AET',
                   'AMG','AFL','A','APD','AKAM','ALK','ALB','ARE','ALXN','ALGN','ALLE',

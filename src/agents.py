@@ -10,12 +10,14 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import gym
 import numpy as np
 import torch
+from typing import Tuple
+
 from src.buffer import ReplayBuffer
 from src.networks import Actor, Critic, Value
-import gym
-from typing import Tuple
+
    
 class Agent():
     

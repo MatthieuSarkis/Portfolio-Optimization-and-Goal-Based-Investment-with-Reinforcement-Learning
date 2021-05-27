@@ -10,11 +10,12 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-import os
-from src.utilities import make_dir
-import torch
 import numpy as np
+import os
+import torch
 from typing import Tuple, List
+
+from src.utilities import make_dir
 
 class Critic(torch.nn.Module):
     

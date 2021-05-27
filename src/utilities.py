@@ -10,9 +10,9 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-import os
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 def time_to_string(t):
     return t.strftime("%Y.%m.%d/%H.%M.%S")
