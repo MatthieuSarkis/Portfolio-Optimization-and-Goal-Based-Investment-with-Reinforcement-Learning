@@ -104,7 +104,7 @@ class Actor(torch.nn.Module):
         self.to(self.device)
         
     def forward(self, 
-                state: List[float]) -> List[torch.tensor, torch.tensor]:
+                state: List[float]) -> List[torch.tensor]:
         
         x = self.layer1(state)
         x = torch.nn.functional.relu(x)
@@ -119,7 +119,7 @@ class Actor(torch.nn.Module):
     
     def sample_normal(self, 
                       state: List[float], 
-                      reparameterize: bool = True) -> Tuple[torch.tensor, torch.tensor]:
+                      reparameterize: bool = True) -> Tuple[torch.tensor]:
         
         mu, sigma = self.forward(state)
         probabilities = torch.distributions.Normal(mu, sigma)

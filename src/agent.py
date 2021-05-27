@@ -18,6 +18,7 @@ import gym
 from typing import Tuple
    
 class Agent():
+    
     def __init__(self,
                  lr_Q: float, 
                  lr_pi: float, 
@@ -127,6 +128,7 @@ class Agent():
             network.load_network_weights()
    
 class Agent_ManualTemperature(Agent):
+    
     def __init__(self) -> None:
         
         super(Agent_ManualTemperature, self).__init__()

@@ -61,6 +61,7 @@ stocks_symbols = ['MMM','ABT','ABBV','ACN','ATVI','AYI','ADBE','AMD','AAP','AES'
 
 stocks_symbols_temp = ['MMM','ABT','ABBV']
 
+
 def main(args):
     
     torch.manual_seed(args.seed)
