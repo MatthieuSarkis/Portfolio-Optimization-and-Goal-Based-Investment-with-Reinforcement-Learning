@@ -13,7 +13,7 @@
 import os
 from src.environment import Environment
 import numpy as np
-from src.agent import Agent, Agent_AutomaticTemperature
+from src.agent import Agent_ManualTemperature, Agent_AutomaticTemperature
 from src.utilities import make_dir, plot_learning_curve
 from src.get_data import DataFetcher, Preprocessor
 from argparse import ArgumentParser
@@ -108,18 +108,18 @@ def main(args):
     else:
         agent_name = 'manual_temperature'
         
-        agent = Agent(lr_pi=args.lr_pi, 
-                      lr_Q=args.lr_Q, 
-                      gamma=args.gamma, 
-                      agent_name=agent_name, 
-                      input_shape=env.observation_space.shape, 
-                      tau=args.tau,
-                      env=env, 
-                      size=args.memory_size,
-                      batch_size=args.batch_size, 
-                      layer1_size=args.layer1_size, 
-                      layer2_size=args.layer2_size,
-                      action_space_dimension=env.action_space.shape[0])
+        agent = Agent_ManualTemperature(lr_pi=args.lr_pi, 
+                                        lr_Q=args.lr_Q, 
+                                        gamma=args.gamma, 
+                                        agent_name=agent_name, 
+                                        input_shape=env.observation_space.shape, 
+                                        tau=args.tau,
+                                        env=env, 
+                                        size=args.memory_size,
+                                        batch_size=args.batch_size, 
+                                        layer1_size=args.layer1_size, 
+                                        layer2_size=args.layer2_size,
+                                        action_space_dimension=env.action_space.shape[0])
     
     n_episodes = args.n_episodes
     filename = str(n_episodes) + 'episodes' + '.png'
