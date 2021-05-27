@@ -30,8 +30,8 @@ def main(args):
     with open('src/tickers.txt') as f:
         stocks_symbols = f.read().splitlines()
       
-    if not os.path.exists('data/'):
       
+    if not os.path.exists('data/'):  
         fetcher = DataFetcher(stock_symbols=stocks_symbols[:3],
                               start_date="2010-01-01",
                               end_date="2020-12-31",
