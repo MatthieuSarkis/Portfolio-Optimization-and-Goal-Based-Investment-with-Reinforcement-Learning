@@ -20,5 +20,18 @@ class Run():
                  env: gym.Env,
                  agent: Agent,
                  n_episodes: int,
+                 test_mode: bool,
+                 
                  ) -> None:
+        
+        self.env = env
+        self.agent = agent
+        self.n_episodes = n_episodes
+        self.test_mode = test_mode
+        
+        self.step = 0
+        self.best_reward = float('-Inf')
+        self.reward_history = []
+        
+    def run(self) -> None:
         pass

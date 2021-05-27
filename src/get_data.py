@@ -23,7 +23,8 @@ class DataFetcher():
                  stock_symbols: List[str],
                  start_date: str = "2010-01-01",
                  end_date: str = "2020-12-31",
-                 directory_path: str = "data") -> None:
+                 directory_path: str = "data",
+                 ) -> None:
         
         make_dir(directory_name=directory_path)
         
@@ -98,7 +99,8 @@ class Preprocessor():
     
     def __init__(self,
                  df_directory: str = 'data',
-                 file_name: str = 'stock.csv') -> None:
+                 file_name: str = 'stock.csv',
+                 ) -> None:
             
         self.df_directory = df_directory
         path = os.path.join(df_directory, file_name)

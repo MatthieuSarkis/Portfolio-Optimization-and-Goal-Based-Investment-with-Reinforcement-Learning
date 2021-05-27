@@ -60,7 +60,8 @@ class Environment(gym.Env):
         return self._get_observation()
         
     def step(self, 
-             actions: np.array) -> Tuple[np.array, float, bool, dict]:
+             actions: np.array,
+             ) -> Tuple[np.array, float, bool, dict]:
         
         done = self.current_step == (self.time_horizon - 1)
         self.current_step += 1
@@ -91,7 +92,8 @@ class Environment(gym.Env):
         
     def _sell(self, 
               idx: int, 
-              action: int) -> None:
+              action: int,
+              ) -> None:
     
         if int(self.number_of_shares[idx]) < 1:
             return
@@ -103,7 +105,8 @@ class Environment(gym.Env):
             
     def _buy(self, 
              idx: int, 
-             action: int) -> None:
+             action: int,
+             ) -> None:
         
         if self.cash_in_bank < 0:
             return

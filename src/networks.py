@@ -26,7 +26,8 @@ class Critic(torch.nn.Module):
                  layer2_neurons: int, 
                  action_space_dimension: Tuple, 
                  name: str, 
-                 checkpoint_directory: str = 'saved_networks') -> None:
+                 checkpoint_directory: str = 'saved_networks',
+                 ) -> None:
         
         super(Critic, self).__init__()
         self.input_shape = input_shape
@@ -51,7 +52,8 @@ class Critic(torch.nn.Module):
         
     def forward(self, 
                 state: List[float], 
-                action: np.array) -> torch.tensor:
+                action: np.array,
+                ) -> torch.tensor:
         
         x = self.layer1(torch.cat([state, action], dim=1))
         x = torch.nn.functional.relu(x)
@@ -78,7 +80,8 @@ class Actor(torch.nn.Module):
                  max_actions: np.array, 
                  action_space_dimension: Tuple, 
                  name: str, 
-                 checkpoint_directory: str = 'saved_networks') -> None:
+                 checkpoint_directory: str = 'saved_networks',
+                 ) -> None:
         
         super(Actor, self).__init__()
         self.input_shape = input_shape
@@ -105,7 +108,8 @@ class Actor(torch.nn.Module):
         self.to(self.device)
         
     def forward(self, 
-                state: List[float]) -> List[torch.tensor]:
+                state: List[float],
+                ) -> List[torch.tensor]:
         
         x = self.layer1(state)
         x = torch.nn.functional.relu(x)
@@ -120,7 +124,8 @@ class Actor(torch.nn.Module):
     
     def sample_normal(self, 
                       state: List[float], 
-                      reparameterize: bool = True) -> Tuple[torch.tensor]:
+                      reparameterize: bool = True,
+                      ) -> Tuple[torch.tensor]:
         
         mu, sigma = self.forward(state)
         probabilities = torch.distributions.Normal(mu, sigma)
@@ -152,7 +157,8 @@ class Value(torch.nn.Module):
                  layer1_neurons: int, 
                  layer2_neurons: int, 
                  name: str, 
-                 checkpoint_directory: str = 'saved_networks') -> None:
+                 checkpoint_directory: str = 'saved_networks',
+                 ) -> None:
         
         super(Value, self).__init__()
         self.input_shape = input_shape
@@ -175,7 +181,8 @@ class Value(torch.nn.Module):
         self.to(self.device)
         
     def forward(self, 
-                state: List[float]) -> torch.tensor:
+                state: List[float],
+                ) -> torch.tensor:
         
         x = self.layer1(state)
         x = torch.nn.functional.relu(x)

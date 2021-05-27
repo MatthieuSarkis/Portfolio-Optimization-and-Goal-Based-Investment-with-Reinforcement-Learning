@@ -32,7 +32,8 @@ class Agent():
                  size: int = 1000000,
                  layer1_size: int = 256, 
                  layer2_size: int = 256, 
-                 batch_size: int = 256):
+                 batch_size: int = 256,
+                 ) -> None:
         
         self.gamma = gamma
         self.tau = tau
@@ -77,7 +78,8 @@ class Agent():
                  action: np.array, 
                  reward: float, 
                  new_state: np.array, 
-                 done: bool) -> None:
+                 done: bool,
+                 ) -> None:
         
         self.memory.push(state, action, reward, new_state, done)
             
@@ -89,7 +91,8 @@ class Agent():
             net.bias.data.fill_(1e-2)
     
     def _update_target_networks(self, 
-                                tau: float = None) -> None:
+                                tau: float = None,
+                                ) -> None:
     
         if tau is None:
             tau = self.tau
@@ -110,7 +113,8 @@ class Agent():
             self.targeted_network_list[i+shift].load_state_dict(params)
 
     def choose_action(self, 
-                      observation: np.array) -> np.array:
+                      observation: np.array,
+                      ) -> np.array:
         
         state = torch.Tensor([observation]).to(self.actor.device)
         actions, _ = self.actor.sample_normal(state, reparameterize=False)
@@ -133,7 +137,8 @@ class Agent_ManualTemperature(Agent):
     
     def __init__(self, 
                  *args, 
-                 **kwargs) -> None:
+                 **kwargs,
+                 ) -> None:
         
         super(Agent_ManualTemperature, self).__init__(*args, **kwargs)
         
@@ -236,7 +241,8 @@ class Agent_AutomaticTemperature(Agent):
                  lr_alpha: float,
                  alpha: float = 1.0,
                  *args,
-                 **kwargs) -> None:
+                 **kwargs,
+                 ) -> None:
         
         super(Agent_AutomaticTemperature, self).__init__(*args, **kwargs)
         

@@ -17,7 +17,8 @@ class ReplayBuffer():
     def __init__(self, 
                  size: int, 
                  input_shape: Tuple, 
-                 action_space_dimension: int) -> None:
+                 action_space_dimension: int,
+                 ) -> None:
         
         self.size = size
         self.pointer = 0
@@ -33,7 +34,8 @@ class ReplayBuffer():
              action: np.array, 
              reward: float, 
              new_state: List[float], 
-             done: bool) -> None:
+             done: bool,
+             ) -> None:
         
         index = self.pointer % self.size
         self.state_buffer[index] = state
@@ -45,7 +47,8 @@ class ReplayBuffer():
         self.pointer += 1
         
     def sample(self, 
-               batch_size: int = 32) -> Tuple[np.array, np.array, np.array, np.array, np.array]:
+               batch_size: int = 32,
+               ) -> Tuple[np.array, np.array, np.array, np.array, np.array]:
         
         size = min(self.pointer, self.size)
         batch = np.random.choice(size, batch_size)
