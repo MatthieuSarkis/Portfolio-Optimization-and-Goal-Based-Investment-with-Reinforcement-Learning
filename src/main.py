@@ -164,14 +164,14 @@ def main(args):
                 agent.save_networks()
                 
         if args.auto_temperature:
-            print('episode ', i, 'reward %.1f' % reward, 
-                  'running average (100 episodes) %.1f' % avg_reward,
-                  'step %d' % steps, agent_name)
+            print('episode:', i, 'reward: %.1f' % reward, 
+                  'running_average_100_episodes: %.1f' % avg_reward,
+                  'step: %d' % steps, agent_name)
     
         else: 
-            print('episode ', i, 'reward %.1f' % reward, 
-                  'running average (100 episodes) %.1f' % avg_reward,
-                  'step %d' % steps, agent_name, 'temperature', env.sac_temperature)
+            print('episode:', i, 'reward: %.1f' % reward, 
+                  'running_average_100: %.1f' % avg_reward,
+                  'step: %d' % steps, agent_name, 'temperature:', env.sac_temperature)
         
     if not args.test_mode:
         x = [i+1 for i in range(n_episodes)]

@@ -17,7 +17,6 @@ from typing import Tuple
 
 from src.buffer import ReplayBuffer
 from src.networks import Actor, Critic, Value
-
    
 class Agent():
     
@@ -38,6 +37,7 @@ class Agent():
         self.gamma = gamma
         self.tau = tau
         self.memory = ReplayBuffer(size, input_shape, action_space_dimension)
+        self.input_shape = input_shape
         self.batch_size = batch_size
         self.action_space_dimension = action_space_dimension
         self.lr_Q = lr_Q
@@ -131,9 +131,11 @@ class Agent():
    
 class Agent_ManualTemperature(Agent):
     
-    def __init__(self) -> None:
+    def __init__(self, 
+                 *args, 
+                 **kwargs) -> None:
         
-        super(Agent_ManualTemperature, self).__init__()
+        super(Agent_ManualTemperature, self).__init__(*args, **kwargs)
         
         self.value = Value(self.lr_Q, 
                            self.input_shape, 
@@ -232,9 +234,11 @@ class Agent_AutomaticTemperature(Agent):
     
     def __init__(self, 
                  lr_alpha: float,
-                 alpha: float = 1.0) -> None:
+                 alpha: float = 1.0,
+                 *args,
+                 **kwargs) -> None:
         
-        super(Agent_AutomaticTemperature, self).__init__()
+        super(Agent_AutomaticTemperature, self).__init__(*args, **kwargs)
         
         self.alpha = alpha
         self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.critic_1.device)).item()
