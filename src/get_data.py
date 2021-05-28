@@ -33,40 +33,6 @@ class DataFetcher():
         self.end_date = end_date
         self.directory_path = directory_path
         
-    """
-    def fetch_data(self) -> None:
-        
-        for stock in self.stock_symbols:
-            file_path = os.path.join(self.directory_path, "{}.csv".format(stock))
-            if not os.path.exists(file_path):
-                data = yf.download(stock, start=self.start_date, end=self.end_date)
-                if data.size > 0:
-                    data.to_csv(file_path)
-                    file = open(file_path).readlines()
-                    if len(file) < 10:
-                        os.system("rm " + file_path)
-                  
-    def merge_data(self) -> None:    
-        
-        files_path = os.path.join(self.directory_path, '*.csv')
-        files = glob(files_path)
-        
-        final_df = None
-        
-        for file in files:
-            df = pd.read_csv(file)
-            stock_name = file.split('/')[1].split('.')[0]
-            df['Name'] = stock_name
-
-            if final_df is None:
-                final_df = df
-            else:
-                final_df = final_df.append(df, ignore_index=True)
-
-        path = os.path.join(self.directory_path, 'stocks.csv')
-        final_df.to_csv(path, index=False)
-    """
-    
     def fetch_and_merge_data(self) -> None:
         
         final_df = None
@@ -81,16 +47,17 @@ class DataFetcher():
                     if len(file) < 10:
                         os.system("rm " + file_path)
             
-            df = pd.read_csv(file_path)
-            stock_name = file_path.split('/')[1].split('.')[0]
-            df['Name'] = stock_name
+            if os.path.exists(file_path):
+                df = pd.read_csv(file_path)
+                stock_name = file_path.split('/')[1].split('.')[0]
+                df['Name'] = stock_name
 
-            if final_df is None:
-                final_df = df
-            else:
-                final_df = final_df.append(df, ignore_index=True)
+                if final_df is None:
+                    final_df = df
+                else:
+                    final_df = final_df.append(df, ignore_index=True)
                 
-            os.system("rm " + file_path)
+                os.system("rm " + file_path)
                 
         path = os.path.join(self.directory_path, 'stocks.csv')
         final_df.to_csv(path, index=False)
@@ -126,6 +93,4 @@ class Preprocessor():
         self.df.fillna(method='ffill', inplace=True)
         self.df.fillna(method='bfill', inplace=True)
         self.df.to_csv(os.path.join(self.df_directory, 'close.csv'))
-        return self.df
-
-           
+        return self.df   

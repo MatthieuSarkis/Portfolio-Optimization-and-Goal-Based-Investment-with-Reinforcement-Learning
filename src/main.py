@@ -35,7 +35,7 @@ def main(args):
         stocks_symbols = f.read().splitlines()
       
     if not os.path.exists('data/'):  
-        fetcher = DataFetcher(stock_symbols=stocks_symbols[:3],
+        fetcher = DataFetcher(stock_symbols=stocks_symbols,
                               start_date=args.initial_date,
                               end_date=args.final_date,
                               directory_path="data")
@@ -47,7 +47,7 @@ def main(args):
     
     df = preprocessor.collect_close_prices()
     df = preprocessor.handle_missing_values()
-    df = df.iloc[:50]
+    #df = df.iloc[:50]
     
     env = Environment(stock_market_history=df,
                       initial_cash_in_bank=args.initial_cash,
