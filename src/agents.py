@@ -34,6 +34,7 @@ class Agent():
                  layer1_size: int = 256, 
                  layer2_size: int = 256, 
                  batch_size: int = 256,
+                 device: str = 'cpu',
                  ) -> None:
         
         self.gamma = gamma
@@ -48,6 +49,7 @@ class Agent():
         self.agent_name = agent_name
         self.layer1_size = layer1_size
         self.layer2_size = layer2_size
+        self.device = device
 
         self.actor = Actor(lr_pi, 
                            input_shape, 
@@ -55,24 +57,27 @@ class Agent():
                            layer2_size, 
                            action_space_dimension=action_space_dimension, 
                            name=agent_name+'_actor',
-                           max_actions=env.action_space.high)
+                           max_actions=env.action_space.high,
+                           device=device)
         
         self.critic_1 = Critic(self.lr_Q, 
                                self.input_shape, 
                                self.layer1_size,
                                self.layer2_size, 
                                action_space_dimension=self.action_space_dimension, 
-                               name=self.agent_name+'_critic1')
+                               name=self.agent_name+'_critic1',
+                               device=device)
         
         self.critic_2 = Critic(self.lr_Q, 
                                self.input_shape, 
                                self.layer1_size,
                                self.layer2_size, 
                                action_space_dimension=self.action_space_dimension, 
-                               name=self.agent_name+'_critic2')
+                               name=self.agent_name+'_critic2',
+                               device=device)
         
-        self.network_list = [self.actor, self.critic_1, self.critic_2]
-        self.targeted_network_list = []
+        self._network_list = [self.actor, self.critic_1, self.critic_2]
+        self._targeted_network_list = []
     
     def remember(self, 
                  state: np.array, 
@@ -98,12 +103,12 @@ class Agent():
         if tau is None:
             tau = self.tau
 
-        shift = len(self.targeted_network_list) // 2
+        shift = len(self._targeted_network_list) // 2
 
         for i in range(shift):
             
-            target_params = self.targeted_network_list[i+shift].named_parameters()
-            params = self.targeted_network_list[i].named_parameters()
+            target_params = self._targeted_network_list[i+shift].named_parameters()
+            params = self._targeted_network_list[i].named_parameters()
             
             target_params = dict(target_params)
             params = dict(params)
@@ -111,13 +116,13 @@ class Agent():
             for name in params:
                 params[name] = tau * params[name].clone() + (1 - tau) * target_params[name].clone()
                 
-            self.targeted_network_list[i+shift].load_state_dict(params)
+            self._targeted_network_list[i+shift].load_state_dict(params)
 
     def choose_action(self, 
                       observation: np.array,
                       ) -> np.array:
         
-        state = torch.Tensor([observation]).to(self.actor.device)
+        state = torch.Tensor([observation]).to(self.device)
         actions, _ = self.actor.sample_normal(state, reparameterize=False)
         
         return actions.cpu().detach().numpy()[0]
@@ -125,13 +130,13 @@ class Agent():
     def save_networks(self) -> None:
         
         print(' ... saving networks ... ')    
-        for network in self.network_list:
+        for network in self._network_list:
             network.save_network_weights()
         
     def load_networks(self) -> None:
         
         print(' ... loading networks ... ')
-        for network in self.network_list:
+        for network in self._network_list:
             network.load_network_weights()
    
 class Agent_ManualTemperature(Agent):
@@ -147,18 +152,20 @@ class Agent_ManualTemperature(Agent):
                            self.input_shape, 
                            self.layer1_size,
                            self.layer2_size, 
-                           name=self.agent_name+'_value')
+                           name=self.agent_name+'_value',
+                           device=self.device)
         
         self.target_value = Value(self.lr_Q, 
                                   self.input_shape, 
                                   self.layer1_size,
                                   self.layer2_size, 
-                                  name=self.agent_name+'_target_value')
+                                  name=self.agent_name+'_target_value',
+                                  device=self.device)
         
-        self.network_list += [self.value, self.target_value]
-        self.targeted_network_list += [self.value, self.target_value]
+        self._network_list += [self.value, self.target_value]
+        self._targeted_network_list += [self.value, self.target_value]
         
-        for network in self.network_list:
+        for network in self._network_list:
             network.apply(self._initialize_weights) 
         
         self._update_target_networks(tau=1)
@@ -170,11 +177,11 @@ class Agent_ManualTemperature(Agent):
         
         states, actions, rewards, states_, dones = self.memory.sample(self.batch_size)
         
-        states = torch.tensor(states, dtype=torch.float).to(self.critic_1.device)
-        actions = torch.tensor(actions, dtype=torch.float).to(self.critic_1.device)
-        rewards = torch.tensor(rewards, dtype=torch.float).to(self.critic_1.device)
-        states_ = torch.tensor(states_, dtype=torch.float).to(self.critic_1.device)
-        dones = torch.tensor(dones).to(self.critic_1.device)
+        states = torch.tensor(states, dtype=torch.float).to(self.device)
+        actions = torch.tensor(actions, dtype=torch.float).to(self.device)
+        rewards = torch.tensor(rewards, dtype=torch.float).to(self.device)
+        states_ = torch.tensor(states_, dtype=torch.float).to(self.device)
+        dones = torch.tensor(dones).to(self.device)
         
         # VALUE UPDATE
         value = self.value(states).view(-1)
@@ -248,8 +255,8 @@ class Agent_AutomaticTemperature(Agent):
         super(Agent_AutomaticTemperature, self).__init__(*args, **kwargs)
         
         self.alpha = alpha
-        self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.critic_1.device)).item()
-        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.critic_1.device)
+        self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.device)).item()
+        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
         self.target_critic_1 = Critic(self.lr_Q, 
@@ -257,19 +264,21 @@ class Agent_AutomaticTemperature(Agent):
                                       self.layer1_size,
                                       self.layer2_size, 
                                       action_space_dimension=self.action_space_dimension, 
-                                      name=self.agent_name+'_target_critic1')
+                                      name=self.agent_name+'_target_critic1',
+                                      device=self.device)
         
         self.target_critic_2 = Critic(self.lr_Q, 
                                       self.input_shape, 
                                       self.layer1_size,
                                       self.layer2_size, 
                                       action_space_dimension=self.action_space_dimension, 
-                                      name=self.agent_name+'_target_critic2')
+                                      name=self.agent_name+'_target_critic2',
+                                      device=self.device)
         
-        self.network_list += [self.target_critic_1, self.target_critic_2]
-        self.targeted_network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]
+        self._network_list += [self.target_critic_1, self.target_critic_2]
+        self._targeted_network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]
         
-        for network in self.network_list:
+        for network in self._network_list:
             network.apply(self._initialize_weights) 
         
         self._update_target_networks(tau=1)
@@ -281,11 +290,11 @@ class Agent_AutomaticTemperature(Agent):
         
         states, actions, rewards, states_, dones = self.memory.sample(self.batch_size)
                
-        states = torch.tensor(states, dtype=torch.float).to(self.critic_1.device)
-        actions = torch.tensor(actions, dtype=torch.float).to(self.critic_1.device)
-        rewards = torch.tensor(rewards, dtype=torch.float).to(self.critic_1.device)
-        states_ = torch.tensor(states_, dtype=torch.float).to(self.critic_1.device)
-        dones = torch.tensor(dones).to(self.critic_1.device)
+        states = torch.tensor(states, dtype=torch.float).to(self.device)
+        actions = torch.tensor(actions, dtype=torch.float).to(self.device)
+        rewards = torch.tensor(rewards, dtype=torch.float).to(self.device)
+        states_ = torch.tensor(states_, dtype=torch.float).to(self.device)
+        dones = torch.tensor(dones).to(self.device)
         
         # CRITIC UPDATE
         actions_, log_probabilities_ = self.actor.sample_normal(states_, reparameterize=False)
