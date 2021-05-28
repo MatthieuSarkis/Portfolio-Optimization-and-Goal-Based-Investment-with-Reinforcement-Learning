@@ -48,7 +48,10 @@ class Critic(torch.nn.Module):
         
         if torch.cuda.device_count() > 1:
             self = torch.nn.DataParallel(self)  
-        self.to(self.device)
+            self.to(self.module.device)
+        
+        else:
+            self.to(self.device)
         
     def forward(self, 
                 state: List[float], 
@@ -104,8 +107,11 @@ class Actor(torch.nn.Module):
         
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         if torch.cuda.device_count() > 1:
-            self = torch.nn.DataParallel(self)  
-        self.to(self.device)
+            self = torch.nn.DataParallel(self) 
+            self.to(self.module.device)
+            
+        else: 
+            self.to(self.device)
         
     def forward(self, 
                 state: List[float],
@@ -148,7 +154,6 @@ class Actor(torch.nn.Module):
     def load_network_weights(self):
         self.load_state_dict(torch.load(self.checkpoint_file))
         
-        
 class Value(torch.nn.Module):
     
     def __init__(self, 
@@ -178,7 +183,10 @@ class Value(torch.nn.Module):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         if torch.cuda.device_count() > 1:
             self = torch.nn.DataParallel(self)  
-        self.to(self.device)
+            self.to(self.module.device)
+            
+        else:
+            self.to(self.device)
         
     def forward(self, 
                 state: List[float],
