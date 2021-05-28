@@ -39,7 +39,13 @@ python main.py \
 --layer1_size 256 \
 --layer1_size 256 \
 --n_episodes 10 \
---seed 42 
+--seed 42 \
+--memory_size 1000000 \
+--initial_date 2010-01-01 \
+--final_date 2020-12-31 \
+--auto_temperature \
+--num_worker 4 \
+--gpu_devices 0 1 2 3 \
 ```
 ## License
 [Apache License 2.0](https://github.com/MatthieuSarkis/stock/blob/master/LICENSE)
