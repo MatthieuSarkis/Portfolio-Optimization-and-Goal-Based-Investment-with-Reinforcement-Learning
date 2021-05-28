@@ -256,7 +256,7 @@ class Agent_AutomaticTemperature(Agent):
         
         self.alpha = alpha
         self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.device)).item()
-        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device)
+        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device).detach().requires_grad_(True)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
         self.target_critic_1 = Critic(self.lr_Q, 
