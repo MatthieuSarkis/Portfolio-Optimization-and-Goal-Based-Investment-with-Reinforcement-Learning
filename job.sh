@@ -18,7 +18,7 @@ python src/main.py \
 --buy_rate 0.01 \
 --sell_rate 0.01 \
 --sac_temperature 2.0 \
---limit_n_stocks 200 \
+--limit_n_stocks 100 \
 --lr_Q 0.0003 \
 --lr_pi 0.0003 \
 --gamma 0.99 \
@@ -26,7 +26,7 @@ python src/main.py \
 --batch_size 256 \
 --layer1_size 256 \
 --layer1_size 256 \
---n_episodes 20 \
+--n_episodes 50 \
 --seed 42 \
 --memory_size 1000000 \
 --initial_date 2010-01-01 \

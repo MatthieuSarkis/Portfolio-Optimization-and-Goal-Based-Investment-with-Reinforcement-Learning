@@ -82,13 +82,14 @@ class Environment(gym.Env):
             for idx in buy_idx: 
                 self._buy(idx, actions[idx])
                    
+        if self.current_step < self.time_horizon - 1:
+            self.stock_prices = self.stock_market_history.iloc[self.current_step] 
+                   
         new_value_portfolio = self._get_portfolio_value()
         info = {'value_portfolio': new_value_portfolio}
-        reward = new_value_portfolio - initial_value_portfolio 
         
-        if self.current_step < self.time_horizon - 1:
-            self.stock_prices = self.stock_market_history.iloc[self.current_step]    
-
+        reward = new_value_portfolio - initial_value_portfolio 
+           
         return self._get_observation(), reward, done, info
         
     def _sell(self, 
