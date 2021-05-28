@@ -1,0 +1,4 @@
+Using the GPUs! 4
+ ... saving networks ... 
+episode: 0 reward: 0.0 running_average_100_episodes: 0.0 step: 50 auto_temperature
+episode: 1 reward: 0.0 running_average_100_episodes: 0.0 step: 100 auto_temperature

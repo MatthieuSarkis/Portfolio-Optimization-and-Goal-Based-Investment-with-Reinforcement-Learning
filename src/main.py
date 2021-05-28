@@ -24,6 +24,10 @@ from src.utilities import make_dir
 
 def main(args):
 
+    gpu_devices = ','.join([str(id) for id in args.gpu_devices])
+    os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     
@@ -67,7 +71,8 @@ def main(args):
                                            layer1_size=args.layer1_size, 
                                            layer2_size=args.layer2_size,
                                            action_space_dimension=env.action_space.shape[0],
-                                           alpha=args.alpha)
+                                           alpha=args.alpha,
+                                           device=device)
     
     else:
         
@@ -84,7 +89,8 @@ def main(args):
                                         batch_size=args.batch_size, 
                                         layer1_size=args.layer1_size, 
                                         layer2_size=args.layer2_size,
-                                        action_space_dimension=env.action_space.shape[0])
+                                        action_space_dimension=env.action_space.shape[0],
+                                        device=device)
     
     make_dir('plots')
     figure_file = 'plots/' + filename
@@ -127,6 +133,7 @@ if __name__ == '__main__':
     parser.add_argument('--alpha', type=float, default=1.0)
     parser.add_argument('--initial_date', type=str, default='2010-01-01')
     parser.add_argument('--final_date', type=str, default='2020-12-31')
+    parser.add_argument("--gpu_devices", type=int, nargs='+', default=None)
 
     args = parser.parse_args()
     main(args)

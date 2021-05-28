@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --job-name="net2"
-#SBATCH --output="%j.out" # job standard output file (%j replaced by job id)
-#SBATCH --error="%j.err" # job standard error file (%j replaced by job id)
+#SBATCH --job-name="SAC"
+#SBATCH --output="SAC.out" # job standard output file (%j replaced by job id)
+#SBATCH --error="SAC.err" # job standard error file (%j replaced by job id)
 
 #SBATCH --time=48:00:00   # walltime limit (HH:MM:SS)
 #SBATCH --nodes=1   # number of nodes
@@ -32,4 +32,5 @@ python src/main.py \
 --initial_date 2010-01-01 \
 --final_date 2020-12-31 \
 --auto_temperature \
+--gpu_devices 0 1 2 3 \
 

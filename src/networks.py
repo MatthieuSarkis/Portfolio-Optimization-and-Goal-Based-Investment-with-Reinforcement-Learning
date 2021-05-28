@@ -27,6 +27,7 @@ class Critic(torch.nn.Module):
                  action_space_dimension: Tuple, 
                  name: str, 
                  checkpoint_directory: str = 'saved_networks',
+                 device: str = 'cpu',
                  ) -> None:
         
         super(Critic, self).__init__()
@@ -45,14 +46,11 @@ class Critic(torch.nn.Module):
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
         
-        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.device = device
         
         if torch.cuda.device_count() > 1:
             self = torch.nn.DataParallel(self)  
-            self.to(self.module.device)
-        
-        else:
-            self.to(self.device)
+        self.to(device)
         
     def forward(self, 
                 state: List[float], 
@@ -85,6 +83,7 @@ class Actor(torch.nn.Module):
                  action_space_dimension: Tuple, 
                  name: str, 
                  checkpoint_directory: str = 'saved_networks',
+                 device: str = 'cpu',
                  ) -> None:
         
         super(Actor, self).__init__()
@@ -106,14 +105,12 @@ class Actor(torch.nn.Module):
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
         
-        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.device = device
         
         if torch.cuda.device_count() > 1:
             self = torch.nn.DataParallel(self) 
-            self.to(self.module.device)
-            
-        else: 
-            self.to(self.device)
+            print("Using the GPUs!", torch.cuda.device_count())
+        self.to(device)
         
     def forward(self, 
                 state: List[float],
@@ -165,6 +162,7 @@ class Value(torch.nn.Module):
                  layer2_neurons: int, 
                  name: str, 
                  checkpoint_directory: str = 'saved_networks',
+                 device: str = 'cpu',
                  ) -> None:
         
         super(Value, self).__init__()
@@ -182,14 +180,11 @@ class Value(torch.nn.Module):
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
         
-        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.device = device
         
         if torch.cuda.device_count() > 1:
-            self = torch.nn.DataParallel(self)  
-            self.to(self.module.device)
-            
-        else:
-            self.to(self.device)
+            self = torch.nn.DataParallel(self)             
+        self.to(device)
         
     def forward(self, 
                 state: List[float],
