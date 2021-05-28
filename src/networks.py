@@ -109,6 +109,7 @@ class Actor(torch.nn.Module):
         
         if torch.cuda.device_count() > 1:
             self = torch.nn.DataParallel(self) 
+            print("Using the GPUs!", torch.cuda.device_count())
         self.to(device)
         
     def forward(self, 
