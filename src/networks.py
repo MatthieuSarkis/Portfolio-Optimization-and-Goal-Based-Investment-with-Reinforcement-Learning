@@ -44,6 +44,7 @@ class Critic(torch.nn.Module):
         self.Q = torch.nn.Linear(self.layer2_neurons, 1)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
+        
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         
         if torch.cuda.device_count() > 1:
@@ -106,6 +107,7 @@ class Actor(torch.nn.Module):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
         
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        
         if torch.cuda.device_count() > 1:
             self = torch.nn.DataParallel(self) 
             self.to(self.module.device)
@@ -181,6 +183,7 @@ class Value(torch.nn.Module):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
         
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        
         if torch.cuda.device_count() > 1:
             self = torch.nn.DataParallel(self)  
             self.to(self.module.device)
