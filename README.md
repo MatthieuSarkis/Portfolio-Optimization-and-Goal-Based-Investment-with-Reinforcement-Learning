@@ -3,8 +3,9 @@
 * Scaling the data?
 * Donnees fondamentales?
 * Leverage, lower bound on bank account
-* tests unitaires
+* tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
 * typical buy_rate and sell_rate = 0.1%
+* Distributional Soft Actor Critic: https://arxiv.org/pdf/2001.02811.pdf
 
 ## Requirements
 
@@ -20,10 +21,11 @@
 * gym
 
 ```shell
-pip install .
+pip install -r requirements.txt
+python setup.py install
 ```
  ## Example 
- ### __Create a model__, train it, and save the trained model. If you have GPUs, they will automatically be used.
+ ### __Create a model__, train it, and save the trained model.
 
 ```shell
 python main.py \
