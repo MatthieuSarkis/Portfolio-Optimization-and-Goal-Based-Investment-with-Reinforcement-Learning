@@ -13,6 +13,8 @@
 from argparse import ArgumentParser
 import numpy as np
 import os
+import pandas as pd
+import time
 import torch
 
 from src.agents import Agent_ManualTemperature, Agent_AutomaticTemperature
@@ -31,6 +33,8 @@ def main(args):
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     
+    print('>>>>> Dealing with data >>>>>')
+    
     with open('src/tickers.txt') as f:
         stocks_symbols = f.read().splitlines()
       
@@ -42,12 +46,17 @@ def main(args):
         
         fetcher.fetch_and_merge_data()
     
-    preprocessor = Preprocessor(df_directory='data',
-                                file_name='stocks.csv')
+    if not os.path.exists('data/close.csv'):
+        preprocessor = Preprocessor(df_directory='data',
+                                    file_name='stocks.csv')
     
-    df = preprocessor.collect_close_prices()
-    df = preprocessor.handle_missing_values()
-    #df = df.iloc[:50]
+        df = preprocessor.collect_close_prices()
+        df = preprocessor.handle_missing_values()
+    
+    else:
+        df = pd.read_csv('data/close.csv', index_col=0)
+    
+    df = df.iloc[-50:, :3]
     
     env = Environment(stock_market_history=df,
                       initial_cash_in_bank=args.initial_cash,
@@ -95,6 +104,8 @@ def main(args):
     make_dir('plots')
     figure_file = 'plots/' + filename
     
+    print('>>>>> Running >>>>>')
+    
     run = Run(env=env,
               agent=agent,
               n_episodes=args.n_episodes,
@@ -103,9 +114,14 @@ def main(args):
               sac_temperature=args.sac_temperature,
               figure_file=figure_file)
     
+    initial_time = time.time()
+    
     run.run()
     run.plot()
     
+    final_time = time.time()
+    
+    print('Total training duration: {:.3f}'.format(final_time-initial_time))
 
 if __name__ == '__main__':
     
@@ -125,7 +141,6 @@ if __name__ == '__main__':
     parser.add_argument('--layer2_size', type=int, default=256)
     parser.add_argument('--n_episodes', type=int, default=1)
     parser.add_argument('--test_mode', action='store_true', default=False)
-    parser.add_argument('--gpu', type=str, default='0', help='GPU: 0 or 1')
     parser.add_argument('--seed', type=int, default='42')
     parser.add_argument('--auto_temperature', action='store_true', default=False)
     parser.add_argument('--gamma', type=float, default=0.99)
@@ -137,5 +152,3 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     main(args)
-    
-    

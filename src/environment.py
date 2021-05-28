@@ -14,6 +14,7 @@ import gym
 import numpy as np
 import pandas as pd
 from typing import Tuple
+
 class Environment(gym.Env):
 
     def __init__(self, 
@@ -129,4 +130,3 @@ class Environment(gym.Env):
         
         portfolio_value = self.cash_in_bank + self.number_of_shares.dot(self.stock_prices)
         return portfolio_value
-        

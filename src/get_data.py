@@ -38,6 +38,7 @@ class DataFetcher():
         final_df = None
         
         for stock in self.stock_symbols:
+            
             file_path = os.path.join(self.directory_path, "{}.csv".format(stock))
             if not os.path.exists(file_path):
                 data = yf.download(stock, start=self.start_date, end=self.end_date)

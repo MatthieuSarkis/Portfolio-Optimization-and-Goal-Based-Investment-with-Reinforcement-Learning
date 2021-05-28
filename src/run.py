@@ -12,6 +12,7 @@
 
 import gym
 import numpy as np
+import time
 
 from src.agents import Agent
 from src.utilities import plot_learning_curve
@@ -55,6 +56,7 @@ class Run():
         
         for i in range(self.n_episodes):
         
+            initial_time = time.time()
             reward = 0
             done = False
             observation = self.env.reset()
@@ -78,19 +80,14 @@ class Run():
                 self.best_reward = average_reward
                 if not self.test_mode:
                     self.agent.save_networks()
+            
+            final_time = time.time()
                     
             if self.auto_temperature:
-                print('episode:', i, 
-                      'reward: %.1f' % reward, 
-                      'running_average_100_episodes: %.1f' % average_reward,
-                      'step: %d' % self.step, self.agent.agent_name)
+                print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | duration: {:.3f}'.format(i, reward, average_reward, self.step, self.agent.agent_name, final_time-initial_time))
         
             else: 
-                print('episode:', i, 
-                      'reward: %.1f' % reward, 
-                      'running_average_100: %.1f' % average_reward,
-                      'step: %d' % self.step, self.agent.agent_name, 
-                      'temperature:', self.sac_temperature)
+                print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | temperature: {} | duration: {:.3f}'.format(i, reward, average_reward, self.step, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
             
     def plot(self) -> None:
         
