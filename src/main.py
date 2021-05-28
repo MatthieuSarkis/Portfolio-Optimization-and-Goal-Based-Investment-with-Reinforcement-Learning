@@ -133,7 +133,6 @@ if __name__ == '__main__':
     parser.add_argument('--alpha', type=float, default=1.0)
     parser.add_argument('--initial_date', type=str, default='2010-01-01')
     parser.add_argument('--final_date', type=str, default='2020-12-31')
-    parser.add_argument('--num_worker', type=int, default=4)
     parser.add_argument("--gpu_devices", type=int, nargs='+', default=None)
 
     args = parser.parse_args()

@@ -44,7 +44,6 @@ python main.py \
 --initial_date 2010-01-01 \
 --final_date 2020-12-31 \
 --auto_temperature \
---num_worker 4 \
 --gpu_devices 0 1 2 3 \
 ```
 ## License
