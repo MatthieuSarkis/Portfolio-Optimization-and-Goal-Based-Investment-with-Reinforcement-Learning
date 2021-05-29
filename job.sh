@@ -13,8 +13,7 @@
 
 #========================================================
 
-srun --unbuffered \  
-python src/main.py \
+srun --unbuffered python src/main.py \
 --initial_cash 100000 \
 --buy_rate 0.01 \
 --sell_rate 0.01 \
