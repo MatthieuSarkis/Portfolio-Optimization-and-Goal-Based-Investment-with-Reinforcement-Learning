@@ -26,10 +26,10 @@ python src/main.py \
 --batch_size 256 \
 --layer1_size 256 \
 --layer1_size 256 \
---n_episodes 50 \
+--n_episodes 100 \
 --seed 42 \
 --memory_size 1000000 \
---initial_date 2010-01-01 \
+--initial_date 2015-01-01 \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
 --auto_temperature \

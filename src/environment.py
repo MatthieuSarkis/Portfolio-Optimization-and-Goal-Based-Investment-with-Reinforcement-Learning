@@ -64,13 +64,25 @@ class Environment(gym.Env):
              actions: np.array,
              ) -> Tuple[np.array, float, bool, dict]:
         
+        self.current_step += 1      
+        initial_value_portfolio = self._get_portfolio_value()
+        self.stock_prices = self.stock_market_history.iloc[self.current_step] 
+        
+        self._trade(actions)
+                   
+        new_value_portfolio = self._get_portfolio_value()
         done = self.current_step == (self.time_horizon - 1)
-        self.current_step += 1
-
+        info = {'value_portfolio': new_value_portfolio}
+        
+        reward = new_value_portfolio - initial_value_portfolio 
+           
+        return self._get_observation(), reward, done, info
+       
+    def _trade(self, 
+               actions: np.array) -> None:
+        
         actions = (actions * self.limit_n_stocks).astype(int)
         sorted_indices = np.argsort(actions)
-                
-        initial_value_portfolio = self._get_portfolio_value()
         
         sell_idx = sorted_indices[ : np.where(actions<0)[0].size]
         buy_idx = sorted_indices[::-1][ : np.where(actions>0)[0].size]
@@ -81,16 +93,6 @@ class Environment(gym.Env):
         if self.buy_rule == 'most_first':
             for idx in buy_idx: 
                 self._buy(idx, actions[idx])
-                   
-        if self.current_step < self.time_horizon - 1:
-            self.stock_prices = self.stock_market_history.iloc[self.current_step] 
-                   
-        new_value_portfolio = self._get_portfolio_value()
-        info = {'value_portfolio': new_value_portfolio}
-        
-        reward = new_value_portfolio - initial_value_portfolio 
-           
-        return self._get_observation(), reward, done, info
         
     def _sell(self, 
               idx: int, 

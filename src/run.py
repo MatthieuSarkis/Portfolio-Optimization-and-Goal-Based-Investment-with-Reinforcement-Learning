@@ -41,6 +41,7 @@ class Run():
             self.agent.load_networks()
         
         self.step = None
+        self.episode = None
         self.best_reward = None
         self.reward_history = None
         
@@ -49,48 +50,56 @@ class Run():
     def _reset(self) -> None:
         
         self.step = 0
+        self.episode = 0
         self.best_reward = float('-Inf')
         self.reward_history = []
         
     def run(self) -> None:
         
         for i in range(self.n_episodes):
-        
-            initial_time = time.time()
-            reward = 0
-            done = False
-            observation = self.env.reset()
-            
-            while not done:
-                action = self.agent.choose_action(observation)
-                observation_, reward, done, _ = self.env.step(action)
-                if not self.auto_temperature:
-                    reward *= self.sac_temperature
-                self.step += 1
-                reward += reward
-                self.agent.remember(observation, action, reward, observation_, done)
-                if not self.test_mode:
-                    self.agent.learn()
-                observation = observation_
-                
-            self.reward_history.append(reward)
-            average_reward = np.mean(self.reward_history[-100:])
-            
-            final_time = time.time()
-                    
-            if self.auto_temperature:
-                print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | duration: {:.3f} | action: {}'.format(i, reward, average_reward, self.step, self.agent.agent_name, final_time-initial_time, action))
-        
-            else: 
-                print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | temperature: {} | duration: {:.3f}'.format(i, reward, average_reward, self.step, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
-            
-            if average_reward > self.best_reward:
-                self.best_reward = average_reward
-                if not self.test_mode:
-                    self.agent.save_networks()
-            
+            self._run_one_episode()
+                  
     def _run_one_episode(self) -> None:
-        pass
+        
+        initial_time = time.time()
+        reward = 0
+        done = False
+        observation = self.env.reset()
+        
+        while not done:
+            
+            action = self.agent.choose_action(observation)
+            observation_, reward, done, _ = self.env.step(action)
+            
+            if not self.auto_temperature:
+                reward *= self.sac_temperature
+                
+            self.step += 1
+            reward += reward
+            
+            self.agent.remember(observation, action, reward, observation_, done)
+            
+            if not self.test_mode:
+                self.agent.learn()
+                
+            observation = observation_
+            
+        self.reward_history.append(reward)
+        average_reward = np.mean(self.reward_history[-100:])
+        
+        self.episode += 1
+        final_time = time.time()
+                
+        if self.auto_temperature:
+            print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | duration: {:.3f} | action: {}'.format(self.episode, reward, average_reward, self.step, self.agent.agent_name, final_time-initial_time, action))
+    
+        else: 
+            print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | temperature: {} | duration: {:.3f}'.format(self.episode, reward, average_reward, self.step, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
+        
+        if average_reward > self.best_reward:
+            self.best_reward = average_reward
+            if not self.test_mode:
+                self.agent.save_networks()
             
     def plot(self) -> None:
         
