@@ -95,3 +95,38 @@ class Preprocessor():
         self.df.fillna(method='bfill', inplace=True)
         self.df.to_csv(os.path.join(self.df_directory, 'close.csv'))
         return self.df   
+  
+    
+def load_data(initial_date: str, 
+              final_date: str, 
+              mode: str = 'test') -> pd.DataFrame:
+    
+    print('>>>>> Dealing with data <<<<<')
+    
+    with open('src/tickers.txt') as f:
+        stocks_symbols = f.read().splitlines()
+      
+    if not os.path.exists('data/'):  
+        fetcher = DataFetcher(stock_symbols=stocks_symbols,
+                              start_date=initial_date,
+                              end_date=final_date,
+                              directory_path="data")
+        
+        fetcher.fetch_and_merge_data()
+    
+    if not os.path.exists('data/close.csv'):
+        preprocessor = Preprocessor(df_directory='data',
+                                    file_name='stocks.csv')
+    
+        df = preprocessor.collect_close_prices()
+        df = preprocessor.handle_missing_values()
+    
+    else:
+        df = pd.read_csv('data/close.csv', index_col=0)
+    
+    if mode == 'train':
+        df = df.iloc[:3*(df.shape[0]//4), :4]
+    else:
+        df = df.iloc[3*(df.shape[0]//4):, :4]
+        
+    return df

@@ -13,57 +13,32 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import seaborn as sns
+sns.set_theme()
 
-def time_to_string(t):
-    return t.strftime("%Y.%m.%d/%H.%M.%S")
 
-def make_dir(directory_name=''): 
+def make_dir(directory_name: str = '') -> None: 
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
             
-def plot_learning_curve(x, scores, epsilons, filename):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, label="1")
-    ax2 = fig.add_subplot(111, label="2", frame_on=False)
+def plot_learning_curve(x: np.array, 
+                        rewards: np.array, 
+                        figure_file: str, 
+                        mode: str,
+                        ) -> None:
     
-    ax.plot(x, epsilons, color="C0")
-    ax.set_xlabel("Training Steps", color="C0")
-    ax.set_ylabel("Epsilon", color="C0")
-    ax.tick_params(axis='x', colors="C0")
-    ax.tick_params(axis='y', colors="C0")
-
-    N = len(scores)
-    running_avg = np.empty(N)
-    for t in range(N):
-        running_avg[t] = np.mean(scores[max(0, t-100): t+1])
+    running_average = np.zeros(len(rewards))
+    for i in range(len(running_average)):
+        running_average[i] = np.mean(rewards[max(0, i-50): i+1])
         
-    ax2.scatter(x, running_avg, color='C1')
-    ax2.axes.get_xaxis().set_visible(False)
-    ax2.yaxis.tick_right()
-    ax2.set_ylabel('Score', color='C1')
-    ax2.yaxis.set_label_position('right')
-    ax2.tick_params(axis='y', colors='C1')
-    
-    plt.savefig(filename)
-       
-def plot_learning_curve(x, scores, figure_file):
-    running_avg = np.zeros(len(scores))
-    for i in range(len(running_avg)):
-        running_avg[i] = np.mean(scores[max(0, i-100): i+1])
-    plt.plot(x, running_avg)
-    plt.title('Running average of previous 100 scores')
-    plt.savefig(figure_file)
-     
-def plot(mode):
-    images_folder = 'rl_trader_images'
-    make_dir(images_folder)
-    
-    a = np.load('rl_trader_rewards/{}.npy'.format(mode))
-    
     if mode == 'train':
-        plt.plot(a)
-    else:
-        plt.hist(a, bins=20)
+        plt.plot(x, rewards, linestyle='-', color='blue', label='reward')
+        plt.plot(x, running_average, linestyle='--', color='green', label='running average 50')
+        plt.legend()
+        plt.title('Reward as a function of the epoch/episode')
         
-    plt.title(mode)
-    plt.savefig('{}/{}.png'.format(images_folder, mode))
+    elif mode == 'test':
+        plt.hist(rewards, bins=20)
+        plt.title('Reward distribution')
+    
+    plt.savefig(figure_file) 

@@ -12,10 +12,11 @@
 
 import gym
 import numpy as np
+import os
 import time
 
 from src.agents import Agent
-from src.utilities import plot_learning_curve
+from src.utilities import plot_learning_curve, make_dir
 
 class Run():
     
@@ -23,21 +24,19 @@ class Run():
                  env: gym.Env,
                  agent: Agent,
                  n_episodes: int,
-                 test_mode: bool,
                  auto_temperature: bool,
                  sac_temperature: float,
-                 figure_file: str,
+                 mode: str = 'test'
                  ) -> None:
         
         self.env = env
         self.agent = agent
         self.n_episodes = n_episodes
-        self.test_mode = test_mode
         self.auto_temperature = auto_temperature
         self.sac_temperature = sac_temperature
-        self.figure_file = figure_file
+        self.mode = mode
         
-        if self.test_mode:
+        if self.mode == 'test':
             self.agent.load_networks()
         
         self.step = None
@@ -54,11 +53,23 @@ class Run():
         self.best_reward = float('-Inf')
         self.reward_history = []
         
-    def run(self) -> None:
+    def run(self,
+            log_directory: str,
+            ) -> None:
         
-        for i in range(self.n_episodes):
+        print('>>>>> Running <<<<<')
+        
+        for _ in range(self.n_episodes):
             self._run_one_episode()
-                  
+           
+        make_dir('logs')      
+        if self.auto_temperature:
+            history_file = '{}/auto_temperature_{}.npy'.format(log_directory, self.mode)
+        else:
+            history_file = '{}/manual_temperature_{}_{}.npy'.format(log_directory, self.sac_temperature, self.mode)
+            
+        np.save(history_file, np.array(self.reward_history))
+                 
     def _run_one_episode(self) -> None:
         
         initial_time = time.time()
@@ -79,7 +90,7 @@ class Run():
             
             self.agent.remember(observation, action, reward, observation_, done)
             
-            if not self.test_mode:
+            if self.mode == 'train':
                 self.agent.learn()
                 
             observation = observation_
@@ -98,15 +109,13 @@ class Run():
         
         if average_reward > self.best_reward:
             self.best_reward = average_reward
-            if not self.test_mode:
+            if self.mode == 'train':
                 self.agent.save_networks()
             
-    def plot(self) -> None:
+    def plot(self,
+             figure_file: str) -> None:
         
-        if not self.test_mode:
-            x = [i+1 for i in range(self.n_episodes)]
-            plot_learning_curve(x, self.reward_history, self.figure_file)
-
-
-
-
+        make_dir('plots')
+        figure_file = os.path.join('plots', figure_file)
+        x = [i+1 for i in range(self.n_episodes)]
+        plot_learning_curve(x, self.reward_history, figure_file, self.mode)
