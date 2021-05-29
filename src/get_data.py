@@ -125,8 +125,8 @@ def load_data(initial_date: str,
         df = pd.read_csv('data/close.csv', index_col=0)
     
     if mode == 'train':
-        df = df.iloc[:3*(df.shape[0]//4), :4]
+        df = df.iloc[:3*(df.shape[0]//4)]
     else:
-        df = df.iloc[3*(df.shape[0]//4):, :4]
+        df = df.iloc[3*(df.shape[0]//4):]
         
     return df
