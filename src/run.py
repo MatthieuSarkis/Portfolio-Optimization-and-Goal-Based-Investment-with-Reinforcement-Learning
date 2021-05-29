@@ -85,16 +85,16 @@ class Run():
             observation = observation_
             
         self.reward_history.append(reward)
-        average_reward = np.mean(self.reward_history[-10:])
+        average_reward = np.mean(self.reward_history[-50:])
         
         self.episode += 1
         final_time = time.time()
                 
         if self.auto_temperature:
-            print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | {} | duration: {:.3f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
+            print('    episode: {:4d} | reward: {:5.1f} | running_average: {:5.1f} | {} | duration: {:4.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
     
         else: 
-            print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | {} | temperature: {} | duration: {:.3f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
+            print('    episode: {:4d} | reward: {:5.1f} | running_average: {:5.1f} | {} | temperature: {:3.1f} | duration: {:4.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
         
         if average_reward > self.best_reward:
             self.best_reward = average_reward
@@ -106,3 +106,7 @@ class Run():
         if not self.test_mode:
             x = [i+1 for i in range(self.n_episodes)]
             plot_learning_curve(x, self.reward_history, self.figure_file)
+
+
+
+

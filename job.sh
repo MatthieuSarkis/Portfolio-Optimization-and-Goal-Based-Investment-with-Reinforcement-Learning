@@ -13,7 +13,7 @@
 
 #========================================================
 
-python src/main.py \
+srun --unbuffered python src/main.py \
 --initial_cash 10000 \
 --buy_rate 0.01 \
 --sell_rate 0.01 \
@@ -26,7 +26,7 @@ python src/main.py \
 --batch_size 256 \
 --layer1_size 256 \
 --layer1_size 256 \
---n_episodes 100 \
+--n_episodes 1000 \
 --seed 42 \
 --memory_size 1000000 \
 --initial_date 2015-01-01 \

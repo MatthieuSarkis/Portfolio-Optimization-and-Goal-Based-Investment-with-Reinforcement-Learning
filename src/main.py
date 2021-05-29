@@ -56,7 +56,7 @@ def main(args):
     else:
         df = pd.read_csv('data/close.csv', index_col=0)
     
-    df = df.iloc[:3*(df.shape[0]//4), :4]
+    df = df.iloc[:3*(df.shape[0]//4)]
     
     env = Environment(stock_market_history=df,
                       initial_cash_in_bank=args.initial_cash,
