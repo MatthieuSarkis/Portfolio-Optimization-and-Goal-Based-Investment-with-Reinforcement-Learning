@@ -91,7 +91,7 @@ class Run():
         final_time = time.time()
                 
         if self.auto_temperature:
-            print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | duration: {:.3f} | action: {}'.format(self.episode, reward, average_reward, self.step, self.agent.agent_name, final_time-initial_time, action))
+            print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | duration: {:.3f}'.format(self.episode, reward, average_reward, self.step, self.agent.agent_name, final_time-initial_time))
     
         else: 
             print('    episode: {:2d} | reward: {:.1f} | running_average_100: {:.1f} | step: {:6d} | {} | temperature: {} | duration: {:.3f}'.format(self.episode, reward, average_reward, self.step, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
