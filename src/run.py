@@ -85,7 +85,7 @@ class Run():
             observation = observation_
             
         self.reward_history.append(reward)
-        average_reward = np.mean(self.reward_history[-100:])
+        average_reward = np.mean(self.reward_history[-10:])
         
         self.episode += 1
         final_time = time.time()
