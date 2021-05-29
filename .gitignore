@@ -3,6 +3,7 @@
 .env/
 data/
 plots/
+logs/
 saved_networks/
 __pycache__/
 *egg-info/
