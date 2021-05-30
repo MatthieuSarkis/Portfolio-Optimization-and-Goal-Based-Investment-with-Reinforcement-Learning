@@ -28,7 +28,7 @@ srun --unbuffered python src/main.py \
 --layer1_size 256 \
 --n_episodes 1000 \
 --seed 42 \
---mode train \
+--mode test \
 --memory_size 1000000 \
 --initial_date 2015-01-01 \
 --final_date 2020-12-31 \

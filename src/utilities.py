@@ -25,6 +25,7 @@ def plot_learning_curve(x: np.array,
                         rewards: np.array, 
                         figure_file: str, 
                         mode: str,
+                        bins: int = 20,
                         ) -> None:
     
     running_average = np.zeros(len(rewards))
@@ -38,7 +39,7 @@ def plot_learning_curve(x: np.array,
         plt.title('Reward as a function of the epoch/episode')
         
     elif mode == 'test':
-        plt.hist(rewards, bins=20)
+        plt.hist(rewards, bins=bins)
         plt.title('Reward distribution')
     
     plt.savefig(figure_file) 

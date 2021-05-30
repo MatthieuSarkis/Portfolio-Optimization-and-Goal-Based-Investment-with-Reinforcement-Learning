@@ -7,6 +7,8 @@
 * typical buy_rate and sell_rate = 0.1%
 * Distributional Soft Actor Critic: https://arxiv.org/pdf/2001.02811.pdf
 * Implement new buying strategies: cyclic, random, trained??
+* Prendre en compte le taux du compte en banque
+* bien aligner les print
 
 ## Requirements
 
