@@ -13,6 +13,7 @@
 import gym
 import numpy as np
 import os
+from sklearn.preprocessing import StandardScaler
 import time
 
 from src.agents import Agent
@@ -26,7 +27,8 @@ class Run():
                  n_episodes: int,
                  auto_temperature: bool,
                  sac_temperature: float,
-                 mode: str = 'test'
+                 scaler: StandardScaler,
+                 mode: str = 'test',
                  ) -> None:
         
         self.env = env
@@ -35,6 +37,7 @@ class Run():
         self.auto_temperature = auto_temperature
         self.sac_temperature = sac_temperature
         self.mode = mode
+        self.scaler = scaler
         
         if self.mode == 'test':
             self.agent.load_networks()
@@ -76,11 +79,13 @@ class Run():
         reward = 0
         done = False
         observation = self.env.reset()
+        observation = self.scaler.transform([observation])
         
         while not done:
             
             action = self.agent.choose_action(observation)
             observation_, reward, done, _ = self.env.step(action)
+            observation_ = self.scaler.transform([observation_])
             
             if not self.auto_temperature:
                 reward *= self.sac_temperature

@@ -13,8 +13,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import pickle
 import seaborn as sns
 sns.set_theme()
+from sklearn.preprocessing import StandardScaler
+
+from src.environment import Environment
 
 
 def make_dir(directory_name: str = '') -> None: 
@@ -43,3 +47,27 @@ def plot_learning_curve(x: np.array,
         plt.title('Reward distribution')
     
     plt.savefig(figure_file) 
+
+def produce_scaler(env: Environment,
+               mode: str) -> StandardScaler:
+    
+    scaler = StandardScaler()
+    
+    if mode == 'train':
+        observation = env.reset()
+        observations = [observation]
+        done = False
+        while not done:
+            action = np.random.choice(env.action_space)
+            observation_, _, done, _ = env.step(action)
+            observations.append(observation_)
+
+        scaler.fit(observations)
+        with open('saved_networks/scaler.pkl', 'wb') as f:
+            pickle.dump(scaler, f)
+    
+    if mode == 'test':
+        with open('saved_networks/scaler.pkl', 'rb') as f:
+            scaler = pickle.load(f)
+    
+    return scaler

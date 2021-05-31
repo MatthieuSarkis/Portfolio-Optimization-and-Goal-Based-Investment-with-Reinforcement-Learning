@@ -20,6 +20,7 @@ from src.agents import Agent_ManualTemperature, Agent_AutomaticTemperature
 from src.environment import Environment
 from src.get_data import load_data
 from src.run import Run
+from src.utilities import produce_scaler
 
 
 def main(args):
@@ -40,6 +41,8 @@ def main(args):
                       bank_rate=args.bank_rate,
                       limit_n_stocks=args.limit_n_stocks,
                       buy_rule=args.buy_rule)
+    
+    scaler = produce_scaler(env, args.mode)
     
     if args.auto_temperature:
         agent_name = 'auto_temperature'
@@ -81,7 +84,8 @@ def main(args):
               n_episodes=args.n_episodes,
               auto_temperature=args.auto_temperature,
               sac_temperature=args.sac_temperature,
-              mode=args.mode)
+              mode=args.mode,
+              scaler=scaler)
     
     initial_time = time.time()
     
