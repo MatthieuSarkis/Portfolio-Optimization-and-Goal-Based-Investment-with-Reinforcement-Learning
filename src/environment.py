@@ -94,6 +94,26 @@ class Environment(gym.Env):
             for idx in buy_idx: 
                 self._buy(idx, actions[idx])
         
+        if self.buy_rule == 'most_first': 
+            for idx in buy_idx: 
+                self._buy(idx, actions[idx])
+                
+        if self.buy_rule == 'cyclic':
+            should_buy = np.copy(actions[buy_idx])
+            i = 0
+            while self.cash_in_bank > 0 and not np.all((should_buy == 0)):
+                if should_buy[i] > 0:
+                    self._buy(buy_idx[i])
+                    should_buy[i] -= 1
+                i = (i + 1) % len(buy_idx) 
+                
+        if self.buy_rule == 'random':
+            should_buy = np.copy(actions[buy_idx])
+            while self.cash_in_bank > 0 and not np.all((should_buy == 0)):
+                i = np.random.choice(np.where(should_buy > 0))
+                self._buy(buy_idx[i])
+                should_buy[i] -= 1
+        
     def _sell(self, 
               idx: int, 
               action: int,

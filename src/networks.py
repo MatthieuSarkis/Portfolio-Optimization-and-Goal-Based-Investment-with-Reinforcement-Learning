@@ -37,7 +37,7 @@ class Critic(torch.nn.Module):
         self.action_space_dimension = action_space_dimension
         self.name = name
         self.checkpoint_dir = checkpoint_directory
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name + 'SAC')
+        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
         make_dir(directory_name=checkpoint_directory)
         
         self.layer1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer1_neurons)
@@ -94,7 +94,7 @@ class Actor(torch.nn.Module):
         self.name = name
         self.max_actions = max_actions
         self.checkpoint_dir = checkpoint_directory
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name + '_sac')
+        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
         make_dir(directory_name=checkpoint_directory)
         self.reparam_noise = 1e-6
         
@@ -171,7 +171,7 @@ class Value(torch.nn.Module):
         self.layer2_neurons = layer2_neurons
         self.name = name
         self.checkpoint_dir = checkpoint_directory
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name + '_sac')
+        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
         make_dir(directory_name=checkpoint_directory)
         
         self.layer1 = torch.nn.Linear(*self.input_shape, self.layer1_neurons)
