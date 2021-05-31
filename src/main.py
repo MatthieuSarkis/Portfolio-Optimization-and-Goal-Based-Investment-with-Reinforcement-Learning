@@ -37,6 +37,7 @@ def main(args):
                       initial_cash_in_bank=args.initial_cash,
                       buy_rate=args.buy_rate,
                       sell_rate=args.sell_rate,
+                      bank_rate=args.bank_rate,
                       limit_n_stocks=args.limit_n_stocks,
                       buy_rule=args.buy_rule)
     
@@ -98,6 +99,7 @@ if __name__ == '__main__':
     parser.add_argument('--initial_cash', type=float, default=10000)
     parser.add_argument('--buy_rate', type=float, default=0.1)
     parser.add_argument('--sell_rate', type=float, default=0.1)
+    parser.add_argument('--bank_rate', type=float, default=0.1)
     parser.add_argument('--sac_temperature', type=float, default=2.0)
     parser.add_argument('--limit_n_stocks', type=int, default=50)
     parser.add_argument('--lr_Q', type=float, default=0.0003)

@@ -18,6 +18,7 @@ python src/main.py \
 --initial_cash 100000 \
 --buy_rate 0.01 \
 --sell_rate 0.01 \
+--bank_rate 0.0 \
 --sac_temperature 2.0 \
 --limit_n_stocks 500 \
 --lr_Q 0.0003 \

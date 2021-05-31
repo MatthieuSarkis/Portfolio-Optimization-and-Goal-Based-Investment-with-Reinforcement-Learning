@@ -22,6 +22,7 @@ class Environment(gym.Env):
                  initial_cash_in_bank: float,
                  buy_rate: float,
                  sell_rate: float,
+                 bank_rate: float,
                  limit_n_stocks: float = 200,
                  buy_rule: str = 'most_first',
                  ) -> None:
@@ -43,6 +44,7 @@ class Environment(gym.Env):
         
         self.buy_rate = buy_rate
         self.sell_rate = sell_rate
+        self.bank_rate = bank_rate
         
         self.current_step = None
         self.cash_in_bank = None
@@ -69,7 +71,8 @@ class Environment(gym.Env):
         self.stock_prices = self.stock_market_history.iloc[self.current_step] 
         
         self._trade(actions)
-                   
+        
+        self.cash_in_bank *= 1 + self.bank_rate # should this line be before the trade?       
         new_value_portfolio = self._get_portfolio_value()
         done = self.current_step == (self.time_horizon - 1)
         info = {'value_portfolio': new_value_portfolio}
