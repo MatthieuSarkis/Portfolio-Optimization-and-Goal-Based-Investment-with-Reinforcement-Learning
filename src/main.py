@@ -13,6 +13,7 @@
 from argparse import ArgumentParser
 import numpy as np
 import os
+
 import time
 import torch
 
@@ -94,7 +95,7 @@ def main(args):
     
     final_time = time.time()
     
-    print('Total training duration: {:.3f}'.format(final_time-initial_time))
+    print('Total training duration: {:*^13.3f}'.format(final_time-initial_time))
 
 if __name__ == '__main__':
     

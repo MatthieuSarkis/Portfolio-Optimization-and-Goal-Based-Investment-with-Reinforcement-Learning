@@ -1,6 +1,5 @@
 ## Notes / To do
 
-* Scaling the data?
 * Donnees fondamentales?
 * Leverage, lower bound on bank account
 * tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
