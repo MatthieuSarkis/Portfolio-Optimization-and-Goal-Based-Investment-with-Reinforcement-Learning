@@ -27,11 +27,12 @@ python src/main.py \
 --batch_size 256 \
 --layer1_size 256 \
 --layer1_size 256 \
---n_episodes 5 \
+--n_episodes 500 \
 --seed 42 \
 --mode train \
 --memory_size 1000000 \
 --initial_date 2015-01-01 \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
+--buy_rule most_first\
 --auto_temperature \

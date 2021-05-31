@@ -102,10 +102,10 @@ class Run():
         final_time = time.time()
                 
         if self.auto_temperature:
-            print('    episode: {:4d} | reward: {:5.1f} | running_average: {:5.1f} | {} | duration: {:4.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
+            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
     
         else: 
-            print('    episode: {:4d} | reward: {:5.1f} | running_average: {:5.1f} | {} | temperature: {:3.1f} | duration: {:4.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
+            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
         
         if average_reward > self.best_reward:
             self.best_reward = average_reward

@@ -37,7 +37,8 @@ def main(args):
                       initial_cash_in_bank=args.initial_cash,
                       buy_rate=args.buy_rate,
                       sell_rate=args.sell_rate,
-                      limit_n_stocks=args.limit_n_stocks)
+                      limit_n_stocks=args.limit_n_stocks,
+                      buy_rule=args.buy_rule)
     
     if args.auto_temperature:
         agent_name = 'auto_temperature'
@@ -115,7 +116,8 @@ if __name__ == '__main__':
     parser.add_argument('--alpha', type=float, default=1.0)
     parser.add_argument('--initial_date', type=str, default='2010-01-01')
     parser.add_argument('--final_date', type=str, default='2020-12-31')
-    parser.add_argument("--gpu_devices", type=int, nargs='+', default=None)
+    parser.add_argument('--gpu_devices', type=int, nargs='+', default=None)
+    parser.add_argument('--buy_rule', type=str, default='most_first')
 
     args = parser.parse_args()
     main(args)
