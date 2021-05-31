@@ -2,7 +2,6 @@
 .DS_Store
 .env/
 data/
-plots/
 logs/
 saved_networks/
 __pycache__/
