@@ -133,6 +133,7 @@ class Actor(torch.nn.Module):
                       ) -> Tuple[torch.tensor]:
         
         mu, sigma = self.forward(state)
+        #print(mu)
         probabilities = torch.distributions.Normal(mu, sigma)
         
         if reparameterize:

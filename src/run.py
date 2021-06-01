@@ -79,13 +79,13 @@ class Run():
         reward = 0
         done = False
         observation = self.env.reset()
-        observation = self.scaler.transform([observation])
+        observation = self.scaler.transform([observation])[0]
         
         while not done:
             
             action = self.agent.choose_action(observation)
             observation_, reward, done, _ = self.env.step(action)
-            observation_ = self.scaler.transform([observation_])
+            observation_ = self.scaler.transform([observation_])[0]
             
             if not self.auto_temperature:
                 reward *= self.sac_temperature

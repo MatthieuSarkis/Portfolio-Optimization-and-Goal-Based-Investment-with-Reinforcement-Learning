@@ -126,7 +126,7 @@ def load_data(initial_date: str,
     
     if mode == 'train':
         #df = df.iloc[:3*(df.shape[0]//4)]
-        df = df.iloc[:30][['GOOG', 'APPL']]
+        df = df.iloc[:100, :3]
     else:
         df = df.iloc[3*(df.shape[0]//4):]
         

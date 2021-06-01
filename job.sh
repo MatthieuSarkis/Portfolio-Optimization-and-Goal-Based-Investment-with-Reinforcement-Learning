@@ -35,5 +35,5 @@ python src/main.py \
 --initial_date 2015-01-01 \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
---buy_rule most_first\
+--buy_rule most_first \
 --auto_temperature \
