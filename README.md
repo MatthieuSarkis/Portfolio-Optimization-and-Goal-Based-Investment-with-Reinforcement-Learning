@@ -11,6 +11,7 @@
                                     https://www.researchgate.net/publication/341069321_DSAC_Distributional_Soft_Actor_Critic_for_Risk-Sensitive_Learning
 * Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)
 * Cosine annealing for learning rates?
+* Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
 * Different types of deep neural nets?
 * Save hyperparameters in json file
 ## Requirements

@@ -133,7 +133,6 @@ class Actor(torch.nn.Module):
                       ) -> Tuple[torch.tensor]:
         
         mu, sigma = self.forward(state)
-        #print(mu)
         probabilities = torch.distributions.Normal(mu, sigma)
         
         if reparameterize:
@@ -204,83 +203,103 @@ class Value(torch.nn.Module):
         
     def load_network_weights(self) -> None:
         self.load_state_dict(torch.load(self.checkpoint_file))
+         
+class Distributional_Critic(torch.nn.Module):
+    def __init__(self, 
+                 lr_Q: float, 
+                 input_shape: Tuple, 
+                 layer_neurons: int, 
+                 action_space_dimension: Tuple, 
+                 name: str, 
+                 log_std_min=-0.1, 
+                 log_std_max=4,
+                 checkpoint_directory: str = 'saved_networks',
+                 device: str = 'cpu',
+                 ) -> None:
         
+        super(Distributional_Critic, self).__init__()
+        self.input_shape = input_shape
+        self.layer_neurons = layer_neurons
+        self.name = name
         
-        
+        self.linear1 = torch.nnLinear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
+        self.linear2 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear3 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_mean_4 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_mean_5 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_std_4 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_std_5 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
 
-class QNet(torch.nn.Module):
-    def __init__(self, args,log_std_min=-0.1, log_std_max=4):
-        super(QNet, self).__init__()
-        num_states = args.state_dim
-        num_action = args.action_dim
-        num_hidden_cell = args.num_hidden_cell
-        self.NN_type = args.NN_type
-        
-        if self.NN_type == "mlp":
-            self.linear1 = torch.nnLinear(num_states[-1]+num_action, num_hidden_cell, bias=True)
-            self.linear2 = torch.nnLinear(num_hidden_cell, num_hidden_cell, bias=True)
-            self.linear3 = torch.nnLinear(num_hidden_cell, num_hidden_cell, bias=True)
-            self.linear_mean_4 = torch.nnLinear(num_hidden_cell, num_hidden_cell, bias=True)
-            self.linear_mean_5 = torch.nnLinear(num_hidden_cell, num_hidden_cell, bias=True)
-            self.linear_std_4 = torch.nnLinear(num_hidden_cell, num_hidden_cell, bias=True)
-            self.linear_std_5 = torch.nnLinear(num_hidden_cell, num_hidden_cell, bias=True)
-
-        self.mean_layer = torch.nnLinear(num_hidden_cell, 1, bias=True)
-        self.log_std_layer = torch.nnLinear(num_hidden_cell, 1, bias=True)
+        self.mean_layer = torch.nnLinear(self.layer_neurons, 1)
+        self.log_std_layer = torch.nnLinear(self.layer_neurons, 1)
         self.log_std_min = log_std_min
         self.log_std_max = log_std_max
         self.denominator = max(abs(self.log_std_min), self.log_std_max)
-        init_weights(self)
-
-    def _get_conv_out_size(self, num_states):
-        out = self.conv_part(torch.zeros(num_states).unsqueeze(0).permute(0,3,1,2))
-        return int(np.prod(out.size()))
-
-    def forward(self, state, action):
         
-        if self.NN_type == "mlp":
-            x = torch.cat([state, action], 1)
-            x = self.linear1(x)
-            x = torch.nn.functional.gelu(x)
-            x = self.linear2(x)
-            x = torch.nn.functional.gelu(x)
-            x = self.linear3(x)
+        self.checkpoint_dir = checkpoint_directory
+        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
+        make_dir(directory_name=checkpoint_directory)
+        
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
+        
+        self.device = device
+        
+        if torch.cuda.device_count() > 1:
+            self = torch.nn.DataParallel(self)  
+        self.to(device)
 
+    def forward(self, 
+                state: List[float], 
+                action: np.array,
+                ) -> Tuple[torch.Tensor]:
+        
+        x = torch.cat([state, action], 1)
+        x = self.linear1(x)
+        x = torch.nn.functional.gelu(x)
+        x = self.linear2(x)
+        x = torch.nn.functional.gelu(x)
+        x = self.linear3(x)
+        
+        x_mean = torch.nn.functional.gelu(x)
+        x_mean = self.linear_mean_4(x_mean)
+        x_mean = torch.nn.functional.gelu(x_mean)
+        x_mean = self.linear_mean_5(x_mean)
+        x_mean = torch.nn.functional.gelu(x_mean)
 
-            x_mean = torch.nn.functional.gelu(x)
-            x_mean = self.linear_mean_4(x_mean)
-            x_mean = torch.nn.functional.gelu(x_mean)
-            x_mean = self.linear_mean_5(x_mean)
-            x_mean = torch.nn.functional.gelu(x_mean)
-
-            x_std = torch.nn.functional.gelu(x)
-            x_std = self.linear_std_4(x_std)
-            x_std = torch.nn.functional.gelu(x_std)
-            x_std = self.linear_std_5(x_std)
-            x_std = torch.nn.functional.gelu(x_std)
+        x_std = torch.nn.functional.gelu(x)
+        x_std = self.linear_std_4(x_std)
+        x_std = torch.nn.functional.gelu(x_std)
+        x_std = self.linear_std_5(x_std)
+        x_std = torch.nn.functional.gelu(x_std)
+        
         mean = self.mean_layer(x_mean)
         log_std = self.log_std_layer(x_std)
 
         log_std = torch.clamp_min(self.log_std_max*torch.tanh(log_std/self.denominator),0) + \
                   torch.clamp_max(-self.log_std_min * torch.tanh(log_std / self.denominator), 0)
 
-        #log_std = torch.clamp(log_std, self.log_std_min, self.log_std_max)
-
         return mean, log_std
 
-    def evaluate(self, state, action, device=torch.device("cpu"), min=False):
+    def sample_normal(self, 
+                      state: List[float], 
+                      action: np.array,
+                      ) -> torch.Tensor:
+        
         mean, log_std = self.forward(state, action)
         std = log_std.exp()
         normal = torch.distributions.Normal(torch.zeros(mean.shape), torch.ones(std.shape))
 
-        if min == False:
-            z = normal.sample().to(device)
-            z = torch.clamp(z, -2, 2)
-        elif min == True:
-            z = -torch.abs(normal.sample()).to(device)
-
-        q_value = mean + torch.mul(z, std)
-        return mean, std, q_value
+        z = normal.sample()
+        z = torch.clamp(z, -2, 2)
+       
+        q = mean + torch.mul(z, std)
+        return q
+    
+    def save_network_weights(self) -> None:
+        torch.save(self.state_dict(), self.checkpoint_file)
+        
+    def load_network_weights(self) -> None:
+        self.load_state_dict(torch.load(self.checkpoint_file))
 
 
 
