@@ -17,7 +17,7 @@ import torch
 from typing import Tuple
 
 from src.buffer import ReplayBuffer
-from src.networks import Actor, Critic, Value
+from src.networks import Actor, Critic, Value, Distributional_Critic
    
 class Agent():
     
@@ -274,6 +274,103 @@ class Agent_AutomaticTemperature(Agent):
                                       action_space_dimension=self.action_space_dimension, 
                                       name=self.agent_name+'_target_critic2',
                                       device=self.device)
+        
+        self._network_list += [self.target_critic_1, self.target_critic_2]
+        self._targeted_network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]
+        
+        for network in self._network_list:
+            network.apply(self._initialize_weights) 
+        
+        self._update_target_networks(tau=1)
+        
+    def learn(self) -> None:
+        
+        if self.memory.pointer < self.batch_size:
+            return
+        
+        states, actions, rewards, states_, dones = self.memory.sample(self.batch_size)
+               
+        states = torch.tensor(states, dtype=torch.float).to(self.device)
+        actions = torch.tensor(actions, dtype=torch.float).to(self.device)
+        rewards = torch.tensor(rewards, dtype=torch.float).to(self.device)
+        states_ = torch.tensor(states_, dtype=torch.float).to(self.device)
+        dones = torch.tensor(dones).to(self.device)
+        
+        # CRITIC UPDATE
+        actions_, log_probabilities_ = self.actor.sample_normal(states_, reparameterize=False)
+        
+        q1_ = self.target_critic_1.forward(states_, actions_)
+        q2_ = self.target_critic_2.forward(states_, actions_)
+        
+        target_soft_value_ = (torch.min(q1_, q2_) - (self.alpha * log_probabilities_)).view(-1)
+        target_soft_value_[dones] = 0
+        q_target = rewards + self.gamma * target_soft_value_
+        
+        q1 = self.critic_1.forward(states, actions).view(-1)
+        q2 = self.critic_2.forward(states, actions).view(-1)
+        
+        critic_1_loss = 0.5 * torch.nn.functional.mse_loss(q1, q_target)
+        critic_2_loss = 0.5 * torch.nn.functional.mse_loss(q2, q_target)
+        
+        self.critic_1.optimizer.zero_grad()
+        self.critic_2.optimizer.zero_grad()
+        
+        critic_loss = critic_1_loss + critic_2_loss
+        critic_loss.backward(retain_graph=True)
+        
+        self.critic_1.optimizer.step()
+        self.critic_2.optimizer.step()
+        
+        # POLICY UPDATE
+        actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)
+        log_probabilities = log_probabilities
+        
+        q1_ = self.target_critic_1.forward(states, actions)
+        q2_ = self.target_critic_2.forward(states, actions)
+        
+        critic_value = torch.min(q1_, q2_)
+        critic_value = critic_value
+        
+        actor_loss = self.alpha * log_probabilities - critic_value
+        actor_loss = torch.mean(actor_loss.view(-1))
+        
+        self.actor.optimizer.zero_grad()
+        actor_loss.backward(retain_graph=True)
+        self.actor.optimizer.step()
+                    
+        # TEMPERATURE UPDATE
+        log_alpha_loss = -(self.log_alpha * (log_probabilities + self.target_entropy).detach()).mean()
+        
+        self.log_alpha_optimizer.zero_grad()
+        log_alpha_loss.backward()
+        self.log_alpha_optimizer.step()
+        
+        self.alpha = self.log_alpha.exp()
+        
+        # EXPONENTIALLY SMOOTHED COPY TO THE TARGET CRITIC NETWORKS
+        self._update_target_networks()
+        
+        
+        
+        
+        
+class Distributional_Agent(Agent):
+    
+    def __init__(self, 
+                 lr_alpha: float,
+                 alpha: float = 1.0,
+                 *args,
+                 **kwargs,
+                 ) -> None:
+        
+        super(Agent_AutomaticTemperature, self).__init__(*args, **kwargs)
+        
+        self.alpha = alpha
+        self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.device)).item()
+        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device).detach().requires_grad_(True)
+        self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
+        
+        self.critic = Distributional_Critic()
         
         self._network_list += [self.target_critic_1, self.target_critic_2]
         self._targeted_network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]

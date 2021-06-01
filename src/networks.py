@@ -205,6 +205,7 @@ class Value(torch.nn.Module):
         self.load_state_dict(torch.load(self.checkpoint_file))
          
 class Distributional_Critic(torch.nn.Module):
+    
     def __init__(self, 
                  lr_Q: float, 
                  input_shape: Tuple, 
