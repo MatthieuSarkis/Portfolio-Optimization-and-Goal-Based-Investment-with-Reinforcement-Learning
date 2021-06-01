@@ -10,6 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+from gym import Env
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -17,9 +18,6 @@ import pickle
 import seaborn as sns
 sns.set_theme()
 from sklearn.preprocessing import StandardScaler
-
-from src.environment import Environment
-
 
 def make_dir(directory_name: str = '') -> None: 
     if not os.path.exists(directory_name):
@@ -48,8 +46,8 @@ def plot_learning_curve(x: np.array,
     
     plt.savefig(figure_file) 
 
-def produce_scaler(env: Environment,
-               mode: str) -> StandardScaler:
+def produce_scaler(env: Env,
+                   mode: str) -> StandardScaler:
     
     scaler = StandardScaler()
     
