@@ -1,12 +1,15 @@
 ## Notes / To do
 
+* Commenter le code en details
 * Donnees fondamentales?
 * Leverage, lower bound on bank account
 * tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
 * typical buy_rate and sell_rate = 0.1%
-* Distributional Soft Actor Critic: https://arxiv.org/pdf/2001.02811.pdf
 * Implement new buying strategy: trained??
-
+* Prioritized Experience Replay, or even better: https://arxiv.org/abs/1906.04009
+* Distributional Soft Actor Critic: https://arxiv.org/pdf/2001.02811.pdf
+                                    https://www.researchgate.net/publication/341069321_DSAC_Distributional_Soft_Actor_Critic_for_Risk-Sensitive_Learning
+* Different types of deep neural nets?
 ## Requirements
 
 * Python>=3.6
