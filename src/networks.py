@@ -22,8 +22,7 @@ class Critic(torch.nn.Module):
     def __init__(self, 
                  lr_Q: float, 
                  input_shape: Tuple, 
-                 layer1_neurons: int, 
-                 layer2_neurons: int, 
+                 layer_neurons: int, 
                  action_space_dimension: Tuple, 
                  name: str, 
                  checkpoint_directory: str = 'saved_networks',
@@ -32,8 +31,7 @@ class Critic(torch.nn.Module):
         
         super(Critic, self).__init__()
         self.input_shape = input_shape
-        self.layer1_neurons = layer1_neurons
-        self.layer2_neurons = layer2_neurons
+        self.layer_neurons = layer_neurons
         self.action_space_dimension = action_space_dimension
         self.name = name
         self.checkpoint_dir = checkpoint_directory
@@ -41,8 +39,8 @@ class Critic(torch.nn.Module):
         make_dir(directory_name=checkpoint_directory)
         
         self.layer1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer1_neurons)
-        self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
-        self.Q = torch.nn.Linear(self.layer2_neurons, 1)
+        self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.Q = torch.nn.Linear(self.layer_neurons, 1)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
         
@@ -77,8 +75,7 @@ class Actor(torch.nn.Module):
     def __init__(self, 
                  lr_pi: float, 
                  input_shape: Tuple, 
-                 layer1_neurons: int, 
-                 layer2_neurons: int, 
+                 layer_neurons: int, 
                  max_actions: np.array, 
                  action_space_dimension: Tuple, 
                  name: str, 
@@ -88,8 +85,7 @@ class Actor(torch.nn.Module):
         
         super(Actor, self).__init__()
         self.input_shape = input_shape
-        self.layer1_neurons = layer1_neurons
-        self.layer2_neurons = layer2_neurons
+        self.layer_neurons = layer_neurons
         self.action_space_dimension = action_space_dimension
         self.name = name
         self.max_actions = max_actions
@@ -98,10 +94,10 @@ class Actor(torch.nn.Module):
         make_dir(directory_name=checkpoint_directory)
         self.reparam_noise = 1e-6
         
-        self.layer1 = torch.nn.Linear(*self.input_shape, self.layer1_neurons)
-        self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
-        self.mu = torch.nn.Linear(self.layer2_neurons, self.action_space_dimension)
-        self.sigma = torch.nn.Linear(self.layer2_neurons, self.action_space_dimension)
+        self.layer1 = torch.nn.Linear(*self.input_shape, self.layer_neurons)
+        self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.mu = torch.nn.Linear(self.layer_neurons, self.action_space_dimension)
+        self.sigma = torch.nn.Linear(self.layer_neurons, self.action_space_dimension)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
         
