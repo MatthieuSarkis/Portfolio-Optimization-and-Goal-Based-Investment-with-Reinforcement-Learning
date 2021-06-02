@@ -123,10 +123,10 @@ class Actor(torch.nn.Module):
         
         return mu, sigma
     
-    def sample_normal(self, 
-                      state: List[float], 
-                      reparameterize: bool = True,
-                      ) -> Tuple[torch.tensor]:
+    def sample(self, 
+               state: List[float], 
+               reparameterize: bool = True,
+               ) -> Tuple[torch.tensor]:
         
         mu, sigma = self.forward(state)
         probabilities = torch.distributions.Normal(mu, sigma)
@@ -208,8 +208,8 @@ class Distributional_Critic(torch.nn.Module):
                  layer_neurons: int, 
                  action_space_dimension: Tuple, 
                  name: str, 
-                 log_std_min=-0.1, 
-                 log_std_max=4,
+                 log_sigma_min: float = -0.1, 
+                 log_sigma_max: float = 4.0,
                  checkpoint_directory: str = 'saved_networks',
                  device: str = 'cpu',
                  ) -> None:
@@ -222,16 +222,17 @@ class Distributional_Critic(torch.nn.Module):
         self.linear1 = torch.nnLinear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
         self.linear2 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
         self.linear3 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_mean_4 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_mean_5 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_std_4 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_std_5 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-
-        self.mean_layer = torch.nnLinear(self.layer_neurons, 1)
-        self.log_std_layer = torch.nnLinear(self.layer_neurons, 1)
-        self.log_std_min = log_std_min
-        self.log_std_max = log_std_max
-        self.denominator = max(abs(self.log_std_min), self.log_std_max)
+        self.linear_mu_1 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_mu_2 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_mu_3 = torch.nnLinear(self.layer_neurons, 1)
+        self.linear_log_sigma_1 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_log_sigma_2 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_log_sigma_3 = torch.nnLinear(self.layer_neurons, 1)
+        
+        
+        self.log_sigma_min = log_sigma_min
+        self.log_sigma_max = log_sigma_max
+        self.denominator = max(abs(self.log_sigma_min), self.log_sigma_max)
         
         self.checkpoint_dir = checkpoint_directory
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
@@ -250,32 +251,29 @@ class Distributional_Critic(torch.nn.Module):
                 action: np.array,
                 ) -> Tuple[torch.Tensor]:
         
-        x = torch.cat([state, action], 1)
-        x = self.linear1(x)
+        x = self.linear1(torch.cat([state, action], dim=1))
         x = torch.nn.functional.gelu(x)
         x = self.linear2(x)
         x = torch.nn.functional.gelu(x)
         x = self.linear3(x)
+        x = torch.nn.functional.gelu(x)
         
-        x_mean = torch.nn.functional.gelu(x)
-        x_mean = self.linear_mean_4(x_mean)
-        x_mean = torch.nn.functional.gelu(x_mean)
-        x_mean = self.linear_mean_5(x_mean)
-        x_mean = torch.nn.functional.gelu(x_mean)
+        mu = self.linear_mu_1(x)
+        mu = torch.nn.functional.gelu(mu)
+        mu = self.linear_mu_2(mu)
+        mu = torch.nn.functional.gelu(mu)
+        mu = self.linear_mu_3(mu)
 
-        x_std = torch.nn.functional.gelu(x)
-        x_std = self.linear_std_4(x_std)
-        x_std = torch.nn.functional.gelu(x_std)
-        x_std = self.linear_std_5(x_std)
-        x_std = torch.nn.functional.gelu(x_std)
-        
-        mean = self.mean_layer(x_mean)
-        log_std = self.log_std_layer(x_std)
+        log_sigma = self.linear_log_sigma_1(x)
+        log_sigma = torch.nn.functional.gelu(log_sigma)
+        log_sigma = self.linear_log_sigma_2(log_sigma)
+        log_sigma = torch.nn.functional.gelu(log_sigma)
+        log_sigma = self.linear_log_sigma_3(log_sigma)
 
-        log_std = torch.clamp_min(self.log_std_max*torch.tanh(log_std/self.denominator),0) + \
-                  torch.clamp_max(-self.log_std_min * torch.tanh(log_std / self.denominator), 0)
+        log_sigma = torch.clamp_min(self.log_sigma_max*torch.tanh(log_sigma/self.denominator),0) + \
+                  torch.clamp_max(-self.log_sigma_min * torch.tanh(log_sigma / self.denominator), 0)
 
-        return mean, log_std
+        return mu, log_sigma
 
     def sample(self, 
                state: List[float], 
@@ -285,12 +283,7 @@ class Distributional_Critic(torch.nn.Module):
         
         mu, log_sigma = self.forward(state, action)
         sigma = log_sigma.exp()
-        
-        #normal = torch.distributions.Normal(torch.zeros(mu.shape), torch.ones(sigma.shape))
-        #z = normal.sample()
-        #z = torch.clamp(z, -2, 2)
-        #q = mu + torch.mul(z, sigma)
-        
+                
         normal = torch.distributions.Normal(mu, sigma)
         
         if reparameterize:

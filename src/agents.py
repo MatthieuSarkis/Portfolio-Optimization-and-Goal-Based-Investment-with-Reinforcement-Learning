@@ -104,7 +104,7 @@ class Agent():
                       ) -> np.array:
         
         state = torch.Tensor([observation]).to(self.device)
-        actions, _ = self.actor.sample_normal(state, reparameterize=False)
+        actions, _ = self.actor.sample(state, reparameterize=False)
         
         return actions.cpu().detach().numpy()[0]
 
@@ -181,7 +181,7 @@ class Agent_ManualTemperature(Agent):
         value_ = self.target_value(states_).view(-1)
         value_[dones] = 0.0
         
-        actions, log_probabilities = self.actor.sample_normal(states, reparameterize=False)
+        actions, log_probabilities = self.actor.sample(states, reparameterize=False)
         log_probabilities = log_probabilities.view(-1)
                 
         q1_new_policy = self.critic_1.forward(states, actions)
@@ -199,7 +199,7 @@ class Agent_ManualTemperature(Agent):
         self.value.optimizer.step()
         
         # POLICY UPDATE
-        actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)
+        actions, log_probabilities = self.actor.sample(states, reparameterize=True)
         log_probabilities = log_probabilities.view(-1)
         
         q1_new_policy = self.critic_1.forward(states, actions)
@@ -302,7 +302,7 @@ class Agent_AutomaticTemperature(Agent):
         dones = torch.tensor(dones).to(self.device)
         
         # CRITIC UPDATE
-        actions_, log_probabilities_ = self.actor.sample_normal(states_, reparameterize=False)
+        actions_, log_probabilities_ = self.actor.sample(states_, reparameterize=False)
         
         q1_ = self.target_critic_1.forward(states_, actions_)
         q2_ = self.target_critic_2.forward(states_, actions_)
@@ -327,7 +327,7 @@ class Agent_AutomaticTemperature(Agent):
         self.critic_2.optimizer.step()
         
         # POLICY UPDATE
-        actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)
+        actions, log_probabilities = self.actor.sample(states, reparameterize=True)
         
         q1_ = self.target_critic_1.forward(states, actions)
         q2_ = self.target_critic_2.forward(states, actions)
@@ -420,7 +420,7 @@ class Distributional_Agent(Agent):
         
         # CRITIC UPDATE
         _, mu, sigma = self.critic.sample(states, actions, reparameterize=False)
-        action_, log_probabilities_= self.actor.sample_normal(states_, reparameterize=False)
+        action_, log_probabilities_= self.actor.sample(states_, reparameterize=False)
         q_, _, _ = self.target_critic.sample(states_, action_, reparameterize=False)
        
         target_q = rewards + (1 - dones) * self.args.gamma * (q_ - self.alpha.detach() * log_probabilities_)
@@ -433,7 +433,7 @@ class Distributional_Agent(Agent):
         self.critic.optimizer.step()
         
         # POLICY UPDATE
-        actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)
+        actions, log_probabilities = self.actor.sample(states, reparameterize=True)
         
         critic_value = self.target_critic.sample(states, actions, reparameterize=True)
         # In their article they don't use the target critic here...
