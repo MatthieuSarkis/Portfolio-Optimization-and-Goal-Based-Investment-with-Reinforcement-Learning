@@ -35,4 +35,4 @@ python src/main.py \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
 --buy_rule most_first \
---auto_temperature \
+--agent_type automatic_temperature \

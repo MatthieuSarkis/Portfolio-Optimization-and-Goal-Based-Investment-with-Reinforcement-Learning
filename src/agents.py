@@ -17,7 +17,9 @@ import torch
 from typing import Tuple
 
 from src.buffer import ReplayBuffer
+from src.environment import Environment
 from src.networks import Actor, Critic, Value, Distributional_Critic
+  
    
 class Agent():
     
@@ -33,6 +35,7 @@ class Agent():
                  size: int = 1000000,
                  layer_size: int = 256, 
                  batch_size: int = 256,
+                 delay: int = 1,
                  device: str = 'cpu',
                  ) -> None:
         
@@ -47,6 +50,7 @@ class Agent():
         self.env = env
         self.agent_name = agent_name
         self.layer_size = layer_size
+        self.delay = delay
         self.device = device
 
         self.actor = Actor(self.lr_pi, 
@@ -235,6 +239,7 @@ class Agent_ManualTemperature(Agent):
         
         # EXPONENTIALLY SMOOTHED COPY TO THE TARGET VALUE NETWORK
         self._update_target_network()
+    
            
 class Agent_AutomaticTemperature(Agent):
     
@@ -288,7 +293,9 @@ class Agent_AutomaticTemperature(Agent):
         
         self._update_target_networks(tau=1)
         
-    def learn(self) -> None:
+    def learn(self,
+              step: int = 0,
+              ) -> None:
         
         if self.memory.pointer < self.batch_size:
             return
@@ -326,32 +333,35 @@ class Agent_AutomaticTemperature(Agent):
         self.critic_1.optimizer.step()
         self.critic_2.optimizer.step()
         
-        # POLICY UPDATE
-        actions, log_probabilities = self.actor.sample(states, reparameterize=True)
+        if step % self.delay == 0:
         
-        q1_ = self.target_critic_1.forward(states, actions)
-        q2_ = self.target_critic_2.forward(states, actions)
-        
-        critic_value = torch.min(q1_, q2_)
-        
-        actor_loss = self.alpha * log_probabilities - critic_value
-        actor_loss = torch.mean(actor_loss.view(-1))
-        
-        self.actor.optimizer.zero_grad()
-        actor_loss.backward(retain_graph=True)
-        self.actor.optimizer.step()
-                    
-        # TEMPERATURE UPDATE
-        log_alpha_loss = -(self.log_alpha * (log_probabilities + self.target_entropy).detach()).mean()
-        
-        self.log_alpha_optimizer.zero_grad()
-        log_alpha_loss.backward()
-        self.log_alpha_optimizer.step()
-        
-        self.alpha = self.log_alpha.exp()
-        
-        # EXPONENTIALLY SMOOTHED COPY TO THE TARGET CRITIC NETWORKS
-        self._update_target_networks()
+            # POLICY UPDATE
+            actions, log_probabilities = self.actor.sample(states, reparameterize=True)
+            
+            q1_ = self.target_critic_1.forward(states, actions)
+            q2_ = self.target_critic_2.forward(states, actions)
+            
+            critic_value = torch.min(q1_, q2_)
+            
+            actor_loss = self.alpha * log_probabilities - critic_value
+            actor_loss = torch.mean(actor_loss.view(-1))
+            
+            self.actor.optimizer.zero_grad()
+            actor_loss.backward(retain_graph=True)
+            self.actor.optimizer.step()
+                        
+            # TEMPERATURE UPDATE
+            log_alpha_loss = -(self.log_alpha * (log_probabilities + self.target_entropy).detach()).mean()
+            
+            self.log_alpha_optimizer.zero_grad()
+            log_alpha_loss.backward()
+            self.log_alpha_optimizer.step()
+            
+            self.alpha = self.log_alpha.exp()
+            
+            # EXPONENTIALLY SMOOTHED COPY TO THE TARGET CRITIC NETWORKS
+            self._update_target_networks()
+  
                
 class Distributional_Agent(Agent):
     
@@ -405,7 +415,9 @@ class Distributional_Agent(Agent):
         
         self._update_target_networks(tau=1)
         
-    def learn(self) -> None:
+    def learn(self,
+              step: int = 0,
+              ) -> None:
         
         if self.memory.pointer < self.batch_size:
             return
@@ -432,27 +444,91 @@ class Distributional_Agent(Agent):
         critic_loss.backward(retain_graph=True)
         self.critic.optimizer.step()
         
-        # POLICY UPDATE
-        actions, log_probabilities = self.actor.sample(states, reparameterize=True)
+        if step % self.delay == 0:
         
-        critic_value = self.target_critic.sample(states, actions, reparameterize=True)
-        # In their article they don't use the target critic here...
+            # POLICY UPDATE
+            actions, log_probabilities = self.actor.sample(states, reparameterize=True)
+            
+            critic_value = self.target_critic.sample(states, actions, reparameterize=True)
+            
+            actor_loss = self.alpha * log_probabilities - critic_value
+            actor_loss = torch.mean(actor_loss.view(-1))
+            
+            self.actor.optimizer.zero_grad()
+            actor_loss.backward(retain_graph=True)
+            self.actor.optimizer.step()
+                        
+            # TEMPERATURE UPDATE
+            log_alpha_loss = -(self.log_alpha * (log_probabilities + self.target_entropy).detach()).mean()
+            
+            self.log_alpha_optimizer.zero_grad()
+            log_alpha_loss.backward()
+            self.log_alpha_optimizer.step()
+            
+            self.alpha = self.log_alpha.exp()
+            
+            # EXPONENTIALLY SMOOTHED COPY TO THE TARGET CRITIC NETWORKS
+            self._update_target_networks()
+            
+            
+def instanciate_agent(env: Environment, 
+                      device: str, 
+                      args: tuple,
+                      ) -> Tuple[Agent, str]:
         
-        actor_loss = self.alpha * log_probabilities - critic_value
-        actor_loss = torch.mean(actor_loss.view(-1))
+    if args.agent_type == 'automatic_temperature':
         
-        self.actor.optimizer.zero_grad()
-        actor_loss.backward(retain_graph=True)
-        self.actor.optimizer.step()
-                    
-        # TEMPERATURE UPDATE
-        log_alpha_loss = -(self.log_alpha * (log_probabilities + self.target_entropy).detach()).mean()
+        agent_name = 'automatic_temperature'
+        figure_file = str(args.n_episodes) + 'episodes_AutoTemperature_' + args.mode + '.png'
+        agent = Agent_AutomaticTemperature(lr_Q=args.lr_Q,
+                                        lr_pi=args.lr_pi, 
+                                        lr_alpha=args.lr_alpha,  
+                                        agent_name=agent_name, 
+                                        input_shape=env.observation_space.shape, 
+                                        tau=args.tau,
+                                        env=env, 
+                                        size=args.memory_size,
+                                        batch_size=args.batch_size, 
+                                        layer_size=args.layer_size, 
+                                        action_space_dimension=env.action_space.shape[0],
+                                        alpha=args.alpha,
+                                        delay=args.delay,
+                                        device=device)
+    
+    elif args.agent_type == 'manual_temperature':
         
-        self.log_alpha_optimizer.zero_grad()
-        log_alpha_loss.backward()
-        self.log_alpha_optimizer.step()
+        agent_name = 'manual_temperature'
+        figure_file = str(args.n_episodes) + 'episodes_ManualTemperature_{}'.format(args.sac_temperature) + args.mode + '.png'
+        agent = Agent_ManualTemperature(lr_pi=args.lr_pi, 
+                                        lr_Q=args.lr_Q, 
+                                        gamma=args.gamma, 
+                                        agent_name=agent_name, 
+                                        input_shape=env.observation_space.shape, 
+                                        tau=args.tau,
+                                        env=env, 
+                                        size=args.memory_size,
+                                        batch_size=args.batch_size, 
+                                        layer_size=args.layer_size, 
+                                        action_space_dimension=env.action_space.shape[0],
+                                        device=device)
         
-        self.alpha = self.log_alpha.exp()
+    elif args.agent_type == 'distributional':
         
-        # EXPONENTIALLY SMOOTHED COPY TO THE TARGET CRITIC NETWORKS
-        self._update_target_networks()
+        agent_name = 'distributional'
+        figure_file = str(args.n_episodes) + 'episodes_Distributional_' + args.mode + '.png'
+        agent = Distributional_Agent(lr_Q=args.lr_Q,
+                                    lr_pi=args.lr_pi, 
+                                    lr_alpha=args.lr_alpha,  
+                                    agent_name=agent_name, 
+                                    input_shape=env.observation_space.shape, 
+                                    tau=args.tau,
+                                    env=env, 
+                                    size=args.memory_size,
+                                    batch_size=args.batch_size, 
+                                    layer_size=args.layer_size, 
+                                    action_space_dimension=env.action_space.shape[0],
+                                    alpha=args.alpha,
+                                    delay=args.delay,
+                                    device=device)
+        
+    return agent, figure_file

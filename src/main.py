@@ -13,15 +13,14 @@
 from argparse import ArgumentParser
 import numpy as np
 import os
-
 import time
 import torch
 
-from src.agents import Agent_ManualTemperature, Agent_AutomaticTemperature
+from src.agents import instanciate_agent
 from src.environment import Environment
 from src.get_data import load_data
 from src.run import Run
-from src.utilities import produce_scaler
+from src.utilities import instanciate_scaler
 
 
 def main(args):
@@ -33,7 +32,9 @@ def main(args):
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     
-    df = load_data(args.initial_date, args.final_date, args.mode)
+    df = load_data(initial_date=args.initial_date, 
+                   final_date=args.final_date, 
+                   mode=args.mode)
     
     env = Environment(stock_market_history=df,
                       initial_cash_in_bank=args.initial_cash,
@@ -43,47 +44,19 @@ def main(args):
                       limit_n_stocks=args.limit_n_stocks,
                       buy_rule=args.buy_rule)
     
-    scaler = produce_scaler(env, args.mode)
+    scaler = instanciate_scaler(env=env, 
+                            mode=args.mode)
     
-    if args.auto_temperature:
-        agent_name = 'auto_temperature'
-        figure_file = str(args.n_episodes) + 'episodes_AutoTemperature_' + args.mode + '.png'
-        agent = Agent_AutomaticTemperature(lr_Q=args.lr_Q,
-                                           lr_pi=args.lr_pi, 
-                                           lr_alpha=args.lr_alpha,  
-                                           agent_name=agent_name, 
-                                           input_shape=env.observation_space.shape, 
-                                           tau=args.tau,
-                                           env=env, 
-                                           size=args.memory_size,
-                                           batch_size=args.batch_size, 
-                                           layer_size=args.layer_size, 
-                                           action_space_dimension=env.action_space.shape[0],
-                                           alpha=args.alpha,
-                                           device=device)
-    
-    else:
-        agent_name = 'manual_temperature'
-        figure_file = str(args.n_episodes) + 'episodes_ManualTemperature_{}'.format(args.sac_temperature) + args.mode + '.png'
-        agent = Agent_ManualTemperature(lr_pi=args.lr_pi, 
-                                        lr_Q=args.lr_Q, 
-                                        gamma=args.gamma, 
-                                        agent_name=agent_name, 
-                                        input_shape=env.observation_space.shape, 
-                                        tau=args.tau,
-                                        env=env, 
-                                        size=args.memory_size,
-                                        batch_size=args.batch_size, 
-                                        layer_size=args.layer_size, 
-                                        action_space_dimension=env.action_space.shape[0],
-                                        device=device)
+    agent, figure_file = instanciate_agent(env=env, 
+                                           device=device, 
+                                           args=args)
        
     run = Run(env=env,
               agent=agent,
               n_episodes=args.n_episodes,
-              auto_temperature=args.auto_temperature,
-              sac_temperature=args.sac_temperature,
+              agent_type=args.agent_type,
               mode=args.mode,
+              sac_temperature=args.sac_temperature,
               scaler=scaler)
     
     initial_time = time.time()
@@ -95,33 +68,35 @@ def main(args):
     
     print('Total training duration: {:*^13.3f}'.format(final_time-initial_time))
 
+
 if __name__ == '__main__':
     
     parser = ArgumentParser()
 
-    parser.add_argument('--initial_cash', type=float, default=10000)
-    parser.add_argument('--buy_rate', type=float, default=0.1)
-    parser.add_argument('--sell_rate', type=float, default=0.1)
-    parser.add_argument('--bank_rate', type=float, default=0.1)
-    parser.add_argument('--sac_temperature', type=float, default=2.0)
-    parser.add_argument('--limit_n_stocks', type=int, default=50)
-    parser.add_argument('--lr_Q', type=float, default=0.0003)
-    parser.add_argument('--lr_pi', type=float, default=0.0003)
-    parser.add_argument('--lr_alpha', type=float, default=0.0003)
-    parser.add_argument('--tau', type=float, default=0.005)
-    parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--layer_size', type=int, default=256)
-    parser.add_argument('--n_episodes', type=int, default=1)
-    parser.add_argument('--mode', type=str, default='test')
-    parser.add_argument('--seed', type=int, default='42')
-    parser.add_argument('--auto_temperature', action='store_true', default=False)
-    parser.add_argument('--gamma', type=float, default=0.99)
-    parser.add_argument('--memory_size', type=int, default=1000000)
-    parser.add_argument('--alpha', type=float, default=1.0)
-    parser.add_argument('--initial_date', type=str, default='2010-01-01')
-    parser.add_argument('--final_date', type=str, default='2020-12-31')
-    parser.add_argument('--gpu_devices', type=int, nargs='+', default=None)
-    parser.add_argument('--buy_rule', type=str, default='most_first')
+    parser.add_argument('--initial_cash', type=float, default=10000, help='')
+    parser.add_argument('--buy_rate', type=float, default=0.1, help='')
+    parser.add_argument('--sell_rate', type=float, default=0.1, help='')
+    parser.add_argument('--bank_rate', type=float, default=0.1, help='')
+    parser.add_argument('--sac_temperature', type=float, default=2.0, help='')
+    parser.add_argument('--limit_n_stocks', type=int, default=50, help='')
+    parser.add_argument('--lr_Q', type=float, default=0.0003, help='')
+    parser.add_argument('--lr_pi', type=float, default=0.0003, help='')
+    parser.add_argument('--lr_alpha', type=float, default=0.0003, help='')
+    parser.add_argument('--tau', type=float, default=0.005, help='')
+    parser.add_argument('--batch_size', type=int, default=32, help='')
+    parser.add_argument('--layer_size', type=int, default=256, help='')
+    parser.add_argument('--n_episodes', type=int, default=1, help='')
+    parser.add_argument('--delay', type=int, default=1, help='')
+    parser.add_argument('--mode', type=str, default='test', help='')
+    parser.add_argument('--seed', type=int, default='42', help='')
+    parser.add_argument('--agent_type', type=str, default='automatic_temperature', help='')
+    parser.add_argument('--gamma', type=float, default=0.99, help='')
+    parser.add_argument('--memory_size', type=int, default=1000000, help='')
+    parser.add_argument('--alpha', type=float, default=1.0, help='')
+    parser.add_argument('--initial_date', type=str, default='2010-01-01', help='')
+    parser.add_argument('--final_date', type=str, default='2020-12-31', help='')
+    parser.add_argument('--gpu_devices', type=int, nargs='+', default=None, help='')
+    parser.add_argument('--buy_rule', type=str, default='most_first', help='')
 
     args = parser.parse_args()
     main(args)

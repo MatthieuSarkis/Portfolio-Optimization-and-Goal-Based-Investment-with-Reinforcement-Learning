@@ -47,7 +47,7 @@ def plot_learning_curve(x: np.array,
     
     plt.savefig(figure_file) 
 
-def produce_scaler(env: Environment,
+def instanciate_scaler(env: Environment,
                    mode: str) -> StandardScaler:
     
     scaler = StandardScaler()

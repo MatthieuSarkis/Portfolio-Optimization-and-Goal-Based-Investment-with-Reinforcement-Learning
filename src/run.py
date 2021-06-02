@@ -25,16 +25,16 @@ class Run():
                  env: gym.Env,
                  agent: Agent,
                  n_episodes: int,
-                 auto_temperature: bool,
-                 sac_temperature: float,
+                 agent_type: str,
                  scaler: StandardScaler,
+                 sac_temperature: float = 1.0,
                  mode: str = 'test',
                  ) -> None:
         
         self.env = env
         self.agent = agent
         self.n_episodes = n_episodes
-        self.auto_temperature = auto_temperature
+        self.agent_type = agent_type
         self.sac_temperature = sac_temperature
         self.mode = mode
         self.scaler = scaler
@@ -66,10 +66,12 @@ class Run():
             self._run_one_episode()
            
         make_dir('logs')      
-        if self.auto_temperature:
-            history_file = '{}/auto_temperature_{}.npy'.format(log_directory, self.mode)
-        else:
+        if self.agent_type == 'automatic_temperature':
+            history_file = '{}/automatic_temperature_{}.npy'.format(log_directory, self.mode)
+        elif self.agent_type == 'manual_temperature':
             history_file = '{}/manual_temperature_{}_{}.npy'.format(log_directory, self.sac_temperature, self.mode)
+        elif self.agent_type == 'distributional':
+            history_file = '{}/distributional_{}.npy'.format(log_directory, self.mode)
             
         np.save(history_file, np.array(self.reward_history))
                  
@@ -87,7 +89,7 @@ class Run():
             observation_, reward, done, _ = self.env.step(action)
             observation_ = self.scaler.transform([observation_])[0]
             
-            if not self.auto_temperature:
+            if self.agent_type == 'manual_temperature':
                 reward *= self.sac_temperature
                 
             self.step += 1
@@ -96,7 +98,7 @@ class Run():
             self.agent.remember(observation, action, reward, observation_, done)
             
             if self.mode == 'train':
-                self.agent.learn()
+                self.agent.learn(self.step)
                 
             observation = observation_
             
@@ -106,11 +108,14 @@ class Run():
         self.episode += 1
         final_time = time.time()
                 
-        if self.auto_temperature:
-            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
+        if self.agent_type == 'automatic_temperature':
+            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | automatic_temperature | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
     
-        else: 
-            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
+        elif self.agent_type == 'manual_temperature': 
+            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | manual_temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
+        
+        if self.agent_type == 'distributional':
+            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | distributional | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
         
         if average_reward > self.best_reward:
             self.best_reward = average_reward

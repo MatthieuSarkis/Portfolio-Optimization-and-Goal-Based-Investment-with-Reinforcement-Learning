@@ -38,7 +38,7 @@ class Critic(torch.nn.Module):
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
         make_dir(directory_name=checkpoint_directory)
         
-        self.layer1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer1_neurons)
+        self.layer1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
         self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
         self.Q = torch.nn.Linear(self.layer_neurons, 1)
         
