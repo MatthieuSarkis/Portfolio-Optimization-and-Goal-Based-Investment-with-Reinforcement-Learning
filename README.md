@@ -47,8 +47,7 @@ python src/main.py \
 --gamma 0.99 \
 --tau 0.005 \
 --batch_size 256 \
---layer1_size 256 \
---layer1_size 256 \
+--layer_size 256 \
 --n_episodes 500 \
 --seed 42 \
 --mode train \

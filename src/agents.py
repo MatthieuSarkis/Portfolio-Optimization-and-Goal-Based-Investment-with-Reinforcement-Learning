@@ -31,8 +31,7 @@ class Agent():
                  action_space_dimension: int, 
                  gamma: float = 0.99, 
                  size: int = 1000000,
-                 layer1_size: int = 256, 
-                 layer2_size: int = 256, 
+                 layer_size: int = 256, 
                  batch_size: int = 256,
                  device: str = 'cpu',
                  ) -> None:
@@ -47,36 +46,18 @@ class Agent():
         self.lr_pi = lr_pi
         self.env = env
         self.agent_name = agent_name
-        self.layer1_size = layer1_size
-        self.layer2_size = layer2_size
+        self.layer_size = layer_size
         self.device = device
 
-        self.actor = Actor(lr_pi, 
-                           input_shape, 
-                           layer1_size,
-                           layer2_size, 
-                           action_space_dimension=action_space_dimension, 
-                           name=agent_name+'_actor',
-                           max_actions=env.action_space.high,
-                           device=device)
+        self.actor = Actor(self.lr_pi, 
+                           self.input_shape, 
+                           self.layer_size, 
+                           action_space_dimension=self.action_space_dimension, 
+                           name=self.agent_name+'_actor',
+                           max_actions=self.env.action_space.high,
+                           device=self.device)
         
-        self.critic_1 = Critic(self.lr_Q, 
-                               self.input_shape, 
-                               self.layer1_size,
-                               self.layer2_size, 
-                               action_space_dimension=self.action_space_dimension, 
-                               name=self.agent_name+'_critic1',
-                               device=device)
-        
-        self.critic_2 = Critic(self.lr_Q, 
-                               self.input_shape, 
-                               self.layer1_size,
-                               self.layer2_size, 
-                               action_space_dimension=self.action_space_dimension, 
-                               name=self.agent_name+'_critic2',
-                               device=device)
-        
-        self._network_list = [self.actor, self.critic_1, self.critic_2]
+        self._network_list = [self.actor]
         self._targeted_network_list = []
     
     def remember(self, 
@@ -148,21 +129,33 @@ class Agent_ManualTemperature(Agent):
         
         super(Agent_ManualTemperature, self).__init__(*args, **kwargs)
         
+        self.critic_1 = Critic(self.lr_Q, 
+                               self.input_shape, 
+                               self.layer_size, 
+                               action_space_dimension=self.action_space_dimension, 
+                               name=self.agent_name+'_critic1',
+                               device=self.device)
+        
+        self.critic_2 = Critic(self.lr_Q, 
+                               self.input_shape, 
+                               self.layer_size, 
+                               action_space_dimension=self.action_space_dimension, 
+                               name=self.agent_name+'_critic2',
+                               device=self.device)
+        
         self.value = Value(self.lr_Q, 
                            self.input_shape, 
-                           self.layer1_size,
-                           self.layer2_size, 
+                           self.layer_size,
                            name=self.agent_name+'_value',
                            device=self.device)
         
         self.target_value = Value(self.lr_Q, 
                                   self.input_shape, 
-                                  self.layer1_size,
-                                  self.layer2_size, 
+                                  self.layer_size, 
                                   name=self.agent_name+'_target_value',
                                   device=self.device)
         
-        self._network_list += [self.value, self.target_value]
+        self._network_list += [self.critic_1, self.critic_2, self.value, self.target_value]
         self._targeted_network_list += [self.value, self.target_value]
         
         for network in self._network_list:
@@ -259,23 +252,35 @@ class Agent_AutomaticTemperature(Agent):
         self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device).detach().requires_grad_(True)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
+        self.critic_1 = Critic(self.lr_Q, 
+                               self.input_shape, 
+                               self.layer_size,
+                               action_space_dimension=self.action_space_dimension, 
+                               name=self.agent_name+'_critic1',
+                               device=self.device)
+        
+        self.critic_2 = Critic(self.lr_Q, 
+                               self.input_shape, 
+                               self.layer_size,
+                               action_space_dimension=self.action_space_dimension, 
+                               name=self.agent_name+'_critic2',
+                               device=self.device)
+        
         self.target_critic_1 = Critic(self.lr_Q, 
                                       self.input_shape, 
-                                      self.layer1_size,
-                                      self.layer2_size, 
+                                      self.layer_size, 
                                       action_space_dimension=self.action_space_dimension, 
                                       name=self.agent_name+'_target_critic1',
                                       device=self.device)
         
         self.target_critic_2 = Critic(self.lr_Q, 
                                       self.input_shape, 
-                                      self.layer1_size,
-                                      self.layer2_size, 
+                                      self.layer_size, 
                                       action_space_dimension=self.action_space_dimension, 
                                       name=self.agent_name+'_target_critic2',
                                       device=self.device)
         
-        self._network_list += [self.target_critic_1, self.target_critic_2]
+        self._network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]
         self._targeted_network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]
         
         for network in self._network_list:
@@ -351,9 +356,6 @@ class Agent_AutomaticTemperature(Agent):
         self._update_target_networks()
         
         
-        
-        
-        
 class Distributional_Agent(Agent):
     
     def __init__(self, 
@@ -370,10 +372,36 @@ class Distributional_Agent(Agent):
         self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device).detach().requires_grad_(True)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
-        self.critic = Distributional_Critic()
+        self.critic = Distributional_Critic(self.lr_Q,
+                                            self.input_shape,
+                                            self.layer_size,
+                                            self.action_space_dimension,
+                                            self.agent_name,
+                                            log_std_min=-0.1,
+                                            log_std_max=4,
+                                            checkpoint_directory=self.agent_name+'_critic',
+                                            device=self.device)
         
-        self._network_list += [self.target_critic_1, self.target_critic_2]
-        self._targeted_network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]
+        self.target_critic = Distributional_Critic(self.lr_Q,
+                                                   self.input_shape,
+                                                   self.layer_size,
+                                                   self.action_space_dimension,
+                                                   self.agent_name,
+                                                   log_std_min=-0.1,
+                                                   log_std_max=4,
+                                                   checkpoint_directory=self.agent_name+'_critic',
+                                                   device=self.device)
+        
+        self.target_actor = Actor(self.lr_pi, 
+                                  self.input_shape, 
+                                  self.layer_size, 
+                                  action_space_dimension=self.action_space_dimension, 
+                                  name=self.agent_name+'_target_actor',
+                                  max_actions=self.env.action_space.high,
+                                  device=self.device)
+        
+        self._network_list += [self.critic, self.target_critic, self.target_actor]
+        self._targeted_network_list += [self.critic, self.actor, self.target_critic, self.target_actor]
         
         for network in self._network_list:
             network.apply(self._initialize_weights) 
@@ -396,27 +424,18 @@ class Distributional_Agent(Agent):
         # CRITIC UPDATE
         actions_, log_probabilities_ = self.actor.sample_normal(states_, reparameterize=False)
         
-        q1_ = self.target_critic_1.forward(states_, actions_)
-        q2_ = self.target_critic_2.forward(states_, actions_)
-        
-        target_soft_value_ = (torch.min(q1_, q2_) - (self.alpha * log_probabilities_)).view(-1)
+        q_ = self.target_critic.forward(states_, actions_)
+        target_soft_value_ = (q_ - self.alpha * log_probabilities_).view(-1)
         target_soft_value_[dones] = 0
+        
         q_target = rewards + self.gamma * target_soft_value_
+        q = self.critic.forward(states, actions).view(-1)
+        critic_loss = torch.nn.functional.mse_loss(q, q_target)
         
-        q1 = self.critic_1.forward(states, actions).view(-1)
-        q2 = self.critic_2.forward(states, actions).view(-1)
-        
-        critic_1_loss = 0.5 * torch.nn.functional.mse_loss(q1, q_target)
-        critic_2_loss = 0.5 * torch.nn.functional.mse_loss(q2, q_target)
-        
-        self.critic_1.optimizer.zero_grad()
-        self.critic_2.optimizer.zero_grad()
-        
-        critic_loss = critic_1_loss + critic_2_loss
+        self.critic.optimizer.zero_grad()  
         critic_loss.backward(retain_graph=True)
+        self.critic.optimizer.step()
         
-        self.critic_1.optimizer.step()
-        self.critic_2.optimizer.step()
         
         # POLICY UPDATE
         actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)

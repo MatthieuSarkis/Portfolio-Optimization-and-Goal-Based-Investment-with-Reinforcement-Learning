@@ -57,8 +57,7 @@ def main(args):
                                            env=env, 
                                            size=args.memory_size,
                                            batch_size=args.batch_size, 
-                                           layer1_size=args.layer1_size, 
-                                           layer2_size=args.layer2_size,
+                                           layer_size=args.layer_size, 
                                            action_space_dimension=env.action_space.shape[0],
                                            alpha=args.alpha,
                                            device=device)
@@ -75,8 +74,7 @@ def main(args):
                                         env=env, 
                                         size=args.memory_size,
                                         batch_size=args.batch_size, 
-                                        layer1_size=args.layer1_size, 
-                                        layer2_size=args.layer2_size,
+                                        layer_size=args.layer_size, 
                                         action_space_dimension=env.action_space.shape[0],
                                         device=device)
        
@@ -112,8 +110,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr_alpha', type=float, default=0.0003)
     parser.add_argument('--tau', type=float, default=0.005)
     parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--layer1_size', type=int, default=256)
-    parser.add_argument('--layer2_size', type=int, default=256)
+    parser.add_argument('--layer_size', type=int, default=256)
     parser.add_argument('--n_episodes', type=int, default=1)
     parser.add_argument('--mode', type=str, default='test')
     parser.add_argument('--seed', type=int, default='42')
