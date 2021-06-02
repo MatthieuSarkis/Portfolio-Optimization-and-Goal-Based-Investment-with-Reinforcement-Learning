@@ -352,8 +352,7 @@ class Agent_AutomaticTemperature(Agent):
         
         # EXPONENTIALLY SMOOTHED COPY TO THE TARGET CRITIC NETWORKS
         self._update_target_networks()
-        
-        
+               
 class Distributional_Agent(Agent):
     
     def __init__(self, 
