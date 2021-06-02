@@ -334,7 +334,6 @@ class Agent_AutomaticTemperature(Agent):
         q2_ = self.target_critic_2.forward(states, actions)
         
         critic_value = torch.min(q1_, q2_)
-        critic_value = critic_value
         
         actor_loss = self.alpha * log_probabilities - critic_value
         actor_loss = torch.mean(actor_loss.view(-1))
@@ -422,6 +421,10 @@ class Distributional_Agent(Agent):
         dones = torch.tensor(dones).to(self.device)
         
         # CRITIC UPDATE
+        
+        # to do
+        
+        ###
         actions_, log_probabilities_ = self.actor.sample_normal(states_, reparameterize=False)
         
         q_ = self.target_critic.forward(states_, actions_)        
@@ -435,7 +438,7 @@ class Distributional_Agent(Agent):
         self.critic.optimizer.zero_grad()  
         critic_loss.backward(retain_graph=True)
         self.critic.optimizer.step()
-        
+        ###
         
         # POLICY UPDATE
         actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)
