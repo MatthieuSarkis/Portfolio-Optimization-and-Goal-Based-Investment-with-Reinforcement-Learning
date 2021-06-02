@@ -9,7 +9,11 @@
 * Prioritized Experience Replay, or even better: https://arxiv.org/abs/1906.04009
 * Distributional Soft Actor Critic: https://arxiv.org/pdf/2001.02811.pdf
                                     https://www.researchgate.net/publication/341069321_DSAC_Distributional_Soft_Actor_Critic_for_Risk-Sensitive_Learning
+* Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)
+* Cosine annealing for learning rates?
+* Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
 * Different types of deep neural nets?
+* Save hyperparameters in json file
 ## Requirements
 
 * Python>=3.6
@@ -43,8 +47,7 @@ python src/main.py \
 --gamma 0.99 \
 --tau 0.005 \
 --batch_size 256 \
---layer1_size 256 \
---layer1_size 256 \
+--layer_size 256 \
 --n_episodes 500 \
 --seed 42 \
 --mode train \

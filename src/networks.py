@@ -22,8 +22,7 @@ class Critic(torch.nn.Module):
     def __init__(self, 
                  lr_Q: float, 
                  input_shape: Tuple, 
-                 layer1_neurons: int, 
-                 layer2_neurons: int, 
+                 layer_neurons: int, 
                  action_space_dimension: Tuple, 
                  name: str, 
                  checkpoint_directory: str = 'saved_networks',
@@ -32,8 +31,7 @@ class Critic(torch.nn.Module):
         
         super(Critic, self).__init__()
         self.input_shape = input_shape
-        self.layer1_neurons = layer1_neurons
-        self.layer2_neurons = layer2_neurons
+        self.layer_neurons = layer_neurons
         self.action_space_dimension = action_space_dimension
         self.name = name
         self.checkpoint_dir = checkpoint_directory
@@ -41,8 +39,8 @@ class Critic(torch.nn.Module):
         make_dir(directory_name=checkpoint_directory)
         
         self.layer1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer1_neurons)
-        self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
-        self.Q = torch.nn.Linear(self.layer2_neurons, 1)
+        self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.Q = torch.nn.Linear(self.layer_neurons, 1)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
         
@@ -77,8 +75,7 @@ class Actor(torch.nn.Module):
     def __init__(self, 
                  lr_pi: float, 
                  input_shape: Tuple, 
-                 layer1_neurons: int, 
-                 layer2_neurons: int, 
+                 layer_neurons: int, 
                  max_actions: np.array, 
                  action_space_dimension: Tuple, 
                  name: str, 
@@ -88,8 +85,7 @@ class Actor(torch.nn.Module):
         
         super(Actor, self).__init__()
         self.input_shape = input_shape
-        self.layer1_neurons = layer1_neurons
-        self.layer2_neurons = layer2_neurons
+        self.layer_neurons = layer_neurons
         self.action_space_dimension = action_space_dimension
         self.name = name
         self.max_actions = max_actions
@@ -98,10 +94,10 @@ class Actor(torch.nn.Module):
         make_dir(directory_name=checkpoint_directory)
         self.reparam_noise = 1e-6
         
-        self.layer1 = torch.nn.Linear(*self.input_shape, self.layer1_neurons)
-        self.layer2 = torch.nn.Linear(self.layer1_neurons, self.layer2_neurons)
-        self.mu = torch.nn.Linear(self.layer2_neurons, self.action_space_dimension)
-        self.sigma = torch.nn.Linear(self.layer2_neurons, self.action_space_dimension)
+        self.layer1 = torch.nn.Linear(*self.input_shape, self.layer_neurons)
+        self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.mu = torch.nn.Linear(self.layer_neurons, self.action_space_dimension)
+        self.sigma = torch.nn.Linear(self.layer_neurons, self.action_space_dimension)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
         
@@ -133,7 +129,6 @@ class Actor(torch.nn.Module):
                       ) -> Tuple[torch.tensor]:
         
         mu, sigma = self.forward(state)
-        #print(mu)
         probabilities = torch.distributions.Normal(mu, sigma)
         
         if reparameterize:
@@ -204,3 +199,112 @@ class Value(torch.nn.Module):
         
     def load_network_weights(self) -> None:
         self.load_state_dict(torch.load(self.checkpoint_file))
+         
+class Distributional_Critic(torch.nn.Module):
+    
+    def __init__(self, 
+                 lr_Q: float, 
+                 input_shape: Tuple, 
+                 layer_neurons: int, 
+                 action_space_dimension: Tuple, 
+                 name: str, 
+                 log_std_min=-0.1, 
+                 log_std_max=4,
+                 checkpoint_directory: str = 'saved_networks',
+                 device: str = 'cpu',
+                 ) -> None:
+        
+        super(Distributional_Critic, self).__init__()
+        self.input_shape = input_shape
+        self.layer_neurons = layer_neurons
+        self.name = name
+        
+        self.linear1 = torch.nnLinear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
+        self.linear2 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear3 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_mean_4 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_mean_5 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_std_4 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+        self.linear_std_5 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
+
+        self.mean_layer = torch.nnLinear(self.layer_neurons, 1)
+        self.log_std_layer = torch.nnLinear(self.layer_neurons, 1)
+        self.log_std_min = log_std_min
+        self.log_std_max = log_std_max
+        self.denominator = max(abs(self.log_std_min), self.log_std_max)
+        
+        self.checkpoint_dir = checkpoint_directory
+        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
+        make_dir(directory_name=checkpoint_directory)
+        
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
+        
+        self.device = device
+        
+        if torch.cuda.device_count() > 1:
+            self = torch.nn.DataParallel(self)  
+        self.to(device)
+
+    def forward(self, 
+                state: List[float], 
+                action: np.array,
+                ) -> Tuple[torch.Tensor]:
+        
+        x = torch.cat([state, action], 1)
+        x = self.linear1(x)
+        x = torch.nn.functional.gelu(x)
+        x = self.linear2(x)
+        x = torch.nn.functional.gelu(x)
+        x = self.linear3(x)
+        
+        x_mean = torch.nn.functional.gelu(x)
+        x_mean = self.linear_mean_4(x_mean)
+        x_mean = torch.nn.functional.gelu(x_mean)
+        x_mean = self.linear_mean_5(x_mean)
+        x_mean = torch.nn.functional.gelu(x_mean)
+
+        x_std = torch.nn.functional.gelu(x)
+        x_std = self.linear_std_4(x_std)
+        x_std = torch.nn.functional.gelu(x_std)
+        x_std = self.linear_std_5(x_std)
+        x_std = torch.nn.functional.gelu(x_std)
+        
+        mean = self.mean_layer(x_mean)
+        log_std = self.log_std_layer(x_std)
+
+        log_std = torch.clamp_min(self.log_std_max*torch.tanh(log_std/self.denominator),0) + \
+                  torch.clamp_max(-self.log_std_min * torch.tanh(log_std / self.denominator), 0)
+
+        return mean, log_std
+
+    def sample(self, 
+               state: List[float], 
+               action: np.array,
+               reparameterize: bool = True,
+               ) -> torch.Tensor:
+        
+        mu, log_sigma = self.forward(state, action)
+        sigma = log_sigma.exp()
+        
+        #normal = torch.distributions.Normal(torch.zeros(mu.shape), torch.ones(sigma.shape))
+        #z = normal.sample()
+        #z = torch.clamp(z, -2, 2)
+        #q = mu + torch.mul(z, sigma)
+        
+        normal = torch.distributions.Normal(mu, sigma)
+        
+        if reparameterize:
+            q = normal.rsample()
+        else:
+            q = normal.sample()
+        
+        return q, mu, sigma
+    
+    def save_network_weights(self) -> None:
+        torch.save(self.state_dict(), self.checkpoint_file)
+        
+    def load_network_weights(self) -> None:
+        self.load_state_dict(torch.load(self.checkpoint_file))
+
+
+
