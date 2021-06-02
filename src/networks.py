@@ -302,7 +302,7 @@ class Distributional_Critic(torch.nn.Module):
         else:
             q = normal.sample()
         
-        return q
+        return q, mu, sigma
     
     def save_network_weights(self) -> None:
         torch.save(self.state_dict(), self.checkpoint_file)
