@@ -5,15 +5,20 @@
 * Leverage, lower bound on bank account
 * tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
 * typical buy_rate and sell_rate = 0.1%
-* Implement new buying strategy: trained??
 * Prioritized Experience Replay, or even better: https://arxiv.org/abs/1906.04009
-* Distributional Soft Actor Critic: https://arxiv.org/pdf/2001.02811.pdf
-                                    https://www.researchgate.net/publication/341069321_DSAC_Distributional_Soft_Actor_Critic_for_Risk-Sensitive_Learning
-* Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)
+* Implement new buying strategy: learned?
+* test and debug DSAC
 * Cosine annealing for learning rates?
-* Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
 * Different types of deep neural nets?
 * Save hyperparameters in json file
+## Done
+
+* Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)
+* Distributional Soft Actor Critic: https://arxiv.org/pdf/2001.02811.pdf
+                                    https://www.researchgate.net/publication/341069321_DSAC_Distributional_Soft_Actor_Critic_for_Risk-Sensitive_Learning
+* Implement new buying strategy: random, cyclic
+* Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
+
 ## Requirements
 
 * Python>=3.6
