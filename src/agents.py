@@ -328,7 +328,6 @@ class Agent_AutomaticTemperature(Agent):
         
         # POLICY UPDATE
         actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)
-        log_probabilities = log_probabilities
         
         q1_ = self.target_critic_1.forward(states, actions)
         q2_ = self.target_critic_2.forward(states, actions)
@@ -421,28 +420,21 @@ class Distributional_Agent(Agent):
         dones = torch.tensor(dones).to(self.device)
         
         # CRITIC UPDATE
-        
-        # to do
-        
-        ###
-        actions_, log_probabilities_ = self.actor.sample_normal(states_, reparameterize=False)
-        
-        q_ = self.target_critic.forward(states_, actions_)        
-        target_soft_value_ = (q_ - self.alpha * log_probabilities_).view(-1)
-        target_soft_value_[dones] = 0
-        
-        q_target = rewards + self.gamma * target_soft_value_
-        q = self.critic.forward(states, actions).view(-1)
-        critic_loss = torch.nn.functional.mse_loss(q, q_target)
-        
+        _, mu, sigma = self.critic.sample(states, actions, reparameterize=False)
+        action_, log_probabilities_= self.actor.sample_normal(states_, reparameterize=False)
+        q_, _, _ = self.target_critic.sample(states_, action_, reparameterize=False)
+       
+        target_q = rewards + (1 - dones) * self.args.gamma * (q_ - self.alpha.detach() * log_probabilities_)
+        target_q_clipped = mu + torch.clamp(target_q - mu, -3 * sigma, 3 * sigma)
+
+        critic_loss = -torch.distributions.Normal(mu, sigma).log_prob(target_q_clipped.detach()).mean()
+            
         self.critic.optimizer.zero_grad()  
         critic_loss.backward(retain_graph=True)
         self.critic.optimizer.step()
-        ###
         
         # POLICY UPDATE
         actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)
-        log_probabilities = log_probabilities
         
         critic_value = self.target_critic.sample(states, actions, reparameterize=True)
         # In their article they don't use the target critic here...
