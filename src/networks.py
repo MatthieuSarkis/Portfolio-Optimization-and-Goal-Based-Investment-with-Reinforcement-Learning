@@ -281,19 +281,27 @@ class Distributional_Critic(torch.nn.Module):
 
         return mean, log_std
 
-    def sample_normal(self, 
-                      state: List[float], 
-                      action: np.array,
-                      ) -> torch.Tensor:
+    def sample(self, 
+               state: List[float], 
+               action: np.array,
+               reparameterize: bool = True,
+               ) -> torch.Tensor:
         
-        mean, log_std = self.forward(state, action)
-        std = log_std.exp()
-        normal = torch.distributions.Normal(torch.zeros(mean.shape), torch.ones(std.shape))
-
-        z = normal.sample()
-        z = torch.clamp(z, -2, 2)
-       
-        q = mean + torch.mul(z, std)
+        mu, log_sigma = self.forward(state, action)
+        sigma = log_sigma.exp()
+        
+        #normal = torch.distributions.Normal(torch.zeros(mu.shape), torch.ones(sigma.shape))
+        #z = normal.sample()
+        #z = torch.clamp(z, -2, 2)
+        #q = mu + torch.mul(z, sigma)
+        
+        normal = torch.distributions.Normal(mu, sigma)
+        
+        if reparameterize:
+            q = normal.rsample()
+        else:
+            q = normal.sample()
+        
         return q
     
     def save_network_weights(self) -> None:

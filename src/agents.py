@@ -424,7 +424,7 @@ class Distributional_Agent(Agent):
         # CRITIC UPDATE
         actions_, log_probabilities_ = self.actor.sample_normal(states_, reparameterize=False)
         
-        q_ = self.target_critic.forward(states_, actions_)
+        q_ = self.target_critic.forward(states_, actions_)        
         target_soft_value_ = (q_ - self.alpha * log_probabilities_).view(-1)
         target_soft_value_[dones] = 0
         
@@ -441,11 +441,8 @@ class Distributional_Agent(Agent):
         actions, log_probabilities = self.actor.sample_normal(states, reparameterize=True)
         log_probabilities = log_probabilities
         
-        q1_ = self.target_critic_1.forward(states, actions)
-        q2_ = self.target_critic_2.forward(states, actions)
-        
-        critic_value = torch.min(q1_, q2_)
-        critic_value = critic_value
+        critic_value = self.target_critic.sample(states, actions, reparameterize=True)
+        # In their article they don't use the target critic here...
         
         actor_loss = self.alpha * log_probabilities - critic_value
         actor_loss = torch.mean(actor_loss.view(-1))
