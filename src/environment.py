@@ -96,10 +96,6 @@ class Environment(gym.Env):
         if self.buy_rule == 'most_first':
             for idx in buy_idx: 
                 self._buy(idx, actions[idx])
-        
-        if self.buy_rule == 'most_first': 
-            for idx in buy_idx: 
-                self._buy(idx, actions[idx])
                 
         if self.buy_rule == 'cyclic':
             should_buy = np.copy(actions[buy_idx])

@@ -11,6 +11,7 @@
 * Cosine annealing for learning rates?
 * Different types of deep neural nets?
 * Save hyperparameters in json file
+* Add correlation matrix (defined by a sliding window) to the data. It is just a time dependent matrix
 ## Done
 
 * Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)

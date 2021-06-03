@@ -1,0 +1,31 @@
+{
+    "initial_cash": 100000.0,
+    "buy_rate": 0.01,
+    "sell_rate": 0.01,
+    "bank_rate": 0.0,
+    "sac_temperature": 2.0,
+    "limit_n_stocks": 500,
+    "lr_Q": 0.0003,
+    "lr_pi": 0.0003,
+    "lr_alpha": 0.0003,
+    "tau": 0.005,
+    "batch_size": 256,
+    "layer_size": 256,
+    "n_episodes": 5,
+    "delay": 1,
+    "mode": "train",
+    "seed": 42,
+    "agent_type": "automatic_temperature",
+    "gamma": 0.99,
+    "memory_size": 1000000,
+    "alpha": 1.0,
+    "initial_date": "2015-01-01",
+    "final_date": "2020-12-31",
+    "buy_rule": "most_first",
+    "gpu_devices": [
+        0,
+        1,
+        2,
+        3
+    ]
+}

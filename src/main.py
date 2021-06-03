@@ -11,6 +11,7 @@
 # that they have been altered from the originals.
 
 from argparse import ArgumentParser
+import json 
 import numpy as np
 import os
 import time
@@ -24,6 +25,13 @@ from src.utilities import instanciate_scaler
 
 
 def main(args):
+
+    params_dict = vars(args)
+     
+    with open("parameters.json", "w") as f: 
+        json.dump(params_dict, f, indent=4)
+    
+    exit()
 
     gpu_devices = ','.join([str(id) for id in args.gpu_devices])
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
@@ -95,8 +103,8 @@ if __name__ == '__main__':
     parser.add_argument('--alpha', type=float, default=1.0, help='')
     parser.add_argument('--initial_date', type=str, default='2010-01-01', help='')
     parser.add_argument('--final_date', type=str, default='2020-12-31', help='')
-    parser.add_argument('--gpu_devices', type=int, nargs='+', default=None, help='')
     parser.add_argument('--buy_rule', type=str, default='most_first', help='')
+    parser.add_argument('--gpu_devices', type=int, nargs='+', default=None, help='')
 
     args = parser.parse_args()
     main(args)
