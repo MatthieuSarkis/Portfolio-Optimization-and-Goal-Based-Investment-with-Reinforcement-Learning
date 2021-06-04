@@ -16,8 +16,8 @@
 #srun --unbuffered 
 python src/main.py \
 --initial_cash 100000 \
---buy_rate 0.01 \
---sell_rate 0.01 \
+--buy_rate 0.001 \
+--sell_rate 0.001 \
 --bank_rate 0.0 \
 --sac_temperature 2.0 \
 --limit_n_stocks 500 \
