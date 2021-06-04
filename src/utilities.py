@@ -13,6 +13,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import pandas as pd
 import pickle
 import seaborn as sns
 sns.set_theme()
@@ -70,3 +71,9 @@ def instanciate_scaler(env: Environment,
             scaler = pickle.load(f)
     
     return scaler
+
+def compute_correlation_matrix(df: pd.DataFrame,
+                               window: int,
+                               ) -> pd.DataFrame:
+
+    return df.rolling(window).corr().iloc[df.shape[1] * (window - 1) : ]
