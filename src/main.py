@@ -49,7 +49,8 @@ def main(args):
                       bank_rate=args.bank_rate,
                       limit_n_stocks=args.limit_n_stocks,
                       buy_rule=args.buy_rule,
-                      use_corr_matrix=args.use_corr_matrix)
+                      use_corr_matrix=args.use_corr_matrix,
+                      window=args.window)
     
     scaler = instanciate_scaler(env=env, 
                                 mode=args.mode)
@@ -105,6 +106,7 @@ if __name__ == '__main__':
     parser.add_argument('--buy_rule', type=str, default='most_first', help='')
     parser.add_argument('--gpu_devices', type=int, nargs='+', default=None, help='')
     parser.add_argument('--use_corr_matrix', action='store_true', default=False, help='')
+    parser.add_argument('--window', type=int, default=20, help='')
 
     args = parser.parse_args()
     main(args)

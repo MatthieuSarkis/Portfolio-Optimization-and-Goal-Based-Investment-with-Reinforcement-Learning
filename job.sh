@@ -36,3 +36,5 @@ python src/main.py \
 --gpu_devices 0 1 2 3 \
 --buy_rule most_first \
 --agent_type automatic_temperature \
+--window 20 \
+--use_corr_matrix \

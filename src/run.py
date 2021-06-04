@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 import time
 
 from src.agents import Agent
-from src.utilities import plot_learning_curve, make_dir
+from src.utilities import plot_reward, make_dir
 
 class Run():
     
@@ -128,5 +128,5 @@ class Run():
         make_dir('plots')
         figure_file = os.path.join('plots', figure_file)
         x = [i+1 for i in range(self.n_episodes)]
-        plot_learning_curve(x, self.reward_history, figure_file, self.mode,
+        plot_reward(x, self.reward_history, figure_file, self.mode,
                 np.sqrt(self.n_episodes).astype(int))
