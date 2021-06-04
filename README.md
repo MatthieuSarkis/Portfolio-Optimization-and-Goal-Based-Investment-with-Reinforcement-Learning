@@ -1,17 +1,18 @@
-## Notes / To do
+## Notes
+
+* typical buy_rate and sell_rate = 0.1%
+## To do
 
 * Commenter le code en details
-* Donnees fondamentales?
+* Donnees fondamentales des entreprises, news
 * Leverage, lower bound on bank account
 * tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
-* typical buy_rate and sell_rate = 0.1%
 * Prioritized Experience Replay, or even better: https://arxiv.org/abs/1906.04009
-* Implement new buying strategy: learned?
 * test and debug DSAC
 * Cosine annealing for learning rates?
 * Different types of deep neural nets?
-* Save hyperparameters in json file
-* Add correlation matrix (defined by a sliding window) to the data. It is just a time dependent matrix
+* Better data preprocessing? dimensionality reduction along stock space dimension instead of just plugging in the correlation matrix?
+* How about redefining what we call an observation in the environment? An observation could be a sequence of n time steps for instance. We could use a wrapper for that.
 ## Done
 
 * Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)
@@ -19,6 +20,8 @@
                                     https://www.researchgate.net/publication/341069321_DSAC_Distributional_Soft_Actor_Critic_for_Risk-Sensitive_Learning
 * Implement new buying strategy: random, cyclic
 * Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
+* Save hyperparameters in json file
+* Add correlation matrix (defined by a sliding window) to the data. It is just a time dependent matrix
 
 ## Requirements
 
@@ -54,7 +57,7 @@ python src/main.py \
 --tau 0.005 \
 --batch_size 256 \
 --layer_size 256 \
---n_episodes 500 \
+--n_episodes 5 \
 --seed 42 \
 --mode train \
 --memory_size 1000000 \
@@ -63,6 +66,8 @@ python src/main.py \
 --gpu_devices 0 1 2 3 \
 --buy_rule most_first \
 --agent_type automatic_temperature \
+--window 20 \
+--use_corr_matrix \
 ```
 ## License
 [Apache License 2.0](https://github.com/MatthieuSarkis/stock/blob/master/LICENSE)

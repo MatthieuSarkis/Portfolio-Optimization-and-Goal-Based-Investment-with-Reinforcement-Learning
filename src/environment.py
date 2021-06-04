@@ -13,27 +13,39 @@
 import gym
 import numpy as np
 import pandas as pd
+import time
 from typing import Tuple
 
+from src.utilities import append_corr_matrix
 class Environment(gym.Env):
 
     def __init__(self, 
                  stock_market_history: pd.DataFrame,                
                  initial_cash_in_bank: float,
-                 buy_rate: float,
-                 sell_rate: float,
-                 bank_rate: float,
+                 buy_rate: float = 0.001,
+                 sell_rate: float = 0.001,
+                 bank_rate: float = 0.0,
                  limit_n_stocks: float = 200,
                  buy_rule: str = 'most_first',
+                 use_corr_matrix: bool = False,
+                 window: int = 20,
                  ) -> None:
         
         super(Environment, self).__init__()
         
         self.stock_market_history = stock_market_history
-        self.time_horizon, self.stock_space_dimension = stock_market_history.shape
+        self.stock_space_dimension = stock_market_history.shape[1]
         self.buy_rule = buy_rule
+        self.use_corr_matrix = use_corr_matrix
+        self.window = window
         
-        self.state_space_dimension = 2 * self.stock_space_dimension + 1
+        if self.use_corr_matrix:
+            self.stock_market_history = append_corr_matrix(df=self.stock_market_history,
+                                                           window=self.window)
+        
+        self.time_horizon = self.stock_market_history.shape[0]
+        
+        self.state_space_dimension = 1 + self.stock_space_dimension + self.stock_market_history.shape[1]
         self.action_space_dimension = self.stock_space_dimension
         
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_space_dimension,))
@@ -82,7 +94,8 @@ class Environment(gym.Env):
         return self._get_observation(), reward, done, info
        
     def _trade(self, 
-               actions: np.array) -> None:
+               actions: np.array,
+               ) -> None:
         
         actions = (actions * self.limit_n_stocks).astype(int)
         sorted_indices = np.argsort(actions)
@@ -143,12 +156,17 @@ class Environment(gym.Env):
         
         observation = np.empty(self.state_space_dimension)
         observation[0] = self.cash_in_bank
-        observation[1 : self.stock_space_dimension+1] = self.stock_prices
-        observation[self.stock_space_dimension+1 : ] = self.number_of_shares
+        observation[1 : self.stock_prices.shape[0]+1] = self.stock_prices
+        observation[self.stock_prices.shape[0]+1 : ] = self.number_of_shares
         
         return observation
     
     def _get_portfolio_value(self) -> float:
         
-        portfolio_value = self.cash_in_bank + self.number_of_shares.dot(self.stock_prices)
+        portfolio_value = self.cash_in_bank + self.number_of_shares.dot(self.stock_prices[:self.stock_space_dimension])
         return portfolio_value
+
+        
+        
+        
+    

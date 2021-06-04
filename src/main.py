@@ -31,8 +31,6 @@ def main(args):
     with open("parameters.json", "w") as f: 
         json.dump(params_dict, f, indent=4)
     
-    exit()
-
     gpu_devices = ','.join([str(id) for id in args.gpu_devices])
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -50,10 +48,12 @@ def main(args):
                       sell_rate=args.sell_rate,
                       bank_rate=args.bank_rate,
                       limit_n_stocks=args.limit_n_stocks,
-                      buy_rule=args.buy_rule)
+                      buy_rule=args.buy_rule,
+                      use_corr_matrix=args.use_corr_matrix,
+                      window=args.window)
     
     scaler = instanciate_scaler(env=env, 
-                            mode=args.mode)
+                                mode=args.mode)
     
     agent, figure_file = instanciate_agent(env=env, 
                                            device=device, 
@@ -105,6 +105,8 @@ if __name__ == '__main__':
     parser.add_argument('--final_date', type=str, default='2020-12-31', help='')
     parser.add_argument('--buy_rule', type=str, default='most_first', help='')
     parser.add_argument('--gpu_devices', type=int, nargs='+', default=None, help='')
+    parser.add_argument('--use_corr_matrix', action='store_true', default=False, help='')
+    parser.add_argument('--window', type=int, default=20, help='')
 
     args = parser.parse_args()
     main(args)

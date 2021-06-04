@@ -481,19 +481,19 @@ def instanciate_agent(env: Environment,
         agent_name = 'automatic_temperature'
         figure_file = str(args.n_episodes) + 'episodes_AutoTemperature_' + args.mode + '.png'
         agent = Agent_AutomaticTemperature(lr_Q=args.lr_Q,
-                                        lr_pi=args.lr_pi, 
-                                        lr_alpha=args.lr_alpha,  
-                                        agent_name=agent_name, 
-                                        input_shape=env.observation_space.shape, 
-                                        tau=args.tau,
-                                        env=env, 
-                                        size=args.memory_size,
-                                        batch_size=args.batch_size, 
-                                        layer_size=args.layer_size, 
-                                        action_space_dimension=env.action_space.shape[0],
-                                        alpha=args.alpha,
-                                        delay=args.delay,
-                                        device=device)
+                                           lr_pi=args.lr_pi, 
+                                           lr_alpha=args.lr_alpha,  
+                                           agent_name=agent_name, 
+                                           input_shape=env.observation_space.shape, 
+                                           tau=args.tau,
+                                           env=env, 
+                                           size=args.memory_size,
+                                           batch_size=args.batch_size, 
+                                           layer_size=args.layer_size, 
+                                           action_space_dimension=env.action_space.shape[0],
+                                           alpha=args.alpha,
+                                           delay=args.delay,
+                                           device=device)
     
     elif args.agent_type == 'manual_temperature':
         

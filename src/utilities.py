@@ -10,26 +10,28 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import gym
+import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import pandas as pd
 import pickle
 import seaborn as sns
 sns.set_theme()
 from sklearn.preprocessing import StandardScaler
 
-from src.environment import Environment
 
 def make_dir(directory_name: str = '') -> None: 
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
             
-def plot_learning_curve(x: np.array, 
-                        rewards: np.array, 
-                        figure_file: str, 
-                        mode: str,
-                        bins: int = 20,
-                        ) -> None:
+def plot_reward(x: np.array, 
+                rewards: np.array, 
+                figure_file: str, 
+                mode: str,
+                bins: int = 20,
+                ) -> None:
     
     running_average = np.zeros(len(rewards))
     for i in range(len(running_average)):
@@ -47,8 +49,8 @@ def plot_learning_curve(x: np.array,
     
     plt.savefig(figure_file) 
 
-def instanciate_scaler(env: Environment,
-                   mode: str) -> StandardScaler:
+def instanciate_scaler(env: gym.Env,
+                       mode: str) -> StandardScaler:
     
     scaler = StandardScaler()
     
@@ -70,3 +72,27 @@ def instanciate_scaler(env: Environment,
             scaler = pickle.load(f)
     
     return scaler
+
+def append_corr_matrix(df: pd.DataFrame,
+                       window: int,
+                       ) -> pd.DataFrame:
+    """
+        Computes the sliding correlation matrix of a multidimensional time series, \ 
+        timewise flattens it and extracts just the upper triangular part (since it is symmetric), \
+        then appends it to the initial time series.
+    """
+
+    columns = ['{}/{}'.format(m, n) for (m, n) in itertools.combinations_with_replacement(df.columns, r=2)]
+    corr = df.rolling(window).cov()
+    corr_flattened = pd.DataFrame(index=columns).transpose()
+
+    for i in range(df.shape[0]):
+
+        ind = np.triu_indices(df.shape[1])
+        data = corr[df.shape[1]*i : df.shape[1]*(i+1)].to_numpy()[ind]
+        index = [corr.index[df.shape[1]*i][0]]
+
+        temp = pd.DataFrame(data=data, columns=index, index=columns).transpose()
+        corr_flattened = pd.concat([corr_flattened, temp])
+
+    return pd.concat([df, corr_flattened], axis=1).iloc[window-1 : ]
