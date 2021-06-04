@@ -10,6 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import gym
 import itertools
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,7 +21,6 @@ import seaborn as sns
 sns.set_theme()
 from sklearn.preprocessing import StandardScaler
 
-from src.environment import Environment
 
 def make_dir(directory_name: str = '') -> None: 
     if not os.path.exists(directory_name):
@@ -49,8 +49,8 @@ def plot_reward(x: np.array,
     
     plt.savefig(figure_file) 
 
-def instanciate_scaler(env: Environment,
-                   mode: str) -> StandardScaler:
+def instanciate_scaler(env: gym.Env,
+                       mode: str) -> StandardScaler:
     
     scaler = StandardScaler()
     

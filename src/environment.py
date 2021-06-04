@@ -152,7 +152,7 @@ class Environment(gym.Env):
         
     def _get_observation(self) -> np.array:
         
-        observation = np.empty(self.state_space_dimension)
+        observation = np.empty(self.stock_prices.shape[0] + self.stock_space_dimension + 1)
         observation[0] = self.cash_in_bank
         observation[1 : self.stock_prices.shape[0]+1] = self.stock_prices
         observation[self.stock_prices.shape[0]+1 : ] = self.number_of_shares

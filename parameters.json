@@ -27,5 +27,7 @@
         1,
         2,
         3
-    ]
+    ],
+    "use_corr_matrix": true,
+    "window": 20
 }
