@@ -72,8 +72,8 @@ def instanciate_scaler(env: Environment,
     
     return scaler
 
-def compute_correlation_matrix(df: pd.DataFrame,
-                               window: int,
-                               ) -> pd.DataFrame:
+def compute_rolling_corr_matrix(df: pd.DataFrame,
+                                window: int,
+                                ) -> pd.DataFrame:
 
-    return df.rolling(window).corr().iloc[df.shape[1] * (window - 1) : ]
+    return df.rolling(window).corr()

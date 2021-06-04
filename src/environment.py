@@ -15,6 +15,8 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 
+from src.utilities import compute_rolling_corr_matrix
+
 class Environment(gym.Env):
 
     def __init__(self, 
@@ -25,6 +27,7 @@ class Environment(gym.Env):
                  bank_rate: float,
                  limit_n_stocks: float = 200,
                  buy_rule: str = 'most_first',
+                 use_corr_matrix: bool = False,
                  ) -> None:
         
         super(Environment, self).__init__()
@@ -32,6 +35,7 @@ class Environment(gym.Env):
         self.stock_market_history = stock_market_history
         self.time_horizon, self.stock_space_dimension = stock_market_history.shape
         self.buy_rule = buy_rule
+        self.use_corr_matrix = use_corr_matrix
         
         self.state_space_dimension = 2 * self.stock_space_dimension + 1
         self.action_space_dimension = self.stock_space_dimension
@@ -152,3 +156,14 @@ class Environment(gym.Env):
         
         portfolio_value = self.cash_in_bank + self.number_of_shares.dot(self.stock_prices)
         return portfolio_value
+
+    def _append_corr_matrix(self,
+                            window: int = 20,
+                            ) -> None:
+        
+        corr_series = compute_rolling_corr_matrix(df=self.stock_market_history,
+                                                  window=window)
+        
+        
+        
+        #.iloc[df.shape[1] * (window - 1) : ]
