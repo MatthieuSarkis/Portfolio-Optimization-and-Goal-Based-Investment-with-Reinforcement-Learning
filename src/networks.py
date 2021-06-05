@@ -333,15 +333,15 @@ class Distributional_Critic(torch.nn.Module):
         self.layer_neurons = layer_neurons
         self.name = name
         
-        self.linear1 = torch.nnLinear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
-        self.linear2 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear3 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_mu_1 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_mu_2 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_mu_3 = torch.nnLinear(self.layer_neurons, 1)
-        self.linear_log_sigma_1 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_log_sigma_2 = torch.nnLinear(self.layer_neurons, self.layer_neurons)
-        self.linear_log_sigma_3 = torch.nnLinear(self.layer_neurons, 1)
+        self.linear1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
+        self.linear2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.linear3 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.linear_mu_1 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.linear_mu_2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.linear_mu_3 = torch.nn.Linear(self.layer_neurons, 1)
+        self.linear_log_sigma_1 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.linear_log_sigma_2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
+        self.linear_log_sigma_3 = torch.nn.Linear(self.layer_neurons, 1)
         
         
         self.log_sigma_min = log_sigma_min

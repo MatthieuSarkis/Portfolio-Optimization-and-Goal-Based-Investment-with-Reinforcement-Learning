@@ -478,7 +478,7 @@ class Distributional_Agent(Agent):
             no value
         """
         
-        super(Agent_AutomaticTemperature, self).__init__(*args, **kwargs)
+        super(Distributional_Agent, self).__init__(*args, **kwargs)
         
         self.alpha = alpha
         self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.device)).item()
@@ -490,8 +490,8 @@ class Distributional_Agent(Agent):
                                             self.layer_size,
                                             self.action_space_dimension,
                                             self.agent_name,
-                                            log_std_min=-0.1,
-                                            log_std_max=4,
+                                            log_sigma_min=-0.1,
+                                            log_sigma_max=4,
                                             checkpoint_directory=self.agent_name+'_critic',
                                             device=self.device)
         
@@ -500,8 +500,8 @@ class Distributional_Agent(Agent):
                                                    self.layer_size,
                                                    self.action_space_dimension,
                                                    self.agent_name,
-                                                   log_std_min=-0.1,
-                                                   log_std_max=4,
+                                                   log_sigma_min=-0.1,
+                                                   log_sigma_max=4,
                                                    checkpoint_directory=self.agent_name+'_critic',
                                                    device=self.device)
         
@@ -545,10 +545,10 @@ class Distributional_Agent(Agent):
         action_, log_probabilities_= self.actor.sample(states_, reparameterize=False)
         q_, _, _ = self.target_critic.sample(states_, action_, reparameterize=False)
        
-        target_q = rewards + (1 - dones) * self.args.gamma * (q_ - self.alpha.detach() * log_probabilities_)
-        target_q_clipped = mu + torch.clamp(target_q - mu, -3 * sigma, 3 * sigma)
+        target_q = rewards + (1 - dones.int()) * self.gamma * (q_ - self.alpha * log_probabilities_)
+        target_q_clipped = mu + torch.clamp(target_q - mu, -3 * sigma.mean().item(), 3 * sigma.mean().item())
 
-        critic_loss = -torch.distributions.Normal(mu, sigma).log_prob(target_q_clipped.detach()).mean()
+        critic_loss = -torch.distributions.Normal(mu, sigma).log_prob(target_q_clipped).mean()
             
         self.critic.optimizer.zero_grad()  
         critic_loss.backward(retain_graph=True)
@@ -559,7 +559,7 @@ class Distributional_Agent(Agent):
             # POLICY UPDATE
             actions, log_probabilities = self.actor.sample(states, reparameterize=True)
             
-            critic_value = self.target_critic.sample(states, actions, reparameterize=True)
+            critic_value, _, _ = self.target_critic.sample(states, actions, reparameterize=True)
             
             actor_loss = self.alpha * log_probabilities - critic_value
             actor_loss = torch.mean(actor_loss.view(-1))
