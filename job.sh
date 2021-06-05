@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name="SAC"
-#SBATCH --output="SAC.out" # job standard output file (%j replaced by job id)
-#SBATCH --error="SAC.err" # job standard error file (%j replaced by job id)
+#SBATCH --output="%j.out" # job standard output file (%j replaced by job id)
+#SBATCH --error="%j.err" # job standard error file (%j replaced by job id)
 
 #SBATCH --time=48:00:00   # walltime limit (HH:MM:SS)
 #SBATCH --nodes=1   # number of nodes
@@ -13,23 +13,22 @@
 
 #========================================================
 
-#srun --unbuffered 
-python src/main.py \
+srun --unbuffered python src/main.py \
 --initial_cash 100000 \
 --buy_rate 0.001 \
 --sell_rate 0.001 \
---bank_rate 0.0 \
+--bank_rate 0.5 \
 --sac_temperature 2.0 \
---limit_n_stocks 500 \
+--limit_n_stocks 100 \
 --lr_Q 0.0003 \
 --lr_pi 0.0003 \
 --gamma 0.99 \
 --tau 0.005 \
 --batch_size 256 \
 --layer_size 256 \
---n_episodes 20 \
+--n_episodes 1000 \
 --seed 42 \
---delay 4 \
+--delay 2 \
 --mode train \
 --memory_size 1000000 \
 --initial_date 2015-01-01 \

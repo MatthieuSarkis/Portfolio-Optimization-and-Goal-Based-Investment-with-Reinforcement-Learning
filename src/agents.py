@@ -548,7 +548,8 @@ class Distributional_Agent(Agent):
         target_q = rewards + (1 - dones.int()) * self.gamma * (q_ - self.alpha * log_probabilities_)
         target_q_clipped = mu + torch.clamp(target_q - mu, -3 * sigma.mean().item(), 3 * sigma.mean().item())
 
-        critic_loss = -torch.distributions.Normal(mu, sigma).log_prob(target_q_clipped).mean()
+        normal = torch.distributions.Normal(mu, sigma)
+        critic_loss = -normal.log_prob(target_q_clipped).mean()
             
         self.critic.optimizer.zero_grad()  
         critic_loss.backward(retain_graph=True)

@@ -37,7 +37,7 @@ def main(args):
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
-    
+   
     df = load_data(initial_date=args.initial_date, 
                    final_date=args.final_date, 
                    mode=args.mode)
@@ -82,9 +82,9 @@ if __name__ == '__main__':
     parser = ArgumentParser()
 
     parser.add_argument('--initial_cash', type=float, default=10000, help='')
-    parser.add_argument('--buy_rate', type=float, default=0.1, help='')
-    parser.add_argument('--sell_rate', type=float, default=0.1, help='')
-    parser.add_argument('--bank_rate', type=float, default=0.1, help='')
+    parser.add_argument('--buy_rate', type=float, default=0.001, help='')
+    parser.add_argument('--sell_rate', type=float, default=0.001, help='')
+    parser.add_argument('--bank_rate', type=float, default=0.5, help='Annual bank rate')
     parser.add_argument('--sac_temperature', type=float, default=2.0, help='')
     parser.add_argument('--limit_n_stocks', type=int, default=50, help='')
     parser.add_argument('--lr_Q', type=float, default=0.0003, help='')

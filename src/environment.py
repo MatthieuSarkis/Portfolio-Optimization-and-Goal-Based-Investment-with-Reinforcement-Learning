@@ -31,7 +31,7 @@ class Environment(gym.Env):
                  initial_cash_in_bank: float,
                  buy_rate: float = 0.001,
                  sell_rate: float = 0.001,
-                 bank_rate: float = 0.0,
+                 bank_rate: float = 0.5,
                  limit_n_stocks: float = 200,
                  buy_rule: str = 'most_first',
                  use_corr_matrix: bool = False,
@@ -44,7 +44,7 @@ class Environment(gym.Env):
             initial_cash_in_bank (float): Initial amount of money in the bank
             buy_rate (float): fees in percentage for buying a stock 
             sell_rate (float): fees in percentage for selling a stock 
-            bank_rate (float): interest rate of the bank account
+            bank_rate (float): annual interest rate of the bank account
             limit_n_stocks (float): maximum number of stocks one can buy or sell at once
             buy_rule (str): specifies the order in which one buys the stocks the agent decided to buy
             use_corr_matrix (bool): whether or not to append the correlation matrix to the time series
@@ -80,7 +80,7 @@ class Environment(gym.Env):
         
         self.buy_rate = buy_rate
         self.sell_rate = sell_rate
-        self.bank_rate = bank_rate
+        self.daily_bank_rate = pow(1 + bank_rate, 1 / 365) - 1
         
         self.current_step = None
         self.cash_in_bank = None
@@ -123,7 +123,7 @@ class Environment(gym.Env):
         
         self._trade(actions)
         
-        self.cash_in_bank *= 1 + self.bank_rate # should this line be before the trade?       
+        self.cash_in_bank *= 1 + self.daily_bank_rate # should this line be before the trade?       
         new_value_portfolio = self._get_portfolio_value()
         done = self.current_step == (self.time_horizon - 1)
         info = {'value_portfolio': new_value_portfolio}

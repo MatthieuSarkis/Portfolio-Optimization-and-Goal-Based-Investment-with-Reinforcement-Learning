@@ -140,7 +140,7 @@ class Run():
             print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | manual_temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
         
         if self.agent_type == 'distributional':
-            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | distributional | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
+            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
         
         if average_reward > self.best_reward:
             self.best_reward = average_reward
