@@ -64,6 +64,7 @@ def instanciate_scaler(env: gym.Env,
             observations.append(observation_)
 
         scaler.fit(observations)
+        make_dir('saved_networks')
         with open('saved_networks/scaler.pkl', 'wb') as f:
             pickle.dump(scaler, f)
     

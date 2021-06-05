@@ -14,12 +14,24 @@ import numpy as np
 from typing import Tuple, List
 
 class ReplayBuffer():
+    """Plays the role of memory for the Agents, by storing (state, action, reward, state_, done) tuples
+    """
     
     def __init__(self, 
                  size: int, 
                  input_shape: Tuple, 
                  action_space_dimension: int,
                  ) -> None:
+        """Constructor method for the ReplayBuffer class.
+        
+        Args:
+            size (int): maximal size of the replay buffer
+            input_shape (Tuple): dimension of the observation space
+            action_space_dimension (int): dimension of the action space
+        
+        Returns:
+            no value
+        """
         
         self.size = size
         self.pointer = 0
@@ -31,12 +43,24 @@ class ReplayBuffer():
         self.done_buffer = np.zeros(self.size, dtype=np.bool)
         
     def push(self, 
-             state: List[float], 
+             state: np.array, 
              action: np.array, 
              reward: float, 
-             new_state: List[float], 
+             new_state: np.array, 
              done: bool,
              ) -> None:
+        """Add a memory to the buffer
+        
+        Args:
+            state (np.array): observation of the environment state 
+            action (np.array): action chosen in that state
+            reward (float): reward obtained for taking that action
+            new_state (np.array): state in which the environment lands
+            done (bool): whether one has reached the horizon or not
+            
+        Returns:
+            no value
+        """
         
         index = self.pointer % self.size
         self.state_buffer[index] = state
@@ -50,6 +74,14 @@ class ReplayBuffer():
     def sample(self, 
                batch_size: int = 32,
                ) -> Tuple[np.array, np.array, np.array, np.array, np.array]:
+        """Sample a batch of data from the buffer.
+        
+        Args:
+            batch_size (int): size of the batch of data to be sampled
+            
+        Returns:
+            a tuple of np.array of memories, one memory being of the form (state, action, reward, state_, done)
+        """
         
         size = min(self.pointer, self.size)
         batch = np.random.choice(size, batch_size)

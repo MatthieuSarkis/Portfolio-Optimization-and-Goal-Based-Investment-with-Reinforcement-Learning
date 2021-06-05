@@ -22,6 +22,8 @@ from src.networks import Actor, Critic, Value, Distributional_Critic
   
    
 class Agent():
+    """Abstract Agent class to be inherited by the various SAC agents 
+    """
     
     def __init__(self,
                  lr_Q: float, 
@@ -30,7 +32,6 @@ class Agent():
                  tau: float, 
                  env: gym.Env, 
                  agent_name: str, 
-                 action_space_dimension: int, 
                  gamma: float = 0.99, 
                  size: int = 1000000,
                  layer_size: int = 256, 
@@ -38,16 +39,35 @@ class Agent():
                  delay: int = 1,
                  device: str = 'cpu',
                  ) -> None:
+        """Constructor method of the Agent class.
+        
+        Args:
+            lr_Q (float): learning rate for critic nets
+            lr_pi (float): learning rate for policy nets
+            input_shape (Tuple): shape of the input data (state, or state and action)
+            tau (float): linear interpolation parameter for the smooth copy to the target nets
+            env (gym.Env): environment in which the agent evolves
+            agent_name (str): name of the agent
+            gamma (float): discout factor for the rewards
+            size (int): maximal size of the replay buffer
+            layer_size (int): number of neurons in the layers of the neural nets
+            batch_size (int): size of the batches sampled from the replay buffer in the learning process
+            delay (int): number of steps between each update of the policy, temperature and target nets
+            device (str): cpu or gpu
+            
+        Returns:
+            no value
+        """
         
         self.gamma = gamma
         self.tau = tau
-        self.memory = ReplayBuffer(size, input_shape, action_space_dimension)
         self.input_shape = input_shape
         self.batch_size = batch_size
-        self.action_space_dimension = action_space_dimension
         self.lr_Q = lr_Q
         self.lr_pi = lr_pi
         self.env = env
+        self.action_space_dimension = env.action_space.shape[0]
+        self.memory = ReplayBuffer(size, self.input_shape, self.action_space_dimension)
         self.agent_name = agent_name
         self.layer_size = layer_size
         self.delay = delay
@@ -71,11 +91,31 @@ class Agent():
                  new_state: np.array, 
                  done: bool,
                  ) -> None:
+        """Store some observation in the replay buffer.
+        
+        Args:
+            state (np.array): observation of the environment state 
+            action (np.array): action chosen in that state
+            reward (float): reward obtained for taking that action
+            new_state (np.array): state in which the environment lands
+            done (bool): whether one has reached the horizon or not
+        
+        Returns:
+            no value
+        """
         
         self.memory.push(state, action, reward, new_state, done)
             
     @staticmethod   
     def _initialize_weights(net: torch.nn.Module) -> None:
+        """Xavier initialization of the weights in the Linear layers of a torch.nn.Module object.
+        
+        Args:
+            net (torch.nn.Module): neural net whose weights are to be initialized
+            
+        Returns:
+            no value
+        """
         
         if type(net) == torch.nn.Linear:
             torch.nn.init.xavier_uniform_(net.weight)
@@ -84,6 +124,14 @@ class Agent():
     def _update_target_networks(self, 
                                 tau: float = None,
                                 ) -> None:
+        """Copy the weights of the nets to their respective target net.
+        
+        Args:
+            tau (float): linear interpolation parameter for the smooth copy to the target nets
+            
+        Returns:
+            no value
+        """
     
         if tau is None:
             tau = self.tau
@@ -106,30 +154,51 @@ class Agent():
     def choose_action(self, 
                       observation: np.array,
                       ) -> np.array:
+        """Choose an action to take given an observation of the state of the environment.
         
+        Args:
+            observation (np.array): state of the environment
+            
+        Returns:
+            action (np.array) taken in the input state 
+        """
+           
         state = torch.Tensor([observation]).to(self.device)
         actions, _ = self.actor.sample(state, reparameterize=False)
         
         return actions.cpu().detach().numpy()[0]
 
     def save_networks(self) -> None:
+        """Save checkpoint for the weights of the various nets, used in training mode.
+        """
         
         print(' ... saving networks ... ')    
         for network in self._network_list:
             network.save_network_weights()
         
     def load_networks(self) -> None:
+        """Loading checkpoint for the weights of the various nets, used in test mode.
+        """
         
         print(' ... loading networks ... ')
         for network in self._network_list:
             network.load_network_weights()
    
 class Agent_ManualTemperature(Agent):
+    """Soft Actor Critic agent according to https://arxiv.org/abs/1801.01290
+    
+    Inherits from the abstract Agent class.
+    Temperature is a hyperparameter to be tuned manually.
+    """
     
     def __init__(self, 
                  *args, 
                  **kwargs,
                  ) -> None:
+        """Constructor method for the Agent_ManualTemperature class.
+        
+        No extra input arguments with respect to the mother class.
+        """
         
         super(Agent_ManualTemperature, self).__init__(*args, **kwargs)
         
@@ -168,6 +237,10 @@ class Agent_ManualTemperature(Agent):
         self._update_target_networks(tau=1)
  
     def learn(self) -> None:
+        """Implements one learning step by sampling a batch of data from the replay buffer.
+        
+        The algorithm is explained in https://arxiv.org/abs/1801.01290
+        """
         
         if self.memory.pointer < self.batch_size:
             return
@@ -242,6 +315,11 @@ class Agent_ManualTemperature(Agent):
     
            
 class Agent_AutomaticTemperature(Agent):
+    """Soft Actor Critic agent as introduced in https://arxiv.org/abs/1812.05905
+    
+    Inherits from the abstract Agent class.
+    The temperature parameter is being automatically updated in the learning process.
+    """
     
     def __init__(self, 
                  lr_alpha: float,
@@ -249,6 +327,15 @@ class Agent_AutomaticTemperature(Agent):
                  *args,
                  **kwargs,
                  ) -> None:
+        """Constructor method of the Agent_AutomaticTemperature class.
+        
+        Args:
+            lr_alpha (float): learning rate for the temperature auto adjustment
+            alpha (float): initial value of the temperature parameter
+            
+        Returns:
+            no value
+        """
         
         super(Agent_AutomaticTemperature, self).__init__(*args, **kwargs)
         
@@ -296,6 +383,10 @@ class Agent_AutomaticTemperature(Agent):
     def learn(self,
               step: int = 0,
               ) -> None:
+        """Implements one learning step by sampling a batch of data from the replay buffer.
+        
+        The algorithm is explained in https://arxiv.org/abs/1812.05905
+        """
         
         if self.memory.pointer < self.batch_size:
             return
@@ -364,6 +455,12 @@ class Agent_AutomaticTemperature(Agent):
   
                
 class Distributional_Agent(Agent):
+    """Distributional Soft Actor Critic agent as introduced in https://arxiv.org/pdf/2001.02811
+    
+    Inherits from the abstract Agent class.
+    The temperature parameter is being automatically updated in the learning process.
+    The critic is now fully considered and learned as a random variable, not only its expectation is being learned.
+    """
     
     def __init__(self, 
                  lr_alpha: float,
@@ -371,6 +468,15 @@ class Distributional_Agent(Agent):
                  *args,
                  **kwargs,
                  ) -> None:
+        """Constructor method of the Agent_AutomaticTemperature class.
+        
+        Args:
+            lr_alpha (float): learning rate for the temperature auto adjustment
+            alpha (float): initial value of the temperature parameter
+            
+        Returns:
+            no value
+        """
         
         super(Agent_AutomaticTemperature, self).__init__(*args, **kwargs)
         
@@ -418,6 +524,10 @@ class Distributional_Agent(Agent):
     def learn(self,
               step: int = 0,
               ) -> None:
+        """Implements one learning step by sampling a batch of data from the replay buffer.
+        
+        The algorithm is explained in https://arxiv.org/pdf/2001.02811
+        """
         
         if self.memory.pointer < self.batch_size:
             return
@@ -475,6 +585,18 @@ def instanciate_agent(env: Environment,
                       device: str, 
                       args: tuple,
                       ) -> Tuple[Agent, str]:
+    """Instanciate the correct type of agent, according to args.agent_type.
+    
+    Args:
+        env (Environment): trading environment
+        device (str): cpu or gpu, to be passed to the agents' constructor
+        args (tuple): various arguments to be passed to the agents' constructor, typically received \
+                      as command line arguments
+    
+    Returns:
+        Agent instance
+        file path for the training of testing plots
+    """
         
     if args.agent_type == 'automatic_temperature':
         
@@ -490,7 +612,6 @@ def instanciate_agent(env: Environment,
                                            size=args.memory_size,
                                            batch_size=args.batch_size, 
                                            layer_size=args.layer_size, 
-                                           action_space_dimension=env.action_space.shape[0],
                                            alpha=args.alpha,
                                            delay=args.delay,
                                            device=device)
@@ -509,7 +630,6 @@ def instanciate_agent(env: Environment,
                                         size=args.memory_size,
                                         batch_size=args.batch_size, 
                                         layer_size=args.layer_size, 
-                                        action_space_dimension=env.action_space.shape[0],
                                         device=device)
         
     elif args.agent_type == 'distributional':
@@ -526,7 +646,6 @@ def instanciate_agent(env: Environment,
                                     size=args.memory_size,
                                     batch_size=args.batch_size, 
                                     layer_size=args.layer_size, 
-                                    action_space_dimension=env.action_space.shape[0],
                                     alpha=args.alpha,
                                     delay=args.delay,
                                     device=device)
