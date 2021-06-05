@@ -3,7 +3,6 @@
 * typical buy_rate and sell_rate = 0.1%
 ## To do
 
-* Commenter le code en details
 * Donnees fondamentales des entreprises, news
 * Leverage, lower bound on bank account
 * tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
@@ -13,6 +12,7 @@
 * Different types of deep neural nets?
 * Better data preprocessing? dimensionality reduction along stock space dimension instead of just plugging in the correlation matrix?
 * How about redefining what we call an observation in the environment? An observation could be a sequence of n time steps for instance. We could use a wrapper for that.
+* Ameliorer les arguments en ligne de commande avec des if statements et des help
 ## Done
 
 * Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)
@@ -22,6 +22,7 @@
 * Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
 * Save hyperparameters in json file
 * Add correlation matrix (defined by a sliding window) to the data. It is just a time dependent matrix
+* Commenter le code en details
 
 ## Requirements
 
