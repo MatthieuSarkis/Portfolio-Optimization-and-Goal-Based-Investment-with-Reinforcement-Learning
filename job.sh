@@ -29,6 +29,7 @@ python src/main.py \
 --layer_size 256 \
 --n_episodes 5 \
 --seed 42 \
+--delay 4 \
 --mode train \
 --memory_size 1000000 \
 --initial_date 2015-01-01 \
@@ -37,4 +38,4 @@ python src/main.py \
 --buy_rule most_first \
 --agent_type distributional \
 --window 20 \
---use_corr_matrix \
+#--use_corr_matrix \

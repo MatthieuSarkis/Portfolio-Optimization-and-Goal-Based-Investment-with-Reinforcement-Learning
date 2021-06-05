@@ -12,7 +12,7 @@
     "batch_size": 256,
     "layer_size": 256,
     "n_episodes": 5,
-    "delay": 1,
+    "delay": 4,
     "mode": "train",
     "seed": 42,
     "agent_type": "distributional",
@@ -28,6 +28,6 @@
         2,
         3
     ],
-    "use_corr_matrix": true,
+    "use_corr_matrix": false,
     "window": 20
 }
