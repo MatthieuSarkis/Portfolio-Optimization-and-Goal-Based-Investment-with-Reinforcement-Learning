@@ -126,7 +126,7 @@ def load_data(initial_date: str,
     
     if mode == 'train':
         #df = df.iloc[:3*(df.shape[0]//4)]
-        df = df.iloc[:100, :3]
+        df = df.iloc[:3*(df.shape[0]//4), :5]
     else:
         df = df.iloc[3*(df.shape[0]//4):]
         
