@@ -23,6 +23,14 @@ from sklearn.preprocessing import StandardScaler
 
 
 def make_dir(directory_name: str = '') -> None: 
+    """Small helper function to create a directory if necessary.
+    
+    Args: directory_name (str): name of the directory to create
+    
+    Returns:
+        no value
+    """
+    
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
             
@@ -32,6 +40,18 @@ def plot_reward(x: np.array,
                 mode: str,
                 bins: int = 20,
                 ) -> None:
+    """Helper function to plot the reward history in train mode and the reward probability distribution in test mode.
+    
+    Args:
+        x (np.array): a linspace, horizontal axis of the plot
+        rewards (np.array): reward history
+        figure_file (str): filepath of the figure file
+        mode (str): train or test to decide what type of plot to generate
+        bins (int): number of bins for the histogram, by default set to the square root of the number of samples
+        
+    Returns:
+        no value
+    """
     
     running_average = np.zeros(len(rewards))
     for i in range(len(running_average)):
@@ -51,6 +71,17 @@ def plot_reward(x: np.array,
 
 def instanciate_scaler(env: gym.Env,
                        mode: str) -> StandardScaler:
+    """Instanciate and either fit or load parameter depending on mode.
+    
+    In train mode, the agent behaves randomly in order to store typical observations in the environment
+    
+    Args:
+        env (gym.Env): trading environment
+        mode (mode): train or test
+        
+    Returns:
+        trained sklearn standard scaler
+    """
     
     scaler = StandardScaler()
     
@@ -77,10 +108,17 @@ def instanciate_scaler(env: gym.Env,
 def append_corr_matrix(df: pd.DataFrame,
                        window: int,
                        ) -> pd.DataFrame:
-    """
-        Computes the sliding correlation matrix of a multidimensional time series, \ 
-        timewise flattens it and extracts just the upper triangular part (since it is symmetric), \
-        then appends it to the initial time series.
+    """Append the sliding correlation matrix of a multidimensional time series.
+        
+    timewise flattens it and extracts just the upper triangular part (since it is symmetric), 
+    then appends it to the initial time series.
+    
+    Args:
+        df (pd.DataFrame): the multidimensional time series whose sliding correlation matrix is computed
+        window (int): size of the sliding window used to compute the correlation matrix
+        
+    Returns:
+        the input time series with the sliding correlation matrix appended
     """
 
     columns = ['{}/{}'.format(m, n) for (m, n) in itertools.combinations_with_replacement(df.columns, r=2)]

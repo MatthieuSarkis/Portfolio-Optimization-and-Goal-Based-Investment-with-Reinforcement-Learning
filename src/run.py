@@ -20,6 +20,7 @@ from src.agents import Agent
 from src.utilities import plot_reward, make_dir
 
 class Run():
+    """Main class to run the training or the testing."""
     
     def __init__(self, 
                  env: gym.Env,
@@ -30,6 +31,20 @@ class Run():
                  sac_temperature: float = 1.0,
                  mode: str = 'test',
                  ) -> None:
+        """Constructor method of the class Run.
+        
+        Args:
+            env (gym.Env): trading environment in which the agent evolves
+            agent (Agent): Soft Actor Critic like agent
+            n_episodes (int): total number of episodes for training, or testing (since the policy is stochastic)
+            agent_type (str): name of the type of agent for saving files
+            scaler (StandardScaler): already fitted sklearn standard scaler, used as a preprocessing step
+            sac_temperature (float): rescaling factor of rewards, in case one uses manual type agent
+            mode (str): train or test
+            
+        Returns:
+            no value
+        """
         
         self.env = env
         self.agent = agent
@@ -50,6 +65,7 @@ class Run():
         self._reset()
         
     def _reset(self) -> None:
+        """Initialize the environment and the reward history."""
         
         self.step = 0
         self.episode = 0
@@ -59,6 +75,14 @@ class Run():
     def run(self,
             log_directory: str,
             ) -> None:
+        """Run the training or the testing during a certain number of steps.
+        
+        Args:
+            log_directory (str): filepath where to save the reward history as a numpy array
+            
+        Returns:
+            no value
+        """
         
         print('>>>>> Running <<<<<')
         
@@ -76,6 +100,7 @@ class Run():
         np.save(history_file, np.array(self.reward_history))
                  
     def _run_one_episode(self) -> None:
+        """Agent takes one step in the environment, and learns if in train mode."""
         
         initial_time = time.time()
         reward = 0
@@ -124,6 +149,14 @@ class Run():
             
     def plot(self,
              figure_file: str) -> None:
+        """Call a helper function to plot the reward history in train mode and the reward distribution in test mode.
+        
+        Args:
+            figure_file (str): hte filepath where to save the plot file
+            
+        Returns:
+            no value
+        """
         
         make_dir('plots')
         figure_file = os.path.join('plots', figure_file)
