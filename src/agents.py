@@ -439,6 +439,9 @@ class Agent_AutomaticTemperature(Agent):
             
             self.actor.optimizer.zero_grad()
             actor_loss.backward(retain_graph=True)
+            
+            #torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 1.0)
+            
             self.actor.optimizer.step()
                         
             # TEMPERATURE UPDATE
@@ -549,6 +552,7 @@ class Distributional_Agent(Agent):
         target_q_clipped = mu + torch.clamp(target_q - mu, -3 * sigma.mean().item(), 3 * sigma.mean().item())
 
         normal = torch.distributions.Normal(mu, sigma)
+        
         critic_loss = -normal.log_prob(target_q_clipped).mean()
             
         self.critic.optimizer.zero_grad()  

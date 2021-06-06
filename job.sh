@@ -25,7 +25,7 @@ python src/main.py \
 --lr_pi 0.0003 \
 --gamma 0.99 \
 --tau 0.005 \
---batch_size 256 \
+--batch_size 128 \
 --layer_size 256 \
 --n_episodes 1000 \
 --seed 42 \
@@ -36,6 +36,6 @@ python src/main.py \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
 --buy_rule most_first \
---agent_type distributional \
+--agent_type automatic_temperature \
 --window 20 \
 #--use_corr_matrix \

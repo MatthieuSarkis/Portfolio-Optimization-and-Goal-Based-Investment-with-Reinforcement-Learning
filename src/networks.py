@@ -173,6 +173,15 @@ class Actor(torch.nn.Module):
         sigma = self.sigma(x)
         sigma = torch.clamp(sigma, min=self.reparam_noise, max=1)
         
+        try:
+            probabilities = torch.distributions.Normal(mu, sigma)
+        except:
+            print(list(self.parameters()))
+        #   print(state) 
+        #   print(x)
+        #   print(list(self.parameters()))
+            exit()
+        
         return mu, sigma
     
     def sample(self, 
@@ -190,8 +199,9 @@ class Actor(torch.nn.Module):
         """
         
         mu, sigma = self.forward(state)
-        probabilities = torch.distributions.Normal(mu, sigma)
         
+        probabilities = torch.distributions.Normal(mu, sigma)
+
         if reparameterize:
             actions = probabilities.rsample()
         else:
