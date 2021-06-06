@@ -173,14 +173,14 @@ class Actor(torch.nn.Module):
         sigma = self.sigma(x)
         sigma = torch.clamp(sigma, min=self.reparam_noise, max=1)
         
-        try:
-            probabilities = torch.distributions.Normal(mu, sigma)
-        except:
-            print(list(self.parameters()))
+        #try:
+        #    probabilities = torch.distributions.Normal(mu, sigma)
+        #except:
+        #    print(list(self.parameters()))
         #   print(state) 
         #   print(x)
         #   print(list(self.parameters()))
-            exit()
+        #    exit()
         
         return mu, sigma
     

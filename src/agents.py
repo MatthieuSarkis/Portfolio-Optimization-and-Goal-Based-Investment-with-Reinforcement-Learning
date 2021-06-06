@@ -439,7 +439,7 @@ class Agent_AutomaticTemperature(Agent):
             
             self.actor.optimizer.zero_grad()
             actor_loss.backward(retain_graph=True)
-            
+            #print(self.actor.layer1.weight.grad)
             #torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 1.0)
             
             self.actor.optimizer.step()
