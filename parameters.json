@@ -15,7 +15,7 @@
     "delay": 2,
     "mode": "train",
     "seed": 42,
-    "agent_type": "manual_temperature",
+    "agent_type": "distributional",
     "gamma": 0.99,
     "memory_size": 1000000,
     "alpha": 1.0,

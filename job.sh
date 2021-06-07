@@ -19,10 +19,10 @@ python src/main.py \
 --buy_rate 0.001 \
 --sell_rate 0.001 \
 --bank_rate 0.5 \
---sac_temperature 2.0 \
+--sac_temperature 1.0 \
 --limit_n_stocks 100 \
---lr_Q 0.0003 \
---lr_pi 0.0003 \
+--lr_Q 0.0001 \
+--lr_pi 0.0001 \
 --gamma 0.99 \
 --tau 0.005 \
 --batch_size 128 \
@@ -36,6 +36,6 @@ python src/main.py \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
 --buy_rule most_first \
---agent_type manual_temperature \
---window 20 \
+--agent_type distributional \
+#--window 20 \
 #--use_corr_matrix \

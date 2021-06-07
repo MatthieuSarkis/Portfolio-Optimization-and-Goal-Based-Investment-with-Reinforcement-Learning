@@ -108,6 +108,8 @@ class Actor(torch.nn.Module):
                  max_actions: np.array, 
                  action_space_dimension: Tuple, 
                  name: str, 
+                 log_sigma_min: float = -0.1, 
+                 log_sigma_max: float = 4.0,
                  checkpoint_directory: str = 'saved_networks',
                  device: str = 'cpu',
                  ) -> None:
@@ -141,7 +143,11 @@ class Actor(torch.nn.Module):
         self.layer1 = torch.nn.Linear(*self.input_shape, self.layer_neurons)
         self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
         self.mu = torch.nn.Linear(self.layer_neurons, self.action_space_dimension)
-        self.sigma = torch.nn.Linear(self.layer_neurons, self.action_space_dimension)
+        self.log_sigma = torch.nn.Linear(self.layer_neurons, self.action_space_dimension)
+        
+        self.log_sigma_min = log_sigma_min
+        self.log_sigma_max = log_sigma_max
+        self.denominator = max(abs(self.log_sigma_min), self.log_sigma_max)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
         
@@ -165,22 +171,17 @@ class Actor(torch.nn.Module):
         """
         
         x = self.layer1(state)
-        x = torch.nn.functional.relu(x)
+        x = torch.nn.functional.gelu(x)
         x = self.layer2(x)
-        x = torch.nn.functional.relu(x)
+        x = torch.nn.functional.gelu(x)
         
         mu = self.mu(x)
-        sigma = self.sigma(x)
-        sigma = torch.clamp(sigma, min=self.reparam_noise, max=1)
+        log_sigma = self.log_sigma(x)
         
-        #try:
-        #    probabilities = torch.distributions.Normal(mu, sigma)
-        #except:
-        #    print(list(self.parameters()))
-        #   print(state) 
-        #   print(x)
-        #   print(list(self.parameters()))
-        #    exit()
+        log_sigma = torch.clamp_min(self.log_sigma_max*torch.tanh(log_sigma/self.denominator), 0) + \
+                    torch.clamp_max(-self.log_sigma_min * torch.tanh(log_sigma/self.denominator), 0)
+        
+        sigma = log_sigma.exp()
         
         return mu, sigma
     
@@ -352,7 +353,6 @@ class Distributional_Critic(torch.nn.Module):
         self.linear_log_sigma_1 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
         self.linear_log_sigma_2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
         self.linear_log_sigma_3 = torch.nn.Linear(self.layer_neurons, 1)
-        
         
         self.log_sigma_min = log_sigma_min
         self.log_sigma_max = log_sigma_max
