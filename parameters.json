@@ -28,6 +28,7 @@
         2,
         3
     ],
+    "grad_clip": 2.0,
     "use_corr_matrix": false,
     "window": 20
 }

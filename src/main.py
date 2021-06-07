@@ -105,6 +105,7 @@ if __name__ == '__main__':
     parser.add_argument('--final_date', type=str, default='2020-12-31', help='')
     parser.add_argument('--buy_rule', type=str, default='most_first', help='')
     parser.add_argument('--gpu_devices', type=int, nargs='+', default=None, help='')
+    parser.add_argument('--grad_clip', type=float, default=1.0, help='')
     parser.add_argument('--use_corr_matrix', action='store_true', default=False, help='')
     parser.add_argument('--window', type=int, default=20, help='')
 

@@ -176,12 +176,14 @@ class Actor(torch.nn.Module):
         x = torch.nn.functional.gelu(x)
         
         mu = self.mu(x)
-        log_sigma = self.log_sigma(x)
         
-        log_sigma = torch.clamp_min(self.log_sigma_max*torch.tanh(log_sigma/self.denominator), 0) + \
-                    torch.clamp_max(-self.log_sigma_min * torch.tanh(log_sigma/self.denominator), 0)
+        sigma = self.log_sigma(x)
+        sigma = torch.clamp(sigma, min=self.reparam_noise, max=1)
         
-        sigma = log_sigma.exp()
+        #log_sigma = self.log_sigma(x)
+        #log_sigma = torch.clamp_min(self.log_sigma_max*torch.tanh(log_sigma/self.denominator), 0) + \
+        #            torch.clamp_max(-self.log_sigma_min * torch.tanh(log_sigma/self.denominator), 0)
+        #sigma = log_sigma.exp()
         
         return mu, sigma
     
