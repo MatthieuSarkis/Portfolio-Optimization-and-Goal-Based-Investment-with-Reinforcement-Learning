@@ -236,7 +236,9 @@ class Agent_ManualTemperature(Agent):
         
         self._update_target_networks(tau=1)
  
-    def learn(self) -> None:
+    def learn(self,
+              step: int = 0,
+              ) -> None:
         """Implements one learning step by sampling a batch of data from the replay buffer.
         
         The algorithm is explained in https://arxiv.org/abs/1801.01290
@@ -252,7 +254,7 @@ class Agent_ManualTemperature(Agent):
         rewards = torch.tensor(rewards, dtype=torch.float).to(self.device)
         states_ = torch.tensor(states_, dtype=torch.float).to(self.device)
         dones = torch.tensor(dones).to(self.device)
-        
+           
         # VALUE UPDATE
         value = self.value(states).view(-1)
         value_ = self.target_value(states_).view(-1)
@@ -275,6 +277,24 @@ class Agent_ManualTemperature(Agent):
         
         self.value.optimizer.step()
         
+        # CRITIC UPDATE
+        q_target = rewards + self.gamma * value_
+        
+        q1 = self.critic_1.forward(states, actions).view(-1)
+        q2 = self.critic_2.forward(states, actions).view(-1)
+        
+        critic_1_loss = 0.5 * torch.nn.functional.mse_loss(q1, q_target)
+        critic_2_loss = 0.5 * torch.nn.functional.mse_loss(q2, q_target)
+        
+        self.critic_1.optimizer.zero_grad()
+        self.critic_2.optimizer.zero_grad()
+        
+        critic_loss = critic_1_loss + critic_2_loss          
+        
+        critic_loss.backward(retain_graph=True)
+        self.critic_1.optimizer.step()
+        self.critic_2.optimizer.step()
+        
         # POLICY UPDATE
         actions, log_probabilities = self.actor.sample(states, reparameterize=True)
         log_probabilities = log_probabilities.view(-1)
@@ -289,29 +309,11 @@ class Agent_ManualTemperature(Agent):
         actor_loss = torch.mean(actor_loss)
         
         self.actor.optimizer.zero_grad()
-        actor_loss.backward(retain_graph=True)
+        actor_loss.backward()
         self.actor.optimizer.step()
         
-        # CRITIC UPDATE
-        q_target = rewards + self.gamma * value_
-        
-        q1 = self.critic_1.forward(states, actions).view(-1)
-        q2 = self.critic_2.forward(states, actions).view(-1)
-        
-        critic_1_loss = 0.5 * torch.nn.functional.mse_loss(q1, q_target)
-        critic_2_loss = 0.5 * torch.nn.functional.mse_loss(q2, q_target)
-        
-        self.critic_1.optimizer.zero_grad()
-        self.critic_2.optimizer.zero_grad()
-        
-        critic_loss = critic_1_loss + critic_2_loss
-        
-        critic_loss.backward()
-        self.critic_1.optimizer.step()
-        self.critic_2.optimizer.step()
-        
         # EXPONENTIALLY SMOOTHED COPY TO THE TARGET VALUE NETWORK
-        self._update_target_network()
+        self._update_target_networks()
     
            
 class Agent_AutomaticTemperature(Agent):
