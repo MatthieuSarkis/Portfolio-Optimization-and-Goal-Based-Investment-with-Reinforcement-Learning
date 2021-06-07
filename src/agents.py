@@ -423,6 +423,9 @@ class Agent_AutomaticTemperature(Agent):
         critic_loss = critic_1_loss + critic_2_loss
         critic_loss.backward(retain_graph=True)
         
+        torch.nn.utils.clip_grad_norm_(self.critic_1.parameters(), max_norm=2.0)
+        torch.nn.utils.clip_grad_norm_(self.critic_2.parameters(), max_norm=2.0)
+        
         self.critic_1.optimizer.step()
         self.critic_2.optimizer.step()
         
@@ -440,6 +443,7 @@ class Agent_AutomaticTemperature(Agent):
             actor_loss = torch.mean(actor_loss.view(-1))
             
             self.actor.optimizer.zero_grad()
+            torch.nn.utils.clip_grad_norm_(self.actor.parameters(), max_norm=2.0)
             actor_loss.backward(retain_graph=True)
             #print(self.actor.layer1.weight.grad)
             #torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 1.0)
@@ -451,6 +455,7 @@ class Agent_AutomaticTemperature(Agent):
             
             self.log_alpha_optimizer.zero_grad()
             log_alpha_loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.log_alpha, max_norm=2.0)
             self.log_alpha_optimizer.step()
             
             self.alpha = self.log_alpha.exp()
@@ -559,6 +564,7 @@ class Distributional_Agent(Agent):
             
         self.critic.optimizer.zero_grad()  
         critic_loss.backward(retain_graph=True)
+        torch.nn.utils.clip_grad_norm_(self.critic.parameters(), max_norm=2.0)
         self.critic.optimizer.step()
         
         if step % self.delay == 0:
@@ -573,6 +579,7 @@ class Distributional_Agent(Agent):
             
             self.actor.optimizer.zero_grad()
             actor_loss.backward(retain_graph=True)
+            torch.nn.utils.clip_grad_norm_(self.actor.parameters(), max_norm=2.0)
             self.actor.optimizer.step()
                         
             # TEMPERATURE UPDATE
@@ -580,6 +587,7 @@ class Distributional_Agent(Agent):
             
             self.log_alpha_optimizer.zero_grad()
             log_alpha_loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.log_alpha, max_norm=2.0)
             self.log_alpha_optimizer.step()
             
             self.alpha = self.log_alpha.exp()
