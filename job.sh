@@ -27,7 +27,7 @@ python src/main.py \
 --tau 0.005 \
 --batch_size 128 \
 --layer_size 256 \
---n_episodes 5 \
+--n_episodes 2 \
 --seed 42 \
 --delay 2 \
 --mode train \
@@ -36,6 +36,6 @@ python src/main.py \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
 --buy_rule most_first \
---agent_type manual_temperature \
+--agent_type automatic_temperature \
 --window 20 \
 #--use_corr_matrix \
