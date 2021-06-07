@@ -27,7 +27,7 @@ python src/main.py \
 --tau 0.005 \
 --batch_size 128 \
 --layer_size 256 \
---n_episodes 1000 \
+--n_episodes 5 \
 --seed 42 \
 --delay 2 \
 --mode train \

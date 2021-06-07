@@ -14,8 +14,7 @@ import numpy as np
 from typing import Tuple, List
 
 class ReplayBuffer():
-    """Plays the role of memory for the Agents, by storing (state, action, reward, state_, done) tuples
-    """
+    """Plays the role of memory for the Agents, by storing (state, action, reward, state_, done) tuples"""
     
     def __init__(self, 
                  size: int, 

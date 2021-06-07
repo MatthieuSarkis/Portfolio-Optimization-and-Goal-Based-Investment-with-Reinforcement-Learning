@@ -124,10 +124,11 @@ def load_data(initial_date: str,
     else:
         df = pd.read_csv('data/close.csv', index_col=0)
     
+    time_horizon = df.shape[0]
+    
     if mode == 'train':
-        df = df.iloc[:3*(df.shape[0]//4), :10]
-        #df = df.iloc[:100, :]
+        df = df.iloc[:time_horizon//2, :]
     else:
-        df = df.iloc[3*(df.shape[0]//4):]
+        df = df.iloc[time_horizon//2:, :]
         
     return df
