@@ -294,25 +294,27 @@ class Agent_ManualTemperature(Agent):
         self.critic_1.optimizer.step()
         self.critic_2.optimizer.step()
         
-        # POLICY UPDATE
-        actions, log_probabilities = self.actor.sample(states, reparameterize=True)
-        log_probabilities = log_probabilities.view(-1)
+        if step % self.delay == 0:
         
-        q1_new_policy = self.critic_1.forward(states, actions)
-        q2_new_policy = self.critic_2.forward(states, actions)
-        
-        critic_value = torch.min(q1_new_policy, q2_new_policy)
-        critic_value = critic_value.view(-1)
-        
-        actor_loss = log_probabilities - critic_value
-        actor_loss = torch.mean(actor_loss)
-        
-        self.actor.optimizer.zero_grad()
-        actor_loss.backward()
-        self.actor.optimizer.step()
-        
-        # EXPONENTIALLY SMOOTHED COPY TO THE TARGET VALUE NETWORK
-        self._update_target_networks()
+            # POLICY UPDATE
+            actions, log_probabilities = self.actor.sample(states, reparameterize=True)
+            log_probabilities = log_probabilities.view(-1)
+            
+            q1_new_policy = self.critic_1.forward(states, actions)
+            q2_new_policy = self.critic_2.forward(states, actions)
+            
+            critic_value = torch.min(q1_new_policy, q2_new_policy)
+            critic_value = critic_value.view(-1)
+            
+            actor_loss = log_probabilities - critic_value
+            actor_loss = torch.mean(actor_loss)
+            
+            self.actor.optimizer.zero_grad()
+            actor_loss.backward()
+            self.actor.optimizer.step()
+            
+            # EXPONENTIALLY SMOOTHED COPY TO THE TARGET VALUE NETWORK
+            self._update_target_networks()
     
            
 class Agent_AutomaticTemperature(Agent):
@@ -446,6 +448,7 @@ class Agent_AutomaticTemperature(Agent):
             self.actor.optimizer.zero_grad()
             #torch.nn.utils.clip_grad_norm_(self.actor.parameters(), max_norm=self.grad_clip)
             actor_loss.backward(retain_graph=True)
+
             self.actor.optimizer.step()
                         
             # TEMPERATURE UPDATE
@@ -562,6 +565,7 @@ class Distributional_Agent(Agent):
         self.critic.optimizer.zero_grad()  
         critic_loss.backward(retain_graph=True)        
         #torch.nn.utils.clip_grad_norm_(self.critic.parameters(), max_norm=self.grad_clip)
+
         self.critic.optimizer.step()
         
         if step % self.delay == 0:
@@ -641,6 +645,7 @@ def instanciate_agent(env: Environment,
                                         batch_size=args.batch_size, 
                                         layer_size=args.layer_size, 
                                         grad_clip=args.grad_clip,
+                                        delay=args.delay,
                                         device=device)
         
     elif args.agent_type == 'distributional':

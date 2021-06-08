@@ -37,7 +37,6 @@ python src/main.py \
 --gpu_devices 0 1 2 3 \
 --grad_clip 2.0 \
 --buy_rule most_first \
---alpha 1.0 \
 --agent_type distributional \
 --window 20 \
 #--use_corr_matrix \
