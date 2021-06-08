@@ -138,7 +138,7 @@ class Actor(torch.nn.Module):
         self.checkpoint_dir = checkpoint_directory
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
         make_dir(directory_name=checkpoint_directory)
-        self.reparam_noise = 1e-6
+        self.noise = 1e-6
         
         self.layer1 = torch.nn.Linear(*self.input_shape, self.layer_neurons)
         self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
@@ -150,7 +150,6 @@ class Actor(torch.nn.Module):
         self.denominator = max(abs(self.log_sigma_min), self.log_sigma_max)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
-        
         self.device = device
         
         if torch.cuda.device_count() > 1:
@@ -174,16 +173,15 @@ class Actor(torch.nn.Module):
         x = torch.nn.functional.gelu(x)
         x = self.layer2(x)
         x = torch.nn.functional.gelu(x)
-        
+           
         mu = self.mu(x)
+
+        #sigma = self.log_sigma(x)
+        #sigma = torch.clamp(sigma, min=self.noise, max=1)
         
-        sigma = self.log_sigma(x)
-        sigma = torch.clamp(sigma, min=self.reparam_noise, max=1)
-        
-        #log_sigma = self.log_sigma(x)
-        #log_sigma = torch.clamp_min(self.log_sigma_max*torch.tanh(log_sigma/self.denominator), 0) + \
-        #            torch.clamp_max(-self.log_sigma_min * torch.tanh(log_sigma/self.denominator), 0)
-        #sigma = log_sigma.exp()
+        log_sigma = self.log_sigma(x)
+        log_sigma = torch.clamp(log_sigma, min=-20, max=2)       
+        sigma = log_sigma.exp()
         
         return mu, sigma
     
@@ -203,16 +201,16 @@ class Actor(torch.nn.Module):
         
         mu, sigma = self.forward(state)
         
-        probabilities = torch.distributions.Normal(mu, sigma)
+        normal = torch.distributions.Normal(mu, sigma)
 
         if reparameterize:
-            actions = probabilities.rsample()
+            actions = normal.rsample()
         else:
-            actions = probabilities.sample()
+            actions = normal.sample()
             
         action = torch.tanh(actions) * torch.tensor(self.max_actions).to(self.device)
-        log_probabilities = probabilities.log_prob(actions)
-        log_probabilities -= torch.log(1-action.pow(2) + self.reparam_noise)
+        log_probabilities = normal.log_prob(actions)
+        log_probabilities -= torch.log(1-action.pow(2) + self.noise)
         log_probabilities = log_probabilities.sum(1, keepdim=True)
         
         return action, log_probabilities
@@ -450,6 +448,3 @@ class Distributional_Critic(torch.nn.Module):
         """Load checkpoint, used in testing mode."""
         
         self.load_state_dict(torch.load(self.checkpoint_file))
-
-
-
