@@ -22,8 +22,7 @@ from src.networks import Actor, Critic, Value, Distributional_Critic
   
    
 class Agent():
-    """Abstract Agent class to be inherited by the various SAC agents 
-    """
+    """Abstract Agent class to be inherited by the various SAC agents."""
     
     def __init__(self,
                  lr_Q: float, 
@@ -37,6 +36,7 @@ class Agent():
                  layer_size: int = 256, 
                  batch_size: int = 256,
                  delay: int = 1,
+                 grad_clip: float = 1.0,
                  device: str = 'cpu',
                  ) -> None:
         """Constructor method of the Agent class.
@@ -71,6 +71,7 @@ class Agent():
         self.agent_name = agent_name
         self.layer_size = layer_size
         self.delay = delay
+        self.grad_clip = grad_clip
         self.device = device
 
         self.actor = Actor(self.lr_pi, 
@@ -169,18 +170,16 @@ class Agent():
         return actions.cpu().detach().numpy()[0]
 
     def save_networks(self) -> None:
-        """Save checkpoint for the weights of the various nets, used in training mode.
-        """
+        """Save checkpoint for the weights of the various nets, used in training mode."""
         
-        print(' ... saving networks ... ')    
+        print(' *** SAVING NETWORK WEIGHTS *** ')    
         for network in self._network_list:
             network.save_network_weights()
         
     def load_networks(self) -> None:
-        """Loading checkpoint for the weights of the various nets, used in test mode.
-        """
+        """Loading checkpoint for the weights of the various nets, used in test mode."""
         
-        print(' ... loading networks ... ')
+        print(' *** LOADING NETWORK WEIGHTS *** ')
         for network in self._network_list:
             network.load_network_weights()
    
@@ -327,7 +326,6 @@ class Agent_AutomaticTemperature(Agent):
     
     def __init__(self, 
                  lr_alpha: float,
-                 alpha: float = 1.0,
                  *args,
                  **kwargs,
                  ) -> None:
@@ -343,9 +341,9 @@ class Agent_AutomaticTemperature(Agent):
         
         super(Agent_AutomaticTemperature, self).__init__(*args, **kwargs)
         
-        self.alpha = alpha
-        self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.device)).item()
-        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device).detach().requires_grad_(True)
+        self.alpha = torch.distributions.Normal(torch.tensor([0.0]), torch.tensor([1.0])).sample().to(self.device)
+        self.target_entropy = -torch.tensor(self.action_space_dimension, dtype=float).to(self.device)
+        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
         self.critic_1 = Critic(self.lr_Q, 
@@ -392,6 +390,8 @@ class Agent_AutomaticTemperature(Agent):
         The algorithm is explained in https://arxiv.org/abs/1812.05905
         """
         
+        #torch.autograd.set_detect_anomaly(True)
+        
         if self.memory.pointer < self.batch_size:
             return
         
@@ -423,10 +423,11 @@ class Agent_AutomaticTemperature(Agent):
         self.critic_2.optimizer.zero_grad()
         
         critic_loss = critic_1_loss + critic_2_loss
+        
         critic_loss.backward(retain_graph=True)
         
-        torch.nn.utils.clip_grad_norm_(self.critic_1.parameters(), max_norm=2.0)
-        torch.nn.utils.clip_grad_norm_(self.critic_2.parameters(), max_norm=2.0)
+        torch.nn.utils.clip_grad_norm_(self.critic_1.parameters(), max_norm=self.grad_clip)
+        torch.nn.utils.clip_grad_norm_(self.critic_2.parameters(), max_norm=self.grad_clip)
         
         self.critic_1.optimizer.step()
         self.critic_2.optimizer.step()
@@ -445,10 +446,9 @@ class Agent_AutomaticTemperature(Agent):
             actor_loss = torch.mean(actor_loss.view(-1))
             
             self.actor.optimizer.zero_grad()
+            #torch.nn.utils.clip_grad_norm_(self.actor.parameters(), max_norm=self.grad_clip)
             actor_loss.backward(retain_graph=True)
-            
-            torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 1.0)
-            
+
             self.actor.optimizer.step()
                         
             # TEMPERATURE UPDATE
@@ -456,6 +456,7 @@ class Agent_AutomaticTemperature(Agent):
             
             self.log_alpha_optimizer.zero_grad()
             log_alpha_loss.backward()
+            #torch.nn.utils.clip_grad_norm_(self.log_alpha, max_norm=self.grad_clip)
             self.log_alpha_optimizer.step()
             
             self.alpha = self.log_alpha.exp()
@@ -474,7 +475,6 @@ class Distributional_Agent(Agent):
     
     def __init__(self, 
                  lr_alpha: float,
-                 alpha: float = 1.0,
                  *args,
                  **kwargs,
                  ) -> None:
@@ -490,9 +490,9 @@ class Distributional_Agent(Agent):
         
         super(Distributional_Agent, self).__init__(*args, **kwargs)
         
-        self.alpha = alpha
-        self.target_entropy = -torch.prod(torch.Tensor(self.action_space_dimension).to(self.device)).item()
-        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device).detach().requires_grad_(True)
+        self.alpha = torch.distributions.Normal(torch.tensor([0.0]), torch.tensor([1.0])).sample().to(self.device)
+        self.target_entropy = -torch.tensor(self.action_space_dimension, dtype=float).to(self.device)
+        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
         self.critic = Distributional_Critic(self.lr_Q,
@@ -559,27 +559,26 @@ class Distributional_Agent(Agent):
         target_q_clipped = mu + torch.clamp(target_q - mu, -3 * sigma.mean().item(), 3 * sigma.mean().item())
 
         normal = torch.distributions.Normal(mu, sigma)
-        
+       
         critic_loss = -normal.log_prob(target_q_clipped).mean()
             
         self.critic.optimizer.zero_grad()  
-        critic_loss.backward(retain_graph=True)
-        torch.nn.utils.clip_grad_norm_(self.critic.parameters(), max_norm=2.0)
+        critic_loss.backward(retain_graph=True)        
+        #torch.nn.utils.clip_grad_norm_(self.critic.parameters(), max_norm=self.grad_clip)
+
         self.critic.optimizer.step()
         
         if step % self.delay == 0:
         
             # POLICY UPDATE
             actions, log_probabilities = self.actor.sample(states, reparameterize=True)
-            
             critic_value, _, _ = self.target_critic.sample(states, actions, reparameterize=True)
-            
             actor_loss = self.alpha * log_probabilities - critic_value
             actor_loss = torch.mean(actor_loss.view(-1))
             
             self.actor.optimizer.zero_grad()
             actor_loss.backward(retain_graph=True)
-            torch.nn.utils.clip_grad_norm_(self.actor.parameters(), max_norm=2.0)
+            #torch.nn.utils.clip_grad_norm_(self.actor.parameters(), max_norm=self.grad_clip)
             self.actor.optimizer.step()
                         
             # TEMPERATURE UPDATE
@@ -587,6 +586,7 @@ class Distributional_Agent(Agent):
             
             self.log_alpha_optimizer.zero_grad()
             log_alpha_loss.backward()
+            #torch.nn.utils.clip_grad_norm_(self.log_alpha, max_norm=self.grad_clip)
             self.log_alpha_optimizer.step()
             
             self.alpha = self.log_alpha.exp()
@@ -626,8 +626,8 @@ def instanciate_agent(env: Environment,
                                            size=args.memory_size,
                                            batch_size=args.batch_size, 
                                            layer_size=args.layer_size, 
-                                           alpha=args.alpha,
                                            delay=args.delay,
+                                           grad_clip=args.grad_clip,
                                            device=device)
     
     elif args.agent_type == 'manual_temperature':
@@ -644,6 +644,7 @@ def instanciate_agent(env: Environment,
                                         size=args.memory_size,
                                         batch_size=args.batch_size, 
                                         layer_size=args.layer_size, 
+                                        grad_clip=args.grad_clip,
                                         delay=args.delay,
                                         device=device)
         
@@ -661,8 +662,8 @@ def instanciate_agent(env: Environment,
                                     size=args.memory_size,
                                     batch_size=args.batch_size, 
                                     layer_size=args.layer_size, 
-                                    alpha=args.alpha,
                                     delay=args.delay,
+                                    grad_clip=args.grad_clip,
                                     device=device)
         
     return agent, figure_file

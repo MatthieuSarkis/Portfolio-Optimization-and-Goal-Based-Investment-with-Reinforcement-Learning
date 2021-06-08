@@ -19,23 +19,24 @@ python src/main.py \
 --buy_rate 0.001 \
 --sell_rate 0.001 \
 --bank_rate 0.5 \
---sac_temperature 2.0 \
---limit_n_stocks 100 \
---lr_Q 0.0003 \
---lr_pi 0.0003 \
+--sac_temperature 1.0 \
+--limit_n_stocks 1000 \
+--lr_Q 0.005 \
+--lr_pi 0.005 \
 --gamma 0.99 \
 --tau 0.005 \
---batch_size 128 \
+--batch_size 256 \
 --layer_size 256 \
---n_episodes 2 \
---seed 42 \
---delay 2 \
+--n_episodes 5 \
+--seed 0 \
+--delay 1 \
 --mode train \
 --memory_size 1000000 \
 --initial_date 2015-01-01 \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
+--grad_clip 2.0 \
 --buy_rule most_first \
---agent_type automatic_temperature \
+--agent_type distributional \
 --window 20 \
 #--use_corr_matrix \

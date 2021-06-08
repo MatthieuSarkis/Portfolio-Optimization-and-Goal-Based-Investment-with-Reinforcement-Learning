@@ -73,7 +73,8 @@ def instanciate_scaler(env: gym.Env,
                        mode: str) -> StandardScaler:
     """Instanciate and either fit or load parameter depending on mode.
     
-    In train mode, the agent behaves randomly in order to store typical observations in the environment
+    In train mode, the agent behaves randomly in order to store typical observations in the environment.
+    The random agent trades for 10 episodes to have a more accurate scaler.
     
     Args:
         env (gym.Env): trading environment
@@ -86,13 +87,16 @@ def instanciate_scaler(env: gym.Env,
     scaler = StandardScaler()
     
     if mode == 'train':
-        observation = env.reset()
-        observations = [observation]
-        done = False
-        while not done:
-            action = env.action_space.sample()
-            observation_, _, done, _ = env.step(action)
-            observations.append(observation_)
+        
+        observations = []
+        for _ in range(10):
+            observation = env.reset()
+            observations.append(observation)
+            done = False
+            while not done:
+                action = env.action_space.sample()
+                observation_, _, done, _ = env.step(action)
+                observations.append(observation_)
 
         scaler.fit(observations)
         make_dir('saved_networks')

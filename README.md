@@ -1,3 +1,7 @@
+## Bugs to solve
+
+* pour DSAC, il semble que ce soit le alpha -> nan
+* pour auto temp c'est mu
 ## Notes
 
 * typical buy_rate and sell_rate = 0.1%
