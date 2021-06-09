@@ -353,7 +353,7 @@ class Agent_AutomaticTemperature(Agent):
         
         self.alpha = torch.distributions.Normal(torch.tensor([0.0]), torch.tensor([1.0])).sample().to(self.device)
         self.target_entropy = -torch.tensor(self.action_space_dimension, dtype=float).to(self.device)
-        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device)
+        self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
         self.critic_1 = Critic(self.lr_Q, 
@@ -505,7 +505,7 @@ class Distributional_Agent(Agent):
         
         self.alpha = torch.distributions.Normal(torch.tensor([0.0]), torch.tensor([1.0])).sample().to(self.device)
         self.target_entropy = -torch.tensor(self.action_space_dimension, dtype=float).to(self.device)
-        self.log_alpha = torch.zeros(1, requires_grad=True).to(self.device)
+        self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
         self.critic = Distributional_Critic(self.lr_Q,

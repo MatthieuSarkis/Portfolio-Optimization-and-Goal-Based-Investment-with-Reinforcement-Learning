@@ -94,7 +94,6 @@ class Critic(torch.nn.Module):
         
     def load_network_weights(self) -> None:
         """Load checkpoint, used in testing mode."""
-        
         self.load_state_dict(torch.load(self.checkpoint_file))
         
       
@@ -222,7 +221,7 @@ class Actor(torch.nn.Module):
         
     def load_network_weights(self):
         """Load checkpoint, used in testing mode."""
-        
+         
         self.load_state_dict(torch.load(self.checkpoint_file))
         
 class Value(torch.nn.Module):

@@ -13,30 +13,29 @@
 
 #========================================================
 
-#srun --unbuffered 
-python src/main.py \
+srun --unbuffered python src/main.py \
 --initial_cash 100000 \
 --buy_rate 0.0003 \
 --sell_rate 0.0003 \
 --bank_rate 0.5 \
 --sac_temperature 1.0 \
---limit_n_stocks 1000 \
+--limit_n_stocks 100 \
 --lr_Q 0.005 \
 --lr_pi 0.005 \
 --gamma 0.99 \
 --tau 0.005 \
 --batch_size 256 \
 --layer_size 256 \
---n_episodes 5 \
+--n_episodes 20 \
 --seed 0 \
---delay 1 \
---mode train \
+--delay 2 \
+--mode test \
 --memory_size 1000000 \
 --initial_date 2015-01-01 \
 --final_date 2020-12-31 \
 --gpu_devices 0 1 2 3 \
 --grad_clip 2.0 \
 --buy_rule most_first \
---agent_type distributional \
+--agent_type automatic_temperature \
 --window 20 \
-#--use_corr_matrix \
+--use_corr_matrix \

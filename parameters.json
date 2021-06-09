@@ -5,8 +5,8 @@
     "bank_rate": 0.5,
     "initial_date": "2015-01-01",
     "final_date": "2020-12-31",
-    "limit_n_stocks": 1000,
-    "agent_type": "distributional",
+    "limit_n_stocks": 100,
+    "agent_type": "automatic_temperature",
     "buy_rule": "most_first",
     "sac_temperature": 1.0,
     "gamma": 0.99,
@@ -16,10 +16,10 @@
     "tau": 0.005,
     "batch_size": 256,
     "layer_size": 256,
-    "n_episodes": 5,
-    "delay": 1,
+    "n_episodes": 20,
+    "delay": 2,
     "memory_size": 1000000,
-    "mode": "train",
+    "mode": "test",
     "seed": 0,
     "gpu_devices": [
         0,
@@ -28,6 +28,6 @@
         3
     ],
     "grad_clip": 2.0,
-    "use_corr_matrix": false,
+    "use_corr_matrix": true,
     "window": 20
 }

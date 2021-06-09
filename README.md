@@ -9,7 +9,6 @@
 * Leverage, lower bound on bank account
 * tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
 * Prioritized Experience Replay, or even better: https://arxiv.org/abs/1906.04009
-* test and debug DSAC
 * Cosine annealing for learning rates?
 * Different types of deep neural nets?
 * Better data preprocessing? dimensionality reduction along stock space dimension instead of just plugging in the correlation matrix?
