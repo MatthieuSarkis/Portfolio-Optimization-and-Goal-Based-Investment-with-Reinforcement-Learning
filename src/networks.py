@@ -342,7 +342,9 @@ class Distributional_Critic(torch.nn.Module):
         super(Distributional_Critic, self).__init__()
         self.input_shape = input_shape
         self.layer_neurons = layer_neurons
-        self.name = name
+        self.checkpoint_dir = checkpoint_directory
+        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
+        make_dir(directory_name=checkpoint_directory)
         
         self.linear1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
         self.linear2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
@@ -358,12 +360,7 @@ class Distributional_Critic(torch.nn.Module):
         self.log_sigma_max = log_sigma_max
         self.denominator = max(abs(self.log_sigma_min), self.log_sigma_max)
         
-        self.checkpoint_dir = checkpoint_directory
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
-        make_dir(directory_name=checkpoint_directory)
-        
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
-        
         self.device = device
         
         if torch.cuda.device_count() > 1:

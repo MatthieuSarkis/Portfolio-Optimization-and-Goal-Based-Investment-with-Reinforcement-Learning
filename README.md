@@ -1,7 +1,5 @@
 ## Bugs to solve
 
-* pour DSAC, il semble que ce soit le alpha -> nan
-* pour auto temp c'est mu
 ## Notes
 
 * typical buy_rate and sell_rate = 0.1%
@@ -17,6 +15,7 @@
 * Better data preprocessing? dimensionality reduction along stock space dimension instead of just plugging in the correlation matrix?
 * How about redefining what we call an observation in the environment? An observation could be a sequence of n time steps for instance. We could use a wrapper for that.
 * Ameliorer les arguments en ligne de commande avec des if statements et des help
+* Generer de meilleurs logs
 ## Done
 
 * Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)

@@ -183,6 +183,13 @@ class Agent():
         for network in self._network_list:
             network.load_network_weights()
    
+    def learn(self,
+              step: int = 0,
+              ) -> None:
+        """One step of the learning process."""
+        
+        raise NotImplementedError
+   
 class Agent_ManualTemperature(Agent):
     """Soft Actor Critic agent according to https://arxiv.org/abs/1801.01290
     
@@ -322,6 +329,10 @@ class Agent_AutomaticTemperature(Agent):
     
     Inherits from the abstract Agent class.
     The temperature parameter is being automatically updated in the learning process.
+    
+    Attributes:
+        alpha (float): initial value of the temperature parameter,
+                       initialized by sampling from a standard normal distribution.
     """
     
     def __init__(self, 
@@ -333,7 +344,6 @@ class Agent_AutomaticTemperature(Agent):
         
         Args:
             lr_alpha (float): learning rate for the temperature auto adjustment
-            alpha (float): initial value of the temperature parameter
             
         Returns:
             no value
@@ -471,6 +481,10 @@ class Distributional_Agent(Agent):
     Inherits from the abstract Agent class.
     The temperature parameter is being automatically updated in the learning process.
     The critic is now fully considered and learned as a random variable, not only its expectation is being learned.
+    
+    Attributes:
+        alpha (float): initial value of the temperature parameter,
+                       initialized by sampling from a standard normal distribution.
     """
     
     def __init__(self, 
@@ -482,7 +496,6 @@ class Distributional_Agent(Agent):
         
         Args:
             lr_alpha (float): learning rate for the temperature auto adjustment
-            alpha (float): initial value of the temperature parameter
             
         Returns:
             no value
@@ -499,20 +512,18 @@ class Distributional_Agent(Agent):
                                             self.input_shape,
                                             self.layer_size,
                                             self.action_space_dimension,
-                                            self.agent_name,
                                             log_sigma_min=-0.1,
                                             log_sigma_max=4,
-                                            checkpoint_directory=self.agent_name+'_critic',
+                                            name=self.agent_name+'_critic',
                                             device=self.device)
         
         self.target_critic = Distributional_Critic(self.lr_Q,
                                                    self.input_shape,
                                                    self.layer_size,
                                                    self.action_space_dimension,
-                                                   self.agent_name,
                                                    log_sigma_min=-0.1,
                                                    log_sigma_max=4,
-                                                   checkpoint_directory=self.agent_name+'_critic',
+                                                   name=self.agent_name+'_critic',
                                                    device=self.device)
         
         self.target_actor = Actor(self.lr_pi, 
@@ -565,7 +576,6 @@ class Distributional_Agent(Agent):
         self.critic.optimizer.zero_grad()  
         critic_loss.backward(retain_graph=True)        
         #torch.nn.utils.clip_grad_norm_(self.critic.parameters(), max_norm=self.grad_clip)
-
         self.critic.optimizer.step()
         
         if step % self.delay == 0:
