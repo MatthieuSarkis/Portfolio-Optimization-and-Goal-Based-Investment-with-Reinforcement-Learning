@@ -13,7 +13,8 @@
 
 #========================================================
 
-srun --unbuffered python src/main.py \
+#srun --unbuffered 
+python src/main.py \
 --initial_cash 100000 \
 --buy_rate 0.0003 \
 --sell_rate 0.0003 \
@@ -26,10 +27,10 @@ srun --unbuffered python src/main.py \
 --tau 0.005 \
 --batch_size 256 \
 --layer_size 256 \
---n_episodes 20 \
+--n_episodes 2 \
 --seed 0 \
 --delay 2 \
---mode test \
+--mode train \
 --memory_size 1000000 \
 --initial_date 2015-01-01 \
 --final_date 2020-12-31 \

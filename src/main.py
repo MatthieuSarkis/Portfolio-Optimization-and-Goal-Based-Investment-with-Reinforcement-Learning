@@ -35,8 +35,12 @@ def main(args):
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
+    seed = args.seed
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
    
     df = load_data(initial_date=args.initial_date, 
                    final_date=args.final_date, 

@@ -16,10 +16,10 @@
     "tau": 0.005,
     "batch_size": 256,
     "layer_size": 256,
-    "n_episodes": 20,
+    "n_episodes": 2,
     "delay": 2,
     "memory_size": 1000000,
-    "mode": "test",
+    "mode": "train",
     "seed": 0,
     "gpu_devices": [
         0,
