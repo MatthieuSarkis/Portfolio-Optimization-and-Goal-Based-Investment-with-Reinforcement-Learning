@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name="SAC"
+#SBATCH --job-name="SAC_agent"
 #SBATCH --output="%j.out" # job standard output file (%j replaced by job id)
 #SBATCH --error="%j.err" # job standard error file (%j replaced by job id)
 
