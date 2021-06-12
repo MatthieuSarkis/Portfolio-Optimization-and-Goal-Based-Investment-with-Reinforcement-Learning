@@ -1,6 +1,8 @@
-# Reinforcement learning for portfolio optimization and Goal Based Investment
+# Reinforcement Learning for Portfolio Optimization and Goal Based Investment
 
-This repository contains __work in progress__. It consists in particular of my implementation of various actor-critic reinforcement learning algorithms in PyTorch, applied to the problem of portfolio optimization, and Goal Based Investment.
+This repository contains *__work in progress__*, and even though the code runs perfectly well, lots of features and improvements remain to be implemented.
+
+The present project consists in particular of my implementation of various actor-critic reinforcement learning algorithms in PyTorch, applied to the problem of portfolio optimization, and Goal Based Investment.
 
 We define a trading environment class which inherits from the gym.Env class. In the case where one simply focuses on the multidimensional time series for the stock prices, the state space consists of the bank account balance, the price of each asset, and the number of shares owned for each asset.
 
@@ -104,22 +106,21 @@ python src/main.py \
 ## To do
 
 * Donnees fondamentales des entreprises, news
+* More generally, better data engineering. Dimensionality reduction along stock space dimension instead of simply plugging in the correlation matrix?
 * Leverage, lower bound on bank account
 * tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
-* Prioritized Experience Replay, or even better: https://arxiv.org/abs/1906.04009
+* Implement Prioritized Experience Replay, or even better: https://arxiv.org/abs/1906.04009
 * Cosine annealing for learning rates?
-* Different types of deep neural nets?
-* Better data preprocessing? dimensionality reduction along stock space dimension instead of just plugging in the correlation matrix?
+* Different types of deep neural nets? 
 * How about redefining what we call an observation in the environment? An observation could be a sequence of n time steps for instance. We could use a wrapper for that.
-* Ameliorer les arguments en ligne de commande avec des if statements et des help
-* Generer de meilleurs logs
+* Improve command line arguments parsing
+* Generate better logs, define some Log class
 * Distributed algorithms
 
 ## Done
 
 * Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)
-* Distributional Soft Actor Critic: https://arxiv.org/pdf/2001.02811.pdf
-                                    https://www.researchgate.net/publication/341069321_DSAC_Distributional_Soft_Actor_Critic_for_Risk-Sensitive_Learning
+* Implement Distributional Soft Actor Critic
 * Implement new buying strategy: random, cyclic
 * Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
 * Save hyperparameters in json file
