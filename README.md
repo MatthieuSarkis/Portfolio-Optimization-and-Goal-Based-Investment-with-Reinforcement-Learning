@@ -114,6 +114,7 @@ python src/main.py \
 * Different types of deep neural nets? 
 * How about redefining what we call an observation in the environment? An observation could be a sequence of n time steps for instance. We could use a wrapper for that.
 * Improve command line arguments parsing
+* Benchmark
 * Generate better logs, define some Log class
 * Distributed algorithms
 

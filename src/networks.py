@@ -107,8 +107,8 @@ class Actor(torch.nn.Module):
                  max_actions: np.array, 
                  action_space_dimension: Tuple, 
                  name: str, 
-                 log_sigma_min: float = -0.1, 
-                 log_sigma_max: float = 4.0,
+                 log_sigma_min: float = -20.0, 
+                 log_sigma_max: float = 2.0,
                  checkpoint_directory: str = 'saved_networks',
                  device: str = 'cpu',
                  ) -> None:
@@ -146,7 +146,6 @@ class Actor(torch.nn.Module):
         
         self.log_sigma_min = log_sigma_min
         self.log_sigma_max = log_sigma_max
-        self.denominator = max(abs(self.log_sigma_min), self.log_sigma_max)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
         self.device = device
@@ -175,11 +174,8 @@ class Actor(torch.nn.Module):
            
         mu = self.mu(x)
 
-        #sigma = self.log_sigma(x)
-        #sigma = torch.clamp(sigma, min=self.noise, max=1)
-        
         log_sigma = self.log_sigma(x)
-        log_sigma = torch.clamp(log_sigma, min=-20, max=2)       
+        log_sigma = torch.clamp(log_sigma, min=self.log_sigma_min, max=self.log_sigma_max)       
         sigma = log_sigma.exp()
         
         return mu, sigma
@@ -317,7 +313,7 @@ class Distributional_Critic(torch.nn.Module):
                  action_space_dimension: Tuple, 
                  name: str, 
                  log_sigma_min: float = -0.1, 
-                 log_sigma_max: float = 4.0,
+                 log_sigma_max: float = 5.0,
                  checkpoint_directory: str = 'saved_networks',
                  device: str = 'cpu',
                  ) -> None:
@@ -377,7 +373,7 @@ class Distributional_Critic(torch.nn.Module):
             action (np.array): input action
             
         Returns:
-            expectation and log standard deviation of a 
+            expectation and standard deviation of a 
             normal critic-value distribution attributed to the (state, action) input pair
         """
         
@@ -400,10 +396,10 @@ class Distributional_Critic(torch.nn.Module):
         log_sigma = torch.nn.functional.gelu(log_sigma)
         log_sigma = self.linear_log_sigma_3(log_sigma)
 
-        log_sigma = torch.clamp_min(self.log_sigma_max*torch.tanh(log_sigma/self.denominator),0) + \
-                    torch.clamp_max(-self.log_sigma_min * torch.tanh(log_sigma / self.denominator), 0)
+        log_sigma = torch.clamp(log_sigma, min=self.log_sigma_min, max=self.log_sigma_max)
+        sigma = log_sigma.exp()
 
-        return mu, log_sigma
+        return mu, sigma
 
     def sample(self, 
                state: List[float], 
@@ -423,8 +419,7 @@ class Distributional_Critic(torch.nn.Module):
             standard deviation of the critic-value random variable
         """
         
-        mu, log_sigma = self.forward(state, action)
-        sigma = log_sigma.exp()
+        mu, sigma = self.forward(state, action)
                 
         normal = torch.distributions.Normal(mu, sigma)
         
