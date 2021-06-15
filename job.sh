@@ -16,18 +16,18 @@
 #srun --unbuffered 
 python src/main.py \
 --initial_cash 100000 \
---buy_rate 0.0003 \
---sell_rate 0.0003 \
+--buy_rate 0.0001 \
+--sell_rate 0.0001 \
 --bank_rate 0.5 \
 --sac_temperature 1.0 \
 --limit_n_stocks 100 \
---lr_Q 0.005 \
---lr_pi 0.005 \
+--lr_Q 0.0003 \
+--lr_pi 0.0003 \
 --gamma 0.99 \
 --tau 0.005 \
 --batch_size 256 \
 --layer_size 256 \
---n_episodes 2 \
+--n_episodes 1000 \
 --seed 0 \
 --delay 2 \
 --mode train \

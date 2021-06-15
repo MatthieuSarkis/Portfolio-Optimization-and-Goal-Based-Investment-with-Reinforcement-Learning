@@ -54,7 +54,6 @@ class Environment(gym.Env):
             no value
         """
         
-        
         super(Environment, self).__init__()
         
         self.stock_market_history = stock_market_history
