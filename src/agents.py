@@ -663,17 +663,17 @@ def instanciate_agent(env: Environment,
         agent_name = 'distributional'
         figure_file = str(args.n_episodes) + 'episodes_Distributional_' + args.mode + '.png'
         agent = Distributional_Agent(lr_Q=args.lr_Q,
-                                    lr_pi=args.lr_pi, 
-                                    lr_alpha=args.lr_alpha,  
-                                    agent_name=agent_name, 
-                                    input_shape=env.observation_space.shape, 
-                                    tau=args.tau,
-                                    env=env, 
-                                    size=args.memory_size,
-                                    batch_size=args.batch_size, 
-                                    layer_size=args.layer_size, 
-                                    delay=args.delay,
-                                    grad_clip=args.grad_clip,
-                                    device=device)
+                                     lr_pi=args.lr_pi, 
+                                     lr_alpha=args.lr_alpha,  
+                                     agent_name=agent_name, 
+                                     input_shape=env.observation_space.shape, 
+                                     tau=args.tau,
+                                     env=env, 
+                                     size=args.memory_size,
+                                     batch_size=args.batch_size, 
+                                     layer_size=args.layer_size, 
+                                     delay=args.delay,
+                                     grad_clip=args.grad_clip,
+                                     device=device)
         
     return agent, figure_file
