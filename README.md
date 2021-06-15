@@ -100,11 +100,6 @@ python src/main.py \
 [Apache License 2.0](https://github.com/MatthieuSarkis/stock/blob/master/LICENSE)
 
 
-## Bugs to solve
-
-## Notes
-
-* typical buy_rate and sell_rate = 0.1%
 ## To do
 
 * Donnees fondamentales des entreprises, news
