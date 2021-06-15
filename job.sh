@@ -23,6 +23,7 @@ python src/main.py \
 --limit_n_stocks 100 \
 --lr_Q 0.0003 \
 --lr_pi 0.0003 \
+--lr_alpha 0.0003 \
 --gamma 0.99 \
 --tau 0.005 \
 --batch_size 256 \
