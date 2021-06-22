@@ -97,7 +97,7 @@ python src/main.py \
 --use_corr_matrix \
 ```
 ## License
-[Apache License 2.0](https://github.com/MatthieuSarkis/stock/blob/master/LICENSE)
+[Apache License 2.0](https://github.com/MatthieuSarkis/Portfolio-Optimization-and-Goal-Based-Investment-with-Reinforcement-Learning/blob/master/LICENSE)
 
 
 ## To do
