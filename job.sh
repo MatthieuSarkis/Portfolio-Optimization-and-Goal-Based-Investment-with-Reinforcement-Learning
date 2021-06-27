@@ -15,7 +15,7 @@
 
 #srun --unbuffered 
 python src/main.py \
---initial_cash 100000 \
+--initial_cash 10000000 \
 --buy_rate 0.0001 \
 --sell_rate 0.0001 \
 --bank_rate 0.5 \
@@ -38,6 +38,6 @@ python src/main.py \
 --gpu_devices 0 1 2 3 \
 --grad_clip 2.0 \
 --buy_rule most_first \
---agent_type automatic_temperature \
---window 20 \
+--agent_type distributional \
+--window 40 \
 --use_corr_matrix \
