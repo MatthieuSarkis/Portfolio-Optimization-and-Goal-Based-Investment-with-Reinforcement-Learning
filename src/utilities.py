@@ -139,3 +139,34 @@ def append_corr_matrix(df: pd.DataFrame,
         corr_flattened = pd.concat([corr_flattened, temp])
 
     return pd.concat([df, corr_flattened], axis=1).iloc[window-1 : ]
+
+def append_corr_matrix_eigenvalues(df: pd.DataFrame,
+                                   window: int,
+                                   k: int = 10
+                                   ) -> pd.DataFrame:
+    """Append the k greatest eigenvalues of the sliding correlation matrix of a multidimensional time series.
+        
+    Args:
+        df (pd.DataFrame): the multidimensional time series whose sliding correlation matrix is computed
+        window (int): size of the sliding window used to compute the correlation matrix
+        
+    Returns:
+        the input time series with the k greatest eigenvalues of the sliding correlation matrix appended
+    """
+    
+    columns = ['Eigenvalue_{}'.format(m+1) for m in range(k)]
+    corr = df.rolling(window).cov()
+    corr_eigenvalues = pd.DataFrame(index=columns).transpose()
+
+    for i in range(window-1, df.shape[0]):
+        data = corr[df.shape[1]*i : df.shape[1]*(i+1)].to_numpy()
+        data = np.linalg.eig(data)
+        data = data[0]
+        data[::-1].sort()
+        data = data[:k]
+
+        index = [corr.index[df.shape[1]*i][0]]
+        temp = pd.DataFrame(data=data, columns=index, index=columns).transpose()
+        corr_eigenvalues = pd.concat([corr_eigenvalues, temp])
+
+    return pd.concat([df.iloc[window-1 : ], corr_eigenvalues], axis=1)
