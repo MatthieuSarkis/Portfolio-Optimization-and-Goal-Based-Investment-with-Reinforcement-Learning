@@ -154,6 +154,9 @@ def append_corr_matrix_eigenvalues(df: pd.DataFrame,
         the input time series with the number_of_eigenvalues greatest eigenvalues of the sliding correlation matrix appended
     """
     
+    if number_of_eigenvalues > df.shape[1]:
+        number_of_eigenvalues = df.shape[1]
+    
     columns = ['Eigenvalue_{}'.format(m+1) for m in range(number_of_eigenvalues)]
     corr = df.rolling(window).cov()
     corr_eigenvalues = pd.DataFrame(index=columns).transpose()

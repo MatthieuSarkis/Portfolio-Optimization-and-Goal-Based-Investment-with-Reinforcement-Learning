@@ -102,6 +102,7 @@ python src/main.py \
 
 ## To do
 
+* Possibility to start from a non-trivial portfolio
 * Donnees fondamentales des entreprises, news
 * More generally, better data engineering. Dimensionality reduction along stock space dimension instead of simply plugging in the correlation matrix?
 * Leverage, lower bound on bank account
@@ -123,4 +124,5 @@ python src/main.py \
 * Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
 * Save hyperparameters in json file
 * Add correlation matrix (defined by a sliding window) to the data. It is just a time dependent matrix
+* Possibility to append a certain number of eigenvalues of the correlation matrix
 * Commenter le code en details
