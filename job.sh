@@ -42,7 +42,7 @@ python src/main.py \
 #--batch_size 256 \
 #--layer_size 256 \
 #--n_episodes 1000 \
-#--seed 0 \
+#--seed 42 \
 #--delay 2 \
 #--mode train \
 #--memory_size 1000000 \
