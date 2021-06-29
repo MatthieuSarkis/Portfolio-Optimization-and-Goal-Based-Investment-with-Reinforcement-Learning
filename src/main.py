@@ -109,7 +109,7 @@ if __name__ == '__main__':
     parser.add_argument('--memory_size',           type=int,            default=1000000,                 help='')
     parser.add_argument('--mode',                  type=str,            default='test',                  help='')
     parser.add_argument('--seed',                  type=int,            default='42',                    help='')
-    parser.add_argument('--gpu_devices',           type=int,            nargs='+', default=None,         help='')
+    parser.add_argument('--gpu_devices',           type=int,            nargs='+', default=[0, 1, 2, 3], help='')
     parser.add_argument('--grad_clip',             type=float,          default=1.0,                     help='')
     parser.add_argument('--window',                type=int,            default=20,                      help='Window for correlation matrix computation.')
     parser.add_argument('--number_of_eigenvalues', type=int,            default=10,                      help='Number of largest eigenvalues to append to the close prices time series.')

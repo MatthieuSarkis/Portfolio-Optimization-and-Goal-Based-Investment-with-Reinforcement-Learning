@@ -62,6 +62,7 @@ class Environment(gym.Env):
         self.stock_space_dimension = stock_market_history.shape[1]
         self.buy_rule = buy_rule
         self.use_corr_matrix = use_corr_matrix
+        self.use_corr_eigenvalues = use_corr_eigenvalues
         
         if self.use_corr_matrix:
             self.stock_market_history = append_corr_matrix(df=self.stock_market_history,
