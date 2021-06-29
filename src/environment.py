@@ -121,8 +121,7 @@ class Environment(gym.Env):
         Returns:
             np.array for the new state
         """
-        
-        
+         
         self.current_step += 1      
         initial_value_portfolio = self._get_portfolio_value()
         self.stock_prices = self.stock_market_history.iloc[self.current_step] 
@@ -253,8 +252,3 @@ class Environment(gym.Env):
         
         portfolio_value = self.cash_in_bank + self.number_of_shares.dot(self.stock_prices[:self.stock_space_dimension])
         return portfolio_value
-
-        
-        
-        
-    
