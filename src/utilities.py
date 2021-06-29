@@ -164,7 +164,7 @@ def append_corr_matrix_eigenvalues(df: pd.DataFrame,
     for i in range(window-1, df.shape[0]):
         data = corr[df.shape[1]*i : df.shape[1]*(i+1)].to_numpy()
         data = np.linalg.eig(data)
-        data = data[0]
+        data = data[0].real
         data[::-1].sort()
         data = data[:number_of_eigenvalues]
 
