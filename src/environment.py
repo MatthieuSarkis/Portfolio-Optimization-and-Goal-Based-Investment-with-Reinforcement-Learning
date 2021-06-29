@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 
-from src.utilities import append_corr_matrix
+from src.utilities import append_corr_matrix, append_corr_matrix_eigenvalues
 class Environment(gym.Env):
     """Environment for stock trading.
     
@@ -35,7 +35,9 @@ class Environment(gym.Env):
                  limit_n_stocks: float = 200,
                  buy_rule: str = 'most_first',
                  use_corr_matrix: bool = False,
+                 use_corr_eigenvalues: bool = False,
                  window: int = 20,
+                 number_of_eigenvalues: int = 10,
                  ) -> None:
         """Initialize the Environment object.
 
@@ -60,11 +62,15 @@ class Environment(gym.Env):
         self.stock_space_dimension = stock_market_history.shape[1]
         self.buy_rule = buy_rule
         self.use_corr_matrix = use_corr_matrix
-        self.window = window
         
         if self.use_corr_matrix:
             self.stock_market_history = append_corr_matrix(df=self.stock_market_history,
-                                                           window=self.window)
+                                                           window=window)
+            
+        elif self.use_corr_eigenvalues:
+            self.stock_market_history = append_corr_matrix_eigenvalues(df=self.stock_market_history,
+                                                                       window=window,
+                                                                       number_of_eigenvalues = number_of_eigenvalues)
         
         self.time_horizon = self.stock_market_history.shape[0]
         
