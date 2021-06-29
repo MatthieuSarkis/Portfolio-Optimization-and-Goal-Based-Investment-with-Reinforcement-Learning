@@ -1,7 +1,7 @@
 {
     "initial_cash": 100000.0,
-    "buy_rate": 0.0003,
-    "sell_rate": 0.0003,
+    "buy_cost": 0.0003,
+    "sell_cost": 0.0003,
     "bank_rate": 0.5,
     "initial_date": "2015-01-01",
     "final_date": "2020-12-31",

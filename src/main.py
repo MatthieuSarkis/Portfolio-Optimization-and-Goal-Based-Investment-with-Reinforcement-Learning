@@ -48,8 +48,8 @@ def main(args):
     
     env = Environment(stock_market_history=df,
                       initial_cash_in_bank=args.initial_cash,
-                      buy_rate=args.buy_rate,
-                      sell_rate=args.sell_rate,
+                      buy_cost=args.buy_cost,
+                      sell_cost=args.sell_cost,
                       bank_rate=args.bank_rate,
                       limit_n_stocks=args.limit_n_stocks,
                       buy_rule=args.buy_rule,
@@ -88,8 +88,8 @@ if __name__ == '__main__':
     parser = ArgumentParser()
 
     parser.add_argument('--initial_cash',          type=float,          default=10000,                   help='')
-    parser.add_argument('--buy_rate',              type=float,          default=0.001,                   help='')
-    parser.add_argument('--sell_rate',             type=float,          default=0.001,                   help='')
+    parser.add_argument('--buy_cost',              type=float,          default=0.001,                   help='')
+    parser.add_argument('--sell_cost',             type=float,          default=0.001,                   help='')
     parser.add_argument('--bank_rate',             type=float,          default=0.5,                     help='Annual bank rate')
     parser.add_argument('--initial_date',          type=str,            default='2010-01-01',            help='')
     parser.add_argument('--final_date',            type=str,            default='2020-12-31',            help='')

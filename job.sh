@@ -29,8 +29,8 @@ python src/main.py \
 #srun --unbuffered 
 #python src/main.py \
 #--initial_cash 10000000 \
-#--buy_rate 0.0001 \
-#--sell_rate 0.0001 \
+#--buy_cost 0.0001 \
+#--sell_cost 0.0001 \
 #--bank_rate 0.5 \
 #--sac_temperature 1.0 \
 #--limit_n_stocks 100 \

@@ -29,8 +29,8 @@ class Environment(gym.Env):
     def __init__(self, 
                  stock_market_history: pd.DataFrame,                
                  initial_cash_in_bank: float,
-                 buy_rate: float = 0.001,
-                 sell_rate: float = 0.001,
+                 buy_cost: float = 0.001,
+                 sell_cost: float = 0.001,
                  bank_rate: float = 0.5,
                  limit_n_stocks: float = 200,
                  buy_rule: str = 'most_first',
@@ -44,8 +44,8 @@ class Environment(gym.Env):
         Args:
             stock_market_history (pd.DataFrame): (time_horizon * number_stocks) format                
             initial_cash_in_bank (float): Initial amount of money in the bank
-            buy_rate (float): fees in percentage for buying a stock 
-            sell_rate (float): fees in percentage for selling a stock 
+            buy_cost (float): fees in percentage for buying a stock 
+            sell_cost (float): fees in percentage for selling a stock 
             bank_rate (float): annual interest rate of the bank account
             limit_n_stocks (float): maximum number of stocks one can buy or sell at once
             buy_rule (str): specifies the order in which one buys the stocks the agent decided to buy
@@ -83,8 +83,8 @@ class Environment(gym.Env):
         
         self.initial_cash_in_bank = initial_cash_in_bank
         
-        self.buy_rate = buy_rate
-        self.sell_rate = sell_rate
+        self.buy_cost = buy_cost
+        self.sell_cost = sell_cost
         self.daily_bank_rate = pow(1 + bank_rate, 1 / 365) - 1
         
         self.current_step = None
@@ -203,7 +203,7 @@ class Environment(gym.Env):
             return
          
         n_stocks_to_sell = min(-action, int(self.number_of_shares[idx]))
-        money_inflow = n_stocks_to_sell * self.stock_prices[idx] * (1 - self.sell_rate)
+        money_inflow = n_stocks_to_sell * self.stock_prices[idx] * (1 - self.sell_cost)
         self.cash_in_bank += money_inflow
         self.number_of_shares[idx] -= n_stocks_to_sell
             
@@ -225,7 +225,7 @@ class Environment(gym.Env):
             return
         
         n_stocks_to_buy = min(action, self.cash_in_bank // self.stock_prices[idx])
-        money_outflow = n_stocks_to_buy * self.stock_prices[idx] * (1 + self.buy_rate)
+        money_outflow = n_stocks_to_buy * self.stock_prices[idx] * (1 + self.buy_cost)
         self.cash_in_bank -= money_outflow
         self.number_of_shares[idx] += n_stocks_to_buy   
         

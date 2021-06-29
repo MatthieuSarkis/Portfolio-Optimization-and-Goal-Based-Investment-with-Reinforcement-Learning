@@ -27,8 +27,8 @@ class TestEnvironment(unittest.TestCase):
     def setUp(self):
         env = Environment(stock_market_history=pd.read_csv('tests/close.csv'),
                           initial_cash_in_bank=10000,
-                          buy_rate=0.1,
-                          sell_rate=0.1,
+                          buy_cost=0.1,
+                          sell_cost=0.1,
                           limit_n_stocks=200)
         
         env.reset()
