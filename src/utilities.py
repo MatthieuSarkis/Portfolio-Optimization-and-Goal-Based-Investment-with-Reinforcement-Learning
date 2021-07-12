@@ -12,6 +12,7 @@
 
 import gym
 import itertools
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -20,6 +21,7 @@ import pickle
 import seaborn as sns
 sns.set_theme()
 from sklearn.preprocessing import StandardScaler
+from typing import List, Union
 
 
 def make_dir(directory_name: str = '') -> None: 
@@ -108,6 +110,31 @@ def instanciate_scaler(env: gym.Env,
             scaler = pickle.load(f)
     
     return scaler
+
+def prepare_initial_portfolio(initial_portfolio: Union[int, float, str],
+                              tickers: List[str]) -> dict:
+    """Prepare the initial portfolio to give to the environment constructor.
+    
+    Args:
+        initial_portfolio (int or float or string): if numerical then initial cash in bank assuming no shares are owned initially, otherwise
+                                                    path to a json file prescribing the initial cah in bank as  well as the number of owned shares of each asset.
+        tickers (List[str]): list of asset names
+        
+    Returns:
+        dictionary giving the structure of the initial portfolio
+    """
+    
+    if isinstance(initial_portfolio, int) or isinstance(initial_portfolio, float):
+        initial_portfolio_returned = {key: 0 for key in tickers}
+        initial_portfolio_returned["Bank_account"] = initial_portfolio
+    
+    else:
+        with open(initial_portfolio, "r") as file:
+            initial_portfolio = json.load(file)
+            initial_portfolio_returned = {key: initial_portfolio[key] for key in tickers}
+            initial_portfolio_returned["Bank_account"] = initial_portfolio["Bank_account"]
+            
+    return initial_portfolio_returned
 
 def append_corr_matrix(df: pd.DataFrame,
                        window: int,

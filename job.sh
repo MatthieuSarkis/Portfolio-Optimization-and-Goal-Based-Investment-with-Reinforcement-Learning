@@ -18,8 +18,8 @@
 #srun --unbuffered 
 python src/main.py \
 --mode train \
---initial_cash 10000000 \
---n_episodes 1000 \
+--initial_portfolio ./initial_portfolio.json \
+--n_episodes 10 \
 --agent_type distributional \
 --use_corr_eigenvalues \
 

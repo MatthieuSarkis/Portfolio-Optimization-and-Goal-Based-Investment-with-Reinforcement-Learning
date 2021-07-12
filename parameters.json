@@ -1,5 +1,6 @@
 {
-    "initial_cash": 10000000.0,
+    "initial_cash": null,
+    "initial_portfolio": "./initial_portfolio.json",
     "buy_cost": 0.001,
     "sell_cost": 0.001,
     "bank_rate": 0.5,
@@ -16,7 +17,7 @@
     "tau": 0.005,
     "batch_size": 32,
     "layer_size": 256,
-    "n_episodes": 1000,
+    "n_episodes": 10,
     "delay": 1,
     "memory_size": 1000000,
     "mode": "train",

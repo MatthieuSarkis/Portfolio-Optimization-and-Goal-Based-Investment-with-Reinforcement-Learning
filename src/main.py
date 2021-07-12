@@ -21,7 +21,7 @@ from src.agents import instanciate_agent
 from src.environment import Environment
 from src.get_data import load_data
 from src.run import Run
-from src.utilities import instanciate_scaler
+from src.utilities import instanciate_scaler, prepare_initial_portfolio
 
 
 def main(args):
@@ -45,9 +45,12 @@ def main(args):
     df = load_data(initial_date=args.initial_date, 
                    final_date=args.final_date, 
                    mode=args.mode)
-    
+     
+    initial_portfolio = prepare_initial_portfolio(initial_portfolio=args.initial_cash if args.initial_cash is not None else args.initial_portfolio,
+                                                  tickers=df.columns.to_list())
+        
     env = Environment(stock_market_history=df,
-                      initial_cash_in_bank=args.initial_cash,
+                      initial_portfolio=initial_portfolio,
                       buy_cost=args.buy_cost,
                       sell_cost=args.sell_cost,
                       bank_rate=args.bank_rate,
@@ -87,34 +90,35 @@ if __name__ == '__main__':
     
     parser = ArgumentParser()
 
-    parser.add_argument('--initial_cash',          type=float,          default=10000,                   help='')
-    parser.add_argument('--buy_cost',              type=float,          default=0.001,                   help='')
-    parser.add_argument('--sell_cost',             type=float,          default=0.001,                   help='')
-    parser.add_argument('--bank_rate',             type=float,          default=0.5,                     help='Annual bank rate')
-    parser.add_argument('--initial_date',          type=str,            default='2010-01-01',            help='')
-    parser.add_argument('--final_date',            type=str,            default='2020-12-31',            help='')
-    parser.add_argument('--limit_n_stocks',        type=int,            default=100,                     help='')
-    parser.add_argument('--agent_type',            type=str,            default='automatic_temperature', help='Choose between: manual_temperature, automatic_temperature or distributional')
-    parser.add_argument('--buy_rule',              type=str,            default='most_first',            help='')
-    parser.add_argument('--sac_temperature',       type=float,          default=2.0,                     help='')
-    parser.add_argument('--gamma',                 type=float,          default=0.99,                    help='')
-    parser.add_argument('--lr_Q',                  type=float,          default=0.0003,                  help='')
-    parser.add_argument('--lr_pi',                 type=float,          default=0.0003,                  help='')
-    parser.add_argument('--lr_alpha',              type=float,          default=0.0003,                  help='')
-    parser.add_argument('--tau',                   type=float,          default=0.005,                   help='')
-    parser.add_argument('--batch_size',            type=int,            default=32,                      help='')
-    parser.add_argument('--layer_size',            type=int,            default=256,                     help='')
-    parser.add_argument('--n_episodes',            type=int,            default=1,                       help='')
-    parser.add_argument('--delay',                 type=int,            default=1,                       help='')
-    parser.add_argument('--memory_size',           type=int,            default=1000000,                 help='')
-    parser.add_argument('--mode',                  type=str,            default='test',                  help='')
-    parser.add_argument('--seed',                  type=int,            default='42',                    help='')
-    parser.add_argument('--gpu_devices',           type=int,            nargs='+', default=[0, 1, 2, 3], help='')
-    parser.add_argument('--grad_clip',             type=float,          default=1.0,                     help='')
-    parser.add_argument('--window',                type=int,            default=20,                      help='Window for correlation matrix computation.')
-    parser.add_argument('--number_of_eigenvalues', type=int,            default=10,                      help='Number of largest eigenvalues to append to the close prices time series.')
-    parser.add_argument('--use_corr_eigenvalues',  action='store_true', default=False,                   help='')
-    parser.add_argument('--use_corr_matrix',       action='store_true', default=False,                   help='')
+    parser.add_argument('--initial_cash',          type=float,          default=None,                      help='')
+    parser.add_argument('--initial_portfolio',     type=str,            default='./initial_portfolio.json', help='')
+    parser.add_argument('--buy_cost',              type=float,          default=0.001,                      help='')
+    parser.add_argument('--sell_cost',             type=float,          default=0.001,                      help='')
+    parser.add_argument('--bank_rate',             type=float,          default=0.5,                        help='Annual bank rate')
+    parser.add_argument('--initial_date',          type=str,            default='2010-01-01',               help='')
+    parser.add_argument('--final_date',            type=str,            default='2020-12-31',               help='')
+    parser.add_argument('--limit_n_stocks',        type=int,            default=100,                        help='')
+    parser.add_argument('--agent_type',            type=str,            default='automatic_temperature',    help='Choose between: manual_temperature, automatic_temperature or distributional')
+    parser.add_argument('--buy_rule',              type=str,            default='most_first',               help='')
+    parser.add_argument('--sac_temperature',       type=float,          default=2.0,                        help='')
+    parser.add_argument('--gamma',                 type=float,          default=0.99,                       help='')
+    parser.add_argument('--lr_Q',                  type=float,          default=0.0003,                     help='')
+    parser.add_argument('--lr_pi',                 type=float,          default=0.0003,                     help='')
+    parser.add_argument('--lr_alpha',              type=float,          default=0.0003,                     help='')
+    parser.add_argument('--tau',                   type=float,          default=0.005,                      help='')
+    parser.add_argument('--batch_size',            type=int,            default=32,                         help='')
+    parser.add_argument('--layer_size',            type=int,            default=256,                        help='')
+    parser.add_argument('--n_episodes',            type=int,            default=1,                          help='')
+    parser.add_argument('--delay',                 type=int,            default=1,                          help='')
+    parser.add_argument('--memory_size',           type=int,            default=1000000,                    help='')
+    parser.add_argument('--mode',                  type=str,            default='test',                     help='')
+    parser.add_argument('--seed',                  type=int,            default='42',                       help='')
+    parser.add_argument('--gpu_devices',           type=int,            nargs='+', default=[0, 1, 2, 3],    help='')
+    parser.add_argument('--grad_clip',             type=float,          default=1.0,                        help='')
+    parser.add_argument('--window',                type=int,            default=20,                         help='Window for correlation matrix computation.')
+    parser.add_argument('--number_of_eigenvalues', type=int,            default=10,                         help='Number of largest eigenvalues to append to the close prices time series.')
+    parser.add_argument('--use_corr_eigenvalues',  action='store_true', default=False,                      help='')
+    parser.add_argument('--use_corr_matrix',       action='store_true', default=False,                      help='')
     
     args = parser.parse_args()
     main(args)

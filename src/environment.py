@@ -28,7 +28,7 @@ class Environment(gym.Env):
 
     def __init__(self, 
                  stock_market_history: pd.DataFrame,                
-                 initial_cash_in_bank: float,
+                 initial_portfolio: dict,
                  buy_cost: float = 0.001,
                  sell_cost: float = 0.001,
                  bank_rate: float = 0.5,
@@ -43,7 +43,7 @@ class Environment(gym.Env):
 
         Args:
             stock_market_history (pd.DataFrame): (time_horizon * number_stocks) format                
-            initial_cash_in_bank (float): Initial amount of money in the bank
+            initial_portfolio (dict): Initial structure of the portfolio (cash in bank and shares owned)
             buy_cost (float): fees in percentage for buying a stock 
             sell_cost (float): fees in percentage for selling a stock 
             bank_rate (float): annual interest rate of the bank account
@@ -82,7 +82,7 @@ class Environment(gym.Env):
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(self.action_space_dimension,)) 
         self.limit_n_stocks = limit_n_stocks
         
-        self.initial_cash_in_bank = initial_cash_in_bank
+        self.initial_portfolio = initial_portfolio
         
         self.buy_cost = buy_cost
         self.sell_cost = sell_cost
@@ -104,9 +104,9 @@ class Environment(gym.Env):
         """
         
         self.current_step = 0
-        self.cash_in_bank = self.initial_cash_in_bank
+        self.cash_in_bank = self.initial_portfolio["Bank_account"]
         self.stock_prices = self.stock_market_history.iloc[self.current_step]
-        self.number_of_shares = np.zeros(self.stock_space_dimension)
+        self.number_of_shares = np.array([self.initial_portfolio[ticker] for ticker in self.stock_market_history.columns[:self.action_space_dimension]])
         
         return self._get_observation()
         
