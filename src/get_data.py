@@ -127,7 +127,7 @@ def load_data(initial_date: str,
     time_horizon = df.shape[0]
     
     if mode == 'train':
-        df = df.iloc[:3*time_horizon//4, :3]
+        df = df.iloc[:3*time_horizon//4, :]
     else:
         df = df.iloc[3*time_horizon//4:, :]
         

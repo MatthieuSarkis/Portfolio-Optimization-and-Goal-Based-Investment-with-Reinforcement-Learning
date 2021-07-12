@@ -19,7 +19,7 @@
 python src/main.py \
 --mode train \
 --initial_portfolio ./initial_portfolio.json \
---n_episodes 10 \
+--n_episodes 1000 \
 --agent_type distributional \
 --use_corr_eigenvalues \
 
