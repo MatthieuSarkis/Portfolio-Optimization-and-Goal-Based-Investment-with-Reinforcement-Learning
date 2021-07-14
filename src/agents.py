@@ -86,10 +86,10 @@ class Agent():
         self._targeted_network_list = []
     
     def remember(self, 
-                 state: np.array, 
-                 action: np.array, 
+                 state: np.ndarray, 
+                 action: np.ndarray, 
                  reward: float, 
-                 new_state: np.array, 
+                 new_state: np.ndarray, 
                  done: bool,
                  ) -> None:
         """Store some observation in the replay buffer.
@@ -153,7 +153,7 @@ class Agent():
             self._targeted_network_list[i+shift].load_state_dict(params)
 
     def choose_action(self, 
-                      observation: np.array,
+                      observation: np.ndarray,
                       ) -> np.array:
         """Choose an action to take given an observation of the state of the environment.
         

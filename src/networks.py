@@ -66,8 +66,8 @@ class Critic(torch.nn.Module):
         self.to(device)
         
     def forward(self, 
-                state: np.array, 
-                action: np.array,
+                state: np.ndarray, 
+                action: np.ndarray,
                 ) -> torch.tensor:
         """Implement the feedforward of the net.
         
@@ -104,7 +104,7 @@ class Actor(torch.nn.Module):
                  lr_pi: float, 
                  input_shape: Tuple, 
                  layer_neurons: int, 
-                 max_actions: np.array, 
+                 max_actions: np.ndarray, 
                  action_space_dimension: Tuple, 
                  name: str, 
                  log_sigma_min: float = -20.0, 
@@ -156,7 +156,7 @@ class Actor(torch.nn.Module):
         self.to(device)
         
     def forward(self, 
-                state: np.array,
+                state: np.ndarray,
                 ) -> List[torch.tensor]:
         """Implement the feedforward of the net.
         
@@ -181,7 +181,7 @@ class Actor(torch.nn.Module):
         return mu, sigma
     
     def sample(self, 
-               state: np.array, 
+               state: np.ndarray, 
                reparameterize: bool = True,
                ) -> Tuple[torch.tensor]:
         """Sample from the Normal distribution, output of feedforward method, to give an action
@@ -270,7 +270,7 @@ class Value(torch.nn.Module):
         self.to(device)
         
     def forward(self, 
-                state: np.array,
+                state: np.ndarray,
                 ) -> torch.tensor:
         """Implement the feedforward of the net.
         
@@ -364,7 +364,7 @@ class Distributional_Critic(torch.nn.Module):
 
     def forward(self, 
                 state: List[float], 
-                action: np.array,
+                action: np.ndarray,
                 ) -> Tuple[torch.Tensor]:
         """Implement the feedforward of the net.
         
@@ -403,7 +403,7 @@ class Distributional_Critic(torch.nn.Module):
 
     def sample(self, 
                state: List[float], 
-               action: np.array,
+               action: np.ndarray,
                reparameterize: bool = True,
                ) -> torch.Tensor:
         """Sample from the Normal distribution, output of feedforward method, to give a critic-value

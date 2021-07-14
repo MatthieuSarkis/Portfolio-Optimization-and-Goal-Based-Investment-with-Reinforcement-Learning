@@ -36,8 +36,8 @@ def make_dir(directory_name: str = '') -> None:
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
             
-def plot_reward(x: np.array, 
-                rewards: np.array, 
+def plot_reward(x: np.ndarray, 
+                rewards: np.ndarray, 
                 figure_file: str, 
                 mode: str,
                 bins: int = 20,

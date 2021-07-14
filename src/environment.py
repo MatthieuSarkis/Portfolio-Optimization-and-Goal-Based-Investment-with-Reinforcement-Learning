@@ -111,7 +111,7 @@ class Environment(gym.Env):
         return self._get_observation()
         
     def step(self, 
-             actions: np.array,
+             actions: np.ndarray,
              ) -> Tuple[np.array, float, bool, dict]:
         """Take one step in the trading environment.
         
@@ -138,7 +138,7 @@ class Environment(gym.Env):
         return self._get_observation(), reward, done, info
        
     def _trade(self, 
-               actions: np.array,
+               actions: np.ndarray,
                ) -> None:
         """Perform one trade according to the actions decided buy an agent
         

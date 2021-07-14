@@ -42,10 +42,10 @@ class ReplayBuffer():
         self.done_buffer = np.zeros(self.size, dtype=np.bool)
         
     def push(self, 
-             state: np.array, 
-             action: np.array, 
+             state: np.ndarray, 
+             action: np.ndarray, 
              reward: float, 
-             new_state: np.array, 
+             new_state: np.ndarray, 
              done: bool,
              ) -> None:
         """Add a memory to the buffer
