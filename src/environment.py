@@ -112,7 +112,7 @@ class Environment(gym.Env):
         
     def step(self, 
              actions: np.ndarray,
-             ) -> Tuple[np.array, float, bool, dict]:
+             ) -> Tuple[np.ndarray, float, bool, dict]:
         """Take one step in the trading environment.
         
         Args:

@@ -72,7 +72,7 @@ class ReplayBuffer():
         
     def sample(self, 
                batch_size: int = 32,
-               ) -> Tuple[np.array, np.array, np.array, np.array, np.array]:
+               ) -> Tuple[np.ndarray, np.array, np.array, np.array, np.array]:
         """Sample a batch of data from the buffer.
         
         Args:
