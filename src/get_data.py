@@ -101,12 +101,13 @@ def load_data(initial_date: str,
               final_date: str, 
               mode: str = 'test') -> pd.DataFrame:
     
-    print('>>>>> Dealing with data <<<<<')
-    
     with open('src/tickers.txt') as f:
         stocks_symbols = f.read().splitlines()
       
     if not os.path.exists('data/'):  
+        
+        print('>>>>> Fetching the data <<<<<')
+        
         fetcher = DataFetcher(stock_symbols=stocks_symbols,
                               start_date=initial_date,
                               end_date=final_date,
@@ -115,6 +116,9 @@ def load_data(initial_date: str,
         fetcher.fetch_and_merge_data()
     
     if not os.path.exists('data/close.csv'):
+        
+        print('>>>>> Extracting close prices <<<<<')
+        
         preprocessor = Preprocessor(df_directory='data',
                                     file_name='stocks.csv')
     
@@ -122,6 +126,9 @@ def load_data(initial_date: str,
         df = preprocessor.handle_missing_values()
     
     else:
+        
+        print('>>>>> Reading the data <<<<<')
+        
         df = pd.read_csv('data/close.csv', index_col=0)
     
     time_horizon = df.shape[0]

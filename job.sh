@@ -19,7 +19,7 @@
 python src/main.py \
 --mode test \
 --initial_portfolio ./initial_portfolio.json \
---n_episodes 10 \
+--n_episodes 300 \
 --agent_type distributional \
 --use_corr_eigenvalues \
 

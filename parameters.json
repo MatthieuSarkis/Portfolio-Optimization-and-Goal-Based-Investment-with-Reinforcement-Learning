@@ -17,7 +17,7 @@
     "tau": 0.005,
     "batch_size": 32,
     "layer_size": 256,
-    "n_episodes": 10,
+    "n_episodes": 300,
     "delay": 1,
     "memory_size": 1000000,
     "mode": "test",

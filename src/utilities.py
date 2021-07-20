@@ -124,6 +124,8 @@ def prepare_initial_portfolio(initial_portfolio: Union[int, float, str],
         dictionary giving the structure of the initial portfolio
     """
     
+    print('>>>>> Reading the provided initial portfolio <<<<<')
+    
     if isinstance(initial_portfolio, int) or isinstance(initial_portfolio, float):
         initial_portfolio_returned = {key: 0 for key in tickers}
         initial_portfolio_returned["Bank_account"] = initial_portfolio
@@ -151,6 +153,8 @@ def append_corr_matrix(df: pd.DataFrame,
     Returns:
         the input time series with the sliding correlation matrix appended
     """
+
+    print('>>>>> Appending the correlation matrix <<<<<')
 
     columns = ['{}/{}'.format(m, n) for (m, n) in itertools.combinations_with_replacement(df.columns, r=2)]
     corr = df.rolling(window).cov()
@@ -181,6 +185,8 @@ def append_corr_matrix_eigenvalues(df: pd.DataFrame,
         the input time series with the number_of_eigenvalues greatest eigenvalues of the sliding correlation matrix appended
     """
     
+    print('>>>>> Appending the eigenvalues <<<<<')
+    
     if number_of_eigenvalues > df.shape[1]:
         number_of_eigenvalues = df.shape[1]
     
@@ -198,5 +204,7 @@ def append_corr_matrix_eigenvalues(df: pd.DataFrame,
         index = [corr.index[df.shape[1]*i][0]]
         temp = pd.DataFrame(data=data, columns=index, index=columns).transpose()
         corr_eigenvalues = pd.concat([corr_eigenvalues, temp])
+
+    print('>>>>> Eigenvalues have been appended <<<<<')
 
     return pd.concat([df.iloc[window-1 : ], corr_eigenvalues], axis=1)
