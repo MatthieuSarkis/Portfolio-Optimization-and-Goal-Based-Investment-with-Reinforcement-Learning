@@ -94,7 +94,7 @@ class Critic(torch.nn.Module):
         
     def load_network_weights(self) -> None:
         """Load checkpoint, used in testing mode."""
-        self.load_state_dict(torch.load(self.checkpoint_file))
+        self.load_state_dict(torch.load(self.checkpoint_file, map_location=self.device))
         
       
 class Actor(torch.nn.Module):
@@ -218,7 +218,7 @@ class Actor(torch.nn.Module):
     def load_network_weights(self):
         """Load checkpoint, used in testing mode."""
          
-        self.load_state_dict(torch.load(self.checkpoint_file))
+        self.load_state_dict(torch.load(self.checkpoint_file, map_location=self.device))
         
 class Value(torch.nn.Module):
     """Define a value network, whose role is to attribute a value to a state.
@@ -297,7 +297,7 @@ class Value(torch.nn.Module):
     def load_network_weights(self) -> None:
         """Load checkpoint, used in testing mode."""
         
-        self.load_state_dict(torch.load(self.checkpoint_file))
+        self.load_state_dict(torch.load(self.checkpoint_file, map_location=self.device))
          
 class Distributional_Critic(torch.nn.Module):
     """Distributional version of a critic net.
@@ -438,4 +438,4 @@ class Distributional_Critic(torch.nn.Module):
     def load_network_weights(self) -> None:
         """Load checkpoint, used in testing mode."""
         
-        self.load_state_dict(torch.load(self.checkpoint_file))
+        self.load_state_dict(torch.load(self.checkpoint_file, map_location=self.device))
