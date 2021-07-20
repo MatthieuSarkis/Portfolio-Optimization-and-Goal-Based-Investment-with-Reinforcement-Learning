@@ -17,9 +17,9 @@
 
 #srun --unbuffered 
 python src/main.py \
---mode train \
+--mode test \
 --initial_portfolio ./initial_portfolio.json \
---n_episodes 1000 \
+--n_episodes 10 \
 --agent_type distributional \
 --use_corr_eigenvalues \
 

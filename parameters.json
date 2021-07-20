@@ -20,7 +20,7 @@
     "n_episodes": 10,
     "delay": 1,
     "memory_size": 1000000,
-    "mode": "train",
+    "mode": "test",
     "seed": 42,
     "gpu_devices": [
         0,
