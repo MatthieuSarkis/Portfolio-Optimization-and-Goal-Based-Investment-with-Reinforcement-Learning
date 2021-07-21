@@ -16,6 +16,7 @@ import os
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import time
+from typing import List
 
 from src.agents import Agent
 from src.utilities import plot_reward, make_dir
@@ -73,6 +74,8 @@ class Run():
         self.best_reward = float('-Inf')
         self.reward_history = []
         
+        self.history_of_portfolio_histories: List = []
+        
     def run(self,
             log_directory: str,
             ) -> None:
@@ -108,6 +111,8 @@ class Run():
         done = False
         observation = self.env.reset()
         observation = self.scaler.transform([observation])[0]
+        
+        #portfolio_history = pd.DataFrame(columns=self.env.assets_list)
         
         while not done:
             
