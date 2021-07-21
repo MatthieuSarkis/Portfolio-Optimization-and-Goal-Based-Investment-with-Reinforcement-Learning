@@ -133,8 +133,13 @@ def prepare_initial_portfolio(initial_portfolio: Union[int, float, str],
     else:
         with open(initial_portfolio, "r") as file:
             initial_portfolio = json.load(file)
-            initial_portfolio_returned = {key: initial_portfolio[key] for key in tickers}
-            initial_portfolio_returned["Bank_account"] = initial_portfolio["Bank_account"]
+            
+        initial_portfolio_returned = {key: 0 for key in tickers}
+        initial_portfolio_returned["Bank_account"] = initial_portfolio["Bank_account"]
+        
+        for key in initial_portfolio_returned.keys():
+            if key in initial_portfolio.keys():
+                initial_portfolio_returned[key] = initial_portfolio[key]
             
     return initial_portfolio_returned
 

@@ -1,4 +1,5 @@
 {
+    "assets_to_trade": "src/tickers_S&P500_subset.txt",
     "initial_cash": null,
     "initial_portfolio": "./initial_portfolio.json",
     "buy_cost": 0.001,
@@ -17,7 +18,7 @@
     "tau": 0.005,
     "batch_size": 32,
     "layer_size": 256,
-    "n_episodes": 300,
+    "n_episodes": 5,
     "delay": 1,
     "memory_size": 1000000,
     "mode": "test",

@@ -58,41 +58,45 @@ class Environment(gym.Env):
         
         super(Environment, self).__init__()
         
+        # attibutes related to the financial time series
         self.stock_market_history = stock_market_history
+        self.assets_list = self.stock_market_history.columns
+        self.time_horizon = self.stock_market_history.shape[0]
         self.stock_space_dimension = stock_market_history.shape[1]
-        self.buy_rule = buy_rule
-        self.use_corr_matrix = use_corr_matrix
-        self.use_corr_eigenvalues = use_corr_eigenvalues
         
-        if self.use_corr_matrix:
+        # if asked, append the sliding correlation matrix of the time series
+        if use_corr_matrix:
             self.stock_market_history = append_corr_matrix(df=self.stock_market_history,
                                                            window=window)
             
-        elif self.use_corr_eigenvalues:
+        # if asked, append the eigenvalues of the sliding correlation matrix of the time series
+        elif use_corr_eigenvalues:
             self.stock_market_history = append_corr_matrix_eigenvalues(df=self.stock_market_history,
                                                                        window=window,
                                                                        number_of_eigenvalues = number_of_eigenvalues)
         
-        self.time_horizon = self.stock_market_history.shape[0]
-        
-        self.state_space_dimension = 1 + self.stock_space_dimension + self.stock_market_history.shape[1]
+        # defining the observation and action space, once all preprocessing has been done
+        self.observation_space_dimension = 1 + self.stock_space_dimension + self.stock_market_history.shape[1]
         self.action_space_dimension = self.stock_space_dimension
-        
-        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_space_dimension,))
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(self.observation_space_dimension,))
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(self.action_space_dimension,)) 
+        
+        # maximal amount of share one can buy or sell in one trade
         self.limit_n_stocks = limit_n_stocks
         
-        self.initial_portfolio = initial_portfolio
-        
+        # attibutes related to buying, selling, and bank interest rate
+        self.buy_rule = buy_rule
         self.buy_cost = buy_cost
         self.sell_cost = sell_cost
         self.daily_bank_rate = pow(1 + bank_rate, 1 / 365) - 1
         
+        self.initial_portfolio = initial_portfolio
+        
+        # initializing the state of the environment
         self.current_step = None
         self.cash_in_bank = None
         self.stock_prices = None
         self.number_of_shares = None
-
         self.reset()
     
     def reset(self) -> np.array:  
@@ -236,7 +240,7 @@ class Environment(gym.Env):
             np.array for the observation
         """
         
-        observation = np.empty(self.state_space_dimension)
+        observation = np.empty(self.observation_space_dimension)
         observation[0] = self.cash_in_bank
         observation[1 : self.stock_prices.shape[0]+1] = self.stock_prices
         observation[self.stock_prices.shape[0]+1 : ] = self.number_of_shares

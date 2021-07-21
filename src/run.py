@@ -13,6 +13,7 @@
 import gym
 import numpy as np
 import os
+import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import time
 
@@ -132,16 +133,27 @@ class Run():
         
         self.episode += 1
         final_time = time.time()
-                
-        if self.agent_type == 'automatic_temperature':
-            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
-    
-        elif self.agent_type == 'manual_temperature': 
-            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | manual_temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
         
-        if self.agent_type == 'distributional':
-            print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
+        if self.mode == 'train':    
+            if self.agent_type == 'automatic_temperature':
+                print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
         
+            elif self.agent_type == 'manual_temperature': 
+                print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | manual_temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
+            
+            elif self.agent_type == 'distributional':
+                print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
+ 
+        if self.mode == 'test':    
+            if self.agent_type == 'automatic_temperature':
+                print('    episode: {:<13d} | reward: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, self.agent.agent_name, final_time-initial_time))
+        
+            elif self.agent_type == 'manual_temperature': 
+                print('    episode: {:<13d} | reward: {:<13.1f} | {} | manual_temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
+            
+            elif self.agent_type == 'distributional':
+                print('    episode: {:<13d} | reward: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, self.agent.agent_name, final_time-initial_time))
+
         if average_reward > self.best_reward:
             self.best_reward = average_reward
             if self.mode == 'train':

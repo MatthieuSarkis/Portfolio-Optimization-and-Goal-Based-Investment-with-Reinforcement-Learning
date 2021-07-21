@@ -19,7 +19,7 @@
 python src/main.py \
 --mode test \
 --initial_portfolio ./initial_portfolio.json \
---n_episodes 300 \
+--n_episodes 5 \
 --agent_type distributional \
 --use_corr_eigenvalues \
 
@@ -28,6 +28,7 @@ python src/main.py \
 
 #srun --unbuffered 
 #python src/main.py \
+#--assets_to_trade src/tickers_S&P500_subset.txt \
 #--initial_cash 10000000 \
 #--buy_cost 0.0001 \
 #--sell_cost 0.0001 \

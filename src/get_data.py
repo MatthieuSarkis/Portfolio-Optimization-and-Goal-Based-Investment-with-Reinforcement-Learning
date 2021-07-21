@@ -99,9 +99,21 @@ class Preprocessor():
     
 def load_data(initial_date: str, 
               final_date: str, 
+              tickers_subset: str,
               mode: str = 'test') -> pd.DataFrame:
+    """Wrapper function designed to download, preprocess and load the data into a dataframe.
     
-    with open('src/tickers.txt') as f:
+    Args:
+        inital_data (str): starting date of the time series
+        final_date (str): final date of the time series
+        tickers_subset (str): subset of tickers for assets of interest
+        mode (str): in order to load either the train or test data
+    
+    Returns:
+        df (pd.DataFrame): multidimensional time series containing the close price of the relevant assets
+    """
+    
+    with open('src/tickers_S&P500.txt') as f:
         stocks_symbols = f.read().splitlines()
       
     if not os.path.exists('data/'):  
@@ -130,6 +142,12 @@ def load_data(initial_date: str,
         print('>>>>> Reading the data <<<<<')
         
         df = pd.read_csv('data/close.csv', index_col=0)
+        
+        # We select the tickers we want to focus on, reading them form a list of tickers text file.
+        with open(tickers_subset) as f:
+            stocks_subset = f.read().splitlines()
+            
+        df = df[stocks_subset]
     
     time_horizon = df.shape[0]
     
