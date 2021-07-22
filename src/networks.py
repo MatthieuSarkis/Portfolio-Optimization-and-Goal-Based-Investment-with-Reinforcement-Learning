@@ -16,6 +16,7 @@ import torch
 from typing import Tuple, List
 
 class Network(torch.nn.Module):
+    """Abtract class to be inherited by the various critic and actor classes."""
     
     def __init__(self,
                  input_shape: Tuple, 
