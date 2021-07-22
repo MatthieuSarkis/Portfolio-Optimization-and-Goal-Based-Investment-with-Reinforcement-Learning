@@ -23,18 +23,6 @@ sns.set_theme()
 from sklearn.preprocessing import StandardScaler
 from typing import List, Union
 
-
-def make_dir(directory_name: str = '') -> None: 
-    """Small helper function to create a directory if necessary.
-    
-    Args: directory_name (str): name of the directory to create
-    
-    Returns:
-        no value
-    """
-    
-    if not os.path.exists(directory_name):
-        os.makedirs(directory_name)
             
 def plot_reward(x: np.ndarray, 
                 rewards: np.ndarray, 
@@ -72,7 +60,8 @@ def plot_reward(x: np.ndarray,
     plt.savefig(figure_file) 
 
 def instanciate_scaler(env: gym.Env,
-                       mode: str) -> StandardScaler:
+                       mode: str,
+                       checkpoint_directory: str) -> StandardScaler:
     """Instanciate and either fit or load parameter depending on mode.
     
     In train mode, the agent behaves randomly in order to store typical observations in the environment.
@@ -101,12 +90,11 @@ def instanciate_scaler(env: gym.Env,
                 observations.append(observation_)
 
         scaler.fit(observations)
-        make_dir('saved_networks')
-        with open('saved_networks/scaler.pkl', 'wb') as f:
+        with open(os.path.join(checkpoint_directory,'scaler.pkl'), 'wb') as f:
             pickle.dump(scaler, f)
     
     if mode == 'test':
-        with open('saved_networks/scaler.pkl', 'rb') as f:
+        with open(os.path.join(checkpoint_directory,'scaler.pkl'), 'rb') as f:
             scaler = pickle.load(f)
     
     return scaler

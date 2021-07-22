@@ -12,10 +12,9 @@
 
 import os
 import pandas as pd
+from pathlib import Path
 from typing import List
 import yfinance as yf
-
-from src.utilities import make_dir
 
 class DataFetcher():
     
@@ -26,7 +25,7 @@ class DataFetcher():
                  directory_path: str = "data",
                  ) -> None:
         
-        make_dir(directory_name=directory_path)
+        Path(directory_path).mkdir(parents=True, exist_ok=True)
         
         self.stock_symbols = stock_symbols
         self.start_date = start_date
@@ -146,6 +145,7 @@ def load_data(initial_date: str,
         # We select the tickers we want to focus on, reading them form a list of tickers text file.
         with open(tickers_subset) as f:
             stocks_subset = f.read().splitlines()
+            stocks_subset = [ticker for ticker in stocks_subset if ticker in df.columns]
             
         df = df[stocks_subset]
     

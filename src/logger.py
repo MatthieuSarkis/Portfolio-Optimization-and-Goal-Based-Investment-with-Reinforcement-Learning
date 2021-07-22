@@ -32,7 +32,16 @@ class Logger():
         if mode == 'train':
             self.logs['reward_running_average'] = []
                           
-    def _set_number_epochs(self,
-                           number_epochs: int):
+    def set_number_epochs(self,
+                           number_epochs: int,
+                           ) -> None:
         
         self.number_epochs = number_epochs
+        
+    def print_status(self) -> None:
+        pass
+    
+    def append_to_portfolio_history(self,
+                                    epoch,
+                                    ) -> None:
+        pass

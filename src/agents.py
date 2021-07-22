@@ -31,6 +31,7 @@ class Agent():
                  tau: float, 
                  env: gym.Env, 
                  agent_name: str, 
+                 checkpoint_directory_networks: str,
                  gamma: float = 0.99, 
                  size: int = 1000000,
                  layer_size: int = 256, 
@@ -73,13 +74,16 @@ class Agent():
         self.delay = delay
         self.grad_clip = grad_clip
         self.device = device
+        self.checkpoint_directory_networks = checkpoint_directory_networks
 
-        self.actor = Actor(self.lr_pi, 
-                           self.input_shape, 
-                           self.layer_size, 
+        self.actor = Actor(lr_pi=self.lr_pi, 
                            action_space_dimension=self.action_space_dimension, 
-                           name=self.agent_name+'_actor',
                            max_actions=self.env.action_space.high,
+                           input_shape=self.input_shape, 
+                           layer_neurons=self.layer_size, 
+                           agent_name=self.agent_name,
+                           network_name='actor',
+                           checkpoint_directory_networks=self.checkpoint_directory_networks,
                            device=self.device)
         
         self._network_list = [self.actor]
@@ -208,30 +212,38 @@ class Agent_ManualTemperature(Agent):
         
         super(Agent_ManualTemperature, self).__init__(*args, **kwargs)
         
-        self.critic_1 = Critic(self.lr_Q, 
-                               self.input_shape, 
-                               self.layer_size, 
+        self.critic_1 = Critic(lr_Q=self.lr_Q, 
                                action_space_dimension=self.action_space_dimension, 
-                               name=self.agent_name+'_critic1',
+                               input_shape=self.input_shape, 
+                               layer_neurons=self.layer_size, 
+                               agent_name=self.agent_name,
+                               network_name='critic1',
+                               checkpoint_directory_networks=self.checkpoint_directory_networks,
                                device=self.device)
         
-        self.critic_2 = Critic(self.lr_Q, 
-                               self.input_shape, 
-                               self.layer_size, 
+        self.critic_2 = Critic(lr_Q=self.lr_Q, 
                                action_space_dimension=self.action_space_dimension, 
-                               name=self.agent_name+'_critic2',
+                               input_shape=self.input_shape, 
+                               layer_neurons=self.layer_size, 
+                               agent_name=self.agent_name,
+                               network_name='critic2',
+                               checkpoint_directory_networks=self.checkpoint_directory_networks,
                                device=self.device)
         
-        self.value = Value(self.lr_Q, 
-                           self.input_shape, 
-                           self.layer_size,
-                           name=self.agent_name+'_value',
+        self.value = Value(lr_Q=self.lr_Q, 
+                           input_shape=self.input_shape, 
+                           layer_neurons=self.layer_size, 
+                           agent_name=self.agent_name,
+                           network_name='value',
+                           checkpoint_directory_networks=self.checkpoint_directory_networks,
                            device=self.device)
         
-        self.target_value = Value(self.lr_Q, 
-                                  self.input_shape, 
-                                  self.layer_size, 
-                                  name=self.agent_name+'_target_value',
+        self.target_value = Value(lr_Q=self.lr_Q, 
+                                  input_shape=self.input_shape, 
+                                  layer_neurons=self.layer_size, 
+                                  agent_name=self.agent_name,
+                                  network_name='targetValue',
+                                  checkpoint_directory_networks=self.checkpoint_directory_networks,
                                   device=self.device)
         
         self._network_list += [self.critic_1, self.critic_2, self.value, self.target_value]
@@ -356,32 +368,40 @@ class Agent_AutomaticTemperature(Agent):
         self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
-        self.critic_1 = Critic(self.lr_Q, 
-                               self.input_shape, 
-                               self.layer_size,
-                               action_space_dimension=self.action_space_dimension, 
-                               name=self.agent_name+'_critic1',
+        self.critic_1 = Critic(lr_Q=self.lr_Q, 
+                               action_space_dimension=self.action_space_dimension,
+                               input_shape=self.input_shape, 
+                               layer_neurons=self.layer_size, 
+                               agent_name=self.agent_name,
+                               network_name="critic1",
+                               checkpoint_directory_networks=self.checkpoint_directory_networks,
                                device=self.device)
         
-        self.critic_2 = Critic(self.lr_Q, 
-                               self.input_shape, 
-                               self.layer_size,
+        self.critic_2 = Critic(lr_Q=self.lr_Q, 
                                action_space_dimension=self.action_space_dimension, 
-                               name=self.agent_name+'_critic2',
+                               input_shape=self.input_shape, 
+                               layer_neurons=self.layer_size, 
+                               agent_name=self.agent_name,
+                               network_name="critic2",
+                               checkpoint_directory_networks=self.checkpoint_directory_networks,
                                device=self.device)
         
-        self.target_critic_1 = Critic(self.lr_Q, 
-                                      self.input_shape, 
-                                      self.layer_size, 
+        self.target_critic_1 = Critic(lr_Q=self.lr_Q,  
                                       action_space_dimension=self.action_space_dimension, 
-                                      name=self.agent_name+'_target_critic1',
+                                      input_shape=self.input_shape, 
+                                      layer_neurons=self.layer_size, 
+                                      agent_name=self.agent_name,
+                                      network_name="targetCritic1",
+                                      checkpoint_directory_networks=self.checkpoint_directory_networks,
                                       device=self.device)
         
-        self.target_critic_2 = Critic(self.lr_Q, 
-                                      self.input_shape, 
-                                      self.layer_size, 
+        self.target_critic_2 = Critic(lr_Q=self.lr_Q, 
                                       action_space_dimension=self.action_space_dimension, 
-                                      name=self.agent_name+'_target_critic2',
+                                      input_shape=self.input_shape, 
+                                      layer_neurons=self.layer_size, 
+                                      agent_name=self.agent_name,
+                                      network_name="targetCritic2",
+                                      checkpoint_directory_networks=self.checkpoint_directory_networks,
                                       device=self.device)
         
         self._network_list += [self.critic_1, self.critic_2, self.target_critic_1, self.target_critic_2]
@@ -509,29 +529,35 @@ class Distributional_Agent(Agent):
         self.log_alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=lr_alpha)
         
         self.critic = Distributional_Critic(self.lr_Q,
-                                            self.input_shape,
-                                            self.layer_size,
                                             self.action_space_dimension,
                                             log_sigma_min=-0.1,
                                             log_sigma_max=4,
-                                            name=self.agent_name+'_critic',
+                                            input_shape=self.input_shape, 
+                                            layer_neurons=self.layer_size, 
+                                            agent_name=self.agent_name,
+                                            network_name="distCritic",
+                                            checkpoint_directory_networks=self.checkpoint_directory_networks,
                                             device=self.device)
         
         self.target_critic = Distributional_Critic(self.lr_Q,
-                                                   self.input_shape,
-                                                   self.layer_size,
                                                    self.action_space_dimension,
                                                    log_sigma_min=-0.1,
                                                    log_sigma_max=4,
-                                                   name=self.agent_name+'_critic',
+                                                   input_shape=self.input_shape, 
+                                                   layer_neurons=self.layer_size, 
+                                                   agent_name=self.agent_name,
+                                                   network_name="distTargetCritic",
+                                                   checkpoint_directory_networks=self.checkpoint_directory_networks,
                                                    device=self.device)
         
         self.target_actor = Actor(self.lr_pi, 
-                                  self.input_shape, 
-                                  self.layer_size, 
                                   action_space_dimension=self.action_space_dimension, 
-                                  name=self.agent_name+'_target_actor',
                                   max_actions=self.env.action_space.high,
+                                  input_shape=self.input_shape, 
+                                  layer_neurons=self.layer_size, 
+                                  agent_name=self.agent_name,
+                                  network_name="targetActor",
+                                  checkpoint_directory_networks=self.checkpoint_directory_networks,
                                   device=self.device)
         
         self._network_list += [self.critic, self.target_critic, self.target_actor]
@@ -607,6 +633,7 @@ class Distributional_Agent(Agent):
             
 def instanciate_agent(env: Environment, 
                       device: str, 
+                      checkpoint_directory_networks: str,
                       args: tuple,
                       ) -> Tuple[Agent, str]:
     """Instanciate the correct type of agent, according to args.agent_type.
@@ -624,12 +651,10 @@ def instanciate_agent(env: Environment,
         
     if args.agent_type == 'automatic_temperature':
         
-        agent_name = 'automatic_temperature'
-        figure_file = str(args.n_episodes) + 'episodes_AutoTemperature_' + args.mode + '.png'
         agent = Agent_AutomaticTemperature(lr_Q=args.lr_Q,
                                            lr_pi=args.lr_pi, 
                                            lr_alpha=args.lr_alpha,  
-                                           agent_name=agent_name, 
+                                           agent_name=args.agent_type, 
                                            input_shape=env.observation_space.shape, 
                                            tau=args.tau,
                                            env=env, 
@@ -638,16 +663,15 @@ def instanciate_agent(env: Environment,
                                            layer_size=args.layer_size, 
                                            delay=args.delay,
                                            grad_clip=args.grad_clip,
+                                           checkpoint_directory_networks=checkpoint_directory_networks,
                                            device=device)
     
     elif args.agent_type == 'manual_temperature':
         
-        agent_name = 'manual_temperature'
-        figure_file = str(args.n_episodes) + 'episodes_ManualTemperature_{}'.format(args.sac_temperature) + args.mode + '.png'
         agent = Agent_ManualTemperature(lr_pi=args.lr_pi, 
                                         lr_Q=args.lr_Q, 
                                         gamma=args.gamma, 
-                                        agent_name=agent_name, 
+                                        agent_name=args.agent_type, 
                                         input_shape=env.observation_space.shape, 
                                         tau=args.tau,
                                         env=env, 
@@ -656,16 +680,15 @@ def instanciate_agent(env: Environment,
                                         layer_size=args.layer_size, 
                                         grad_clip=args.grad_clip,
                                         delay=args.delay,
+                                        checkpoint_directory_networks=checkpoint_directory_networks,
                                         device=device)
         
     elif args.agent_type == 'distributional':
         
-        agent_name = 'distributional'
-        figure_file = str(args.n_episodes) + 'episodes_Distributional_' + args.mode + '.png'
         agent = Distributional_Agent(lr_Q=args.lr_Q,
                                      lr_pi=args.lr_pi, 
                                      lr_alpha=args.lr_alpha,  
-                                     agent_name=agent_name, 
+                                     agent_name=args.agent_type, 
                                      input_shape=env.observation_space.shape, 
                                      tau=args.tau,
                                      env=env, 
@@ -674,6 +697,7 @@ def instanciate_agent(env: Environment,
                                      layer_size=args.layer_size, 
                                      delay=args.delay,
                                      grad_clip=args.grad_clip,
+                                     checkpoint_directory_networks=checkpoint_directory_networks,
                                      device=device)
         
-    return agent, figure_file
+    return agent

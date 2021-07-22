@@ -21,8 +21,8 @@
     "n_episodes": 1,
     "delay": 1,
     "memory_size": 1000000,
-    "mode": "train",
-    "network_path": null,
+    "mode": "test",
+    "checkpoint_directory": "saved_outputs/2021.07.22.21.15.17",
     "seed": 42,
     "gpu_devices": [
         0,

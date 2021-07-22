@@ -77,6 +77,7 @@ python src/main.py \
 
 ## To do
 
+* mother class network with save and load methods implemented
 * Possibility to start from a non-trivial portfolio
 * Donnees fondamentales des entreprises, news
 * More generally, better data engineering. Dimensionality reduction along stock space dimension instead of simply plugging in the correlation matrix?

@@ -58,7 +58,7 @@ class Environment(gym.Env):
         
         super(Environment, self).__init__()
         
-        # attibutes related to the financial time series
+        # attributes related to the financial time series
         self.stock_market_history = stock_market_history
         self.assets_list = self.stock_market_history.columns
         self.time_horizon = self.stock_market_history.shape[0]
@@ -84,7 +84,7 @@ class Environment(gym.Env):
         # maximal amount of share one can buy or sell in one trade
         self.limit_n_stocks = limit_n_stocks
         
-        # attibutes related to buying, selling, and bank interest rate
+        # attributes related to buying, selling, and bank interest rate
         self.buy_rule = buy_rule
         self.buy_cost = buy_cost
         self.sell_cost = sell_cost

@@ -15,56 +15,87 @@ import os
 import torch
 from typing import Tuple, List
 
-from src.utilities import make_dir
-
-class Critic(torch.nn.Module):
-    """Define a critic network, whose role is to attribute a value to a (state, action) pair."""
+class Network(torch.nn.Module):
     
-    def __init__(self, 
-                 lr_Q: float, 
+    def __init__(self,
                  input_shape: Tuple, 
                  layer_neurons: int, 
-                 action_space_dimension: Tuple, 
-                 name: str, 
-                 checkpoint_directory: str = 'saved_networks',
+                 agent_name: str,
+                 network_name: str, 
+                 checkpoint_directory_networks: str,
                  device: str = 'cpu',
                  ) -> None:
-        """Constructor method fo the Critic class.
+        """Constructor method for the Network class.
         
         Args:
-            lr_Q (float): learning rate for the gradient descent 
             input_shape (Tuple): dimension of the state space
             layer_neurons (int): number of neurons of the various layers in the net
-            action_space_dimension (Tuple): dimension of the action space
             name (str): name of the net
-            checkpoint_directory (str = 'saved_networks'): base directory for the checkpoints
-            device (str = 'cpu'): cpu or gpu
+            checkpoint_directory_networks (str = 'saved_networks'): base directory for the checkpoints
             
         Returns:
             no value
         """
         
-        super(Critic, self).__init__()
+        super(Network, self).__init__()
+        self.agent_name = agent_name
+        self.network_name = network_name
+        self.checkpoint_directory_networks = checkpoint_directory_networks
+        self.checkpoint_file_network = os.path.join(self.checkpoint_directory_networks, self.network_name)
+         
+        self.device = device
+        
         self.input_shape = input_shape
         self.layer_neurons = layer_neurons
+        
+        if torch.cuda.device_count() > 1:
+            self = torch.nn.DataParallel(self)  
+        self.to(self.device)
+
+    def forward(self, 
+                *args,
+                **kwargs,
+                ) -> torch.tensor:
+
+        raise NotImplementedError
+
+    def save_network_weights(self) -> None:
+        """Save checkpoint, used in training mode."""
+        
+        torch.save(self.state_dict(), self.checkpoint_file_network)
+        
+    def load_network_weights(self) -> None:
+        """Load checkpoint, used in testing mode."""
+        self.load_state_dict(torch.load(self.checkpoint_file_network, map_location=self.device))
+        
+class Critic(Network):
+    """Define a critic network, whose role is to attribute a value to a (state, action) pair."""
+    
+    def __init__(self, 
+                 lr_Q: float, 
+                 action_space_dimension: Tuple, 
+                 *args, 
+                 **kwargs,
+                 ) -> None:
+        """Constructor method fo the Critic class.
+        
+        Args:
+            lr_Q (float): learning rate for the gradient descent 
+            action_space_dimension (Tuple): dimension of the action space
+            
+        Returns:
+            no value
+        """
+        
+        super(Critic, self).__init__(*args, **kwargs)
         self.action_space_dimension = action_space_dimension
-        self.name = name
-        self.checkpoint_dir = checkpoint_directory
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
-        make_dir(directory_name=checkpoint_directory)
         
         self.layer1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
         self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
         self.Q = torch.nn.Linear(self.layer_neurons, 1)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
-        
-        self.device = device
-        
-        if torch.cuda.device_count() > 1:
-            self = torch.nn.DataParallel(self)  
-        self.to(device)
-        
+            
     def forward(self, 
                 state: np.ndarray, 
                 action: np.ndarray,
@@ -86,57 +117,33 @@ class Critic(torch.nn.Module):
         action_value = self.Q(x)
         
         return action_value
-
-    def save_network_weights(self) -> None:
-        """Save checkpoint, used in training mode."""
-        
-        torch.save(self.state_dict(), self.checkpoint_file)
-        
-    def load_network_weights(self) -> None:
-        """Load checkpoint, used in testing mode."""
-        self.load_state_dict(torch.load(self.checkpoint_file, map_location=self.device))
-        
-      
-class Actor(torch.nn.Module):
+       
+class Actor(Network):
     """Define a stochastic (Gaussian) actor, taking actions in a continous action space."""
     
     def __init__(self, 
                  lr_pi: float, 
-                 input_shape: Tuple, 
-                 layer_neurons: int, 
                  max_actions: np.ndarray, 
                  action_space_dimension: Tuple, 
-                 name: str, 
                  log_sigma_min: float = -20.0, 
                  log_sigma_max: float = 2.0,
-                 checkpoint_directory: str = 'saved_networks',
-                 device: str = 'cpu',
+                 *args,
+                 **kwargs,
                  ) -> None:
         """Constructor method for the Actor class.
         
         Args:
             lr_pi (float): learning rate for the gradient descent 
-            input_shape (Tuple): dimension of the state space
-            layer_neurons (int): number of neurons of the various layers in the net
             max_actions (np.array): upper (and lower) bound of the continous action space
             action_space_dimension (Tuple): dimension of the action space
-            name (str): name of the net
-            checkpoint_directory (str): base directory path for checkpoints
-            device (str): cpu or gpu
             
         Returns:
             no value
         """
         
-        super(Actor, self).__init__()
-        self.input_shape = input_shape
-        self.layer_neurons = layer_neurons
+        super(Actor, self).__init__(*args, **kwargs)
         self.action_space_dimension = action_space_dimension
-        self.name = name
         self.max_actions = max_actions
-        self.checkpoint_dir = checkpoint_directory
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
-        make_dir(directory_name=checkpoint_directory)
         self.noise = 1e-6
         
         self.layer1 = torch.nn.Linear(*self.input_shape, self.layer_neurons)
@@ -148,12 +155,6 @@ class Actor(torch.nn.Module):
         self.log_sigma_max = log_sigma_max
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_pi)
-        self.device = device
-        
-        if torch.cuda.device_count() > 1:
-            self = torch.nn.DataParallel(self) 
-            print("Using the GPUs!", torch.cuda.device_count())
-        self.to(device)
         
     def forward(self, 
                 state: np.ndarray,
@@ -210,17 +211,8 @@ class Actor(torch.nn.Module):
         
         return action, log_probabilities
     
-    def save_network_weights(self):
-        """Save checkpoint, used in training mode."""
         
-        torch.save(self.state_dict(), self.checkpoint_file)
-        
-    def load_network_weights(self):
-        """Load checkpoint, used in testing mode."""
-         
-        self.load_state_dict(torch.load(self.checkpoint_file, map_location=self.device))
-        
-class Value(torch.nn.Module):
+class Value(Network):
     """Define a value network, whose role is to attribute a value to a state.
     
     Used only in the first version of the Soft Actor Critic algorithm, hence in 
@@ -229,45 +221,24 @@ class Value(torch.nn.Module):
     
     def __init__(self, 
                  lr_Q: float, 
-                 input_shape: Tuple, 
-                 layer_neurons: int, 
-                 name: str, 
-                 checkpoint_directory: str = 'saved_networks',
-                 device: str = 'cpu',
+                 *args,
+                 **kwargs,
                  ) -> None:
         """Constructor method fo the Value class.
         
         Args:
             lr_Q (float): learning rate for the gradient descent 
-            input_shape (Tuple): dimension of the state space
-            layer_neurons (int): number of neurons of the various layers in the net
-            name (str): name of the net
-            checkpoint_directory (str = 'saved_networks'): base directory for the checkpoints
-            device (str = 'cpu'): cpu or gpu
             
         Returns:
             no value
         """
         
-        super(Value, self).__init__()
-        self.input_shape = input_shape
-        self.layer_neurons = layer_neurons
-        self.name = name
-        self.checkpoint_dir = checkpoint_directory
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
-        make_dir(directory_name=checkpoint_directory)
-        
+        super(Value, self).__init__(*args, **kwargs)        
         self.layer1 = torch.nn.Linear(*self.input_shape, self.layer_neurons)
         self.layer2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
         self.V = torch.nn.Linear(self.layer_neurons, 1)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
-        
-        self.device = device
-        
-        if torch.cuda.device_count() > 1:
-            self = torch.nn.DataParallel(self)             
-        self.to(device)
         
     def forward(self, 
                 state: np.ndarray,
@@ -288,18 +259,8 @@ class Value(torch.nn.Module):
         
         value = self.V(x)
         return value
-        
-    def save_network_weights(self) -> None:
-        """Save checkpoint, used in training mode."""
-        
-        torch.save(self.state_dict(), self.checkpoint_file)
-        
-    def load_network_weights(self) -> None:
-        """Load checkpoint, used in testing mode."""
-        
-        self.load_state_dict(torch.load(self.checkpoint_file, map_location=self.device))
          
-class Distributional_Critic(torch.nn.Module):
+class Distributional_Critic(Network):
     """Distributional version of a critic net.
     
     Elevate the critic to a full random variable, not only considering its expectation,
@@ -308,39 +269,25 @@ class Distributional_Critic(torch.nn.Module):
     
     def __init__(self, 
                  lr_Q: float, 
-                 input_shape: Tuple, 
-                 layer_neurons: int, 
                  action_space_dimension: Tuple, 
-                 name: str, 
                  log_sigma_min: float = -0.1, 
                  log_sigma_max: float = 5.0,
-                 checkpoint_directory: str = 'saved_networks',
-                 device: str = 'cpu',
+                 *args,
+                 **kwargs,
                  ) -> None:
         """Constructor method fo the Distributional_Critic class.
         
         Args:
             lr_Q (float): learning rate for the gradient descent 
-            input_shape (Tuple): dimension of the state space
-            layer_neurons (int): number of neurons of the various layers in the net
             action_space_dimension (Tuple): dimension of the action space
-            name (str): name of the net
             log_sigma_min (float): clipping parameter for the log standard deviation 
             log_sigma_max (float): clipping parameter for the log standard deviation
-            checkpoint_directory (str = 'saved_networks'): base directory for the checkpoints
-            device (str = 'cpu'): cpu or gpu
             
         Returns:
             no value
         """
         
-        super(Distributional_Critic, self).__init__()
-        self.input_shape = input_shape
-        self.layer_neurons = layer_neurons
-        self.checkpoint_dir = checkpoint_directory
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name)
-        make_dir(directory_name=checkpoint_directory)
-        
+        super(Distributional_Critic, self).__init__(*args, **kwargs)
         self.linear1 = torch.nn.Linear(self.input_shape[0] + action_space_dimension, self.layer_neurons)
         self.linear2 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
         self.linear3 = torch.nn.Linear(self.layer_neurons, self.layer_neurons)
@@ -356,11 +303,6 @@ class Distributional_Critic(torch.nn.Module):
         self.denominator = max(abs(self.log_sigma_min), self.log_sigma_max)
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr_Q)
-        self.device = device
-        
-        if torch.cuda.device_count() > 1:
-            self = torch.nn.DataParallel(self)  
-        self.to(device)
 
     def forward(self, 
                 state: List[float], 
@@ -429,13 +371,3 @@ class Distributional_Critic(torch.nn.Module):
             q = normal.sample()
         
         return q, mu, sigma
-    
-    def save_network_weights(self) -> None:
-        """Save checkpoint, used in training mode."""
-        
-        torch.save(self.state_dict(), self.checkpoint_file)
-        
-    def load_network_weights(self) -> None:
-        """Load checkpoint, used in testing mode."""
-        
-        self.load_state_dict(torch.load(self.checkpoint_file, map_location=self.device))

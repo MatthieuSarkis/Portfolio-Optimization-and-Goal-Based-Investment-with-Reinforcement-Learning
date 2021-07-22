@@ -16,10 +16,9 @@ import os
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import time
-from typing import List
 
 from src.agents import Agent
-from src.utilities import plot_reward, make_dir
+from src.utilities import plot_reward
 
 class Run():
     """Main class to run the training or the testing."""
@@ -30,6 +29,7 @@ class Run():
                  n_episodes: int,
                  agent_type: str,
                  scaler: StandardScaler,
+                 checkpoint_directory_logs: str,
                  sac_temperature: float = 1.0,
                  mode: str = 'test',
                  ) -> None:
@@ -55,6 +55,7 @@ class Run():
         self.sac_temperature = sac_temperature
         self.mode = mode
         self.scaler = scaler
+        self.checkpoint_directory_logs = checkpoint_directory_logs
         
         if self.mode == 'test':
             self.agent.load_networks()
@@ -63,6 +64,7 @@ class Run():
         self.episode = None
         self.best_reward = None
         self.reward_history = None
+        self.portfolio_history_of_histories = None
         
         self._reset()
         
@@ -74,11 +76,7 @@ class Run():
         self.best_reward = float('-Inf')
         self.reward_history = []
         
-        self.history_of_portfolio_histories: List = []
-        
-    def run(self,
-            log_directory: str,
-            ) -> None:
+    def run(self) -> None:
         """Run the training or the testing during a certain number of steps.
         
         Args:
@@ -92,27 +90,17 @@ class Run():
         
         for _ in range(self.n_episodes):
             self._run_one_episode()
-           
-        make_dir('logs')      
-        if self.agent_type == 'automatic_temperature':
-            history_file = '{}/automatic_temperature_{}.npy'.format(log_directory, self.mode)
-        elif self.agent_type == 'manual_temperature':
-            history_file = '{}/manual_temperature_{}_{}.npy'.format(log_directory, self.sac_temperature, self.mode)
-        elif self.agent_type == 'distributional':
-            history_file = '{}/distributional_{}.npy'.format(log_directory, self.mode)
-            
-        np.save(history_file, np.array(self.reward_history))
+                   
+        np.save(os.path.join(self.checkpoint_directory_logs, self.mode), np.array(self.reward_history))
                  
     def _run_one_episode(self) -> None:
         """Agent takes one step in the environment, and learns if in train mode."""
         
         initial_time = time.time()
-        reward = 0
-        done = False
+        reward: float = 0
+        done: bool = False
         observation = self.env.reset()
         observation = self.scaler.transform([observation])[0]
-        
-        #portfolio_history = pd.DataFrame(columns=self.env.assets_list)
         
         while not done:
             
@@ -139,25 +127,7 @@ class Run():
         self.episode += 1
         final_time = time.time()
         
-        if self.mode == 'train':    
-            if self.agent_type == 'automatic_temperature':
-                print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
-        
-            elif self.agent_type == 'manual_temperature': 
-                print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | manual_temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
-            
-            elif self.agent_type == 'distributional':
-                print('    episode: {:<13d} | reward: {:<13.1f} | running_average: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, average_reward, self.agent.agent_name, final_time-initial_time))
- 
-        if self.mode == 'test':    
-            if self.agent_type == 'automatic_temperature':
-                print('    episode: {:<13d} | reward: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, self.agent.agent_name, final_time-initial_time))
-        
-            elif self.agent_type == 'manual_temperature': 
-                print('    episode: {:<13d} | reward: {:<13.1f} | {} | manual_temperature: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, self.agent.agent_name, self.sac_temperature, final_time-initial_time))
-            
-            elif self.agent_type == 'distributional':
-                print('    episode: {:<13d} | reward: {:<13.1f} | {} | duration: {:<13.2f}'.format(self.episode, reward, self.agent.agent_name, final_time-initial_time))
+        print('    episode: {:<13d} | reward: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, final_time-initial_time))
 
         if average_reward > self.best_reward:
             self.best_reward = average_reward
@@ -165,7 +135,7 @@ class Run():
                 self.agent.save_networks()
             
     def plot(self,
-             figure_file: str) -> None:
+             checkpoint_directory_plots: str) -> None:
         """Call a helper function to plot the reward history in train mode and the reward distribution in test mode.
         
         Args:
@@ -175,8 +145,6 @@ class Run():
             no value
         """
         
-        make_dir('plots')
-        figure_file = os.path.join('plots', figure_file)
+        figure_file = os.path.join(checkpoint_directory_plots, self.mode)
         x = [i+1 for i in range(self.n_episodes)]
-        plot_reward(x, self.reward_history, figure_file, self.mode,
-                np.sqrt(self.n_episodes).astype(int))
+        plot_reward(x, self.reward_history, figure_file, self.mode, np.sqrt(self.n_episodes).astype(int))
