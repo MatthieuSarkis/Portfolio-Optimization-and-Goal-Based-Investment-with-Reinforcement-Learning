@@ -10,7 +10,6 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-
 import gym
 import numpy as np
 import torch
@@ -30,7 +29,6 @@ class Agent():
                  input_shape: Tuple, 
                  tau: float, 
                  env: gym.Env, 
-                 agent_name: str, 
                  checkpoint_directory_networks: str,
                  gamma: float = 0.99, 
                  size: int = 1000000,
@@ -48,7 +46,6 @@ class Agent():
             input_shape (Tuple): shape of the input data (state, or state and action)
             tau (float): linear interpolation parameter for the smooth copy to the target nets
             env (gym.Env): environment in which the agent evolves
-            agent_name (str): name of the agent
             gamma (float): discout factor for the rewards
             size (int): maximal size of the replay buffer
             layer_size (int): number of neurons in the layers of the neural nets
@@ -69,7 +66,6 @@ class Agent():
         self.env = env
         self.action_space_dimension = env.action_space.shape[0]
         self.memory = ReplayBuffer(size, self.input_shape, self.action_space_dimension)
-        self.agent_name = agent_name
         self.layer_size = layer_size
         self.delay = delay
         self.grad_clip = grad_clip
@@ -81,7 +77,6 @@ class Agent():
                            max_actions=self.env.action_space.high,
                            input_shape=self.input_shape, 
                            layer_neurons=self.layer_size, 
-                           agent_name=self.agent_name,
                            network_name='actor',
                            checkpoint_directory_networks=self.checkpoint_directory_networks,
                            device=self.device)
@@ -216,7 +211,6 @@ class Agent_ManualTemperature(Agent):
                                action_space_dimension=self.action_space_dimension, 
                                input_shape=self.input_shape, 
                                layer_neurons=self.layer_size, 
-                               agent_name=self.agent_name,
                                network_name='critic1',
                                checkpoint_directory_networks=self.checkpoint_directory_networks,
                                device=self.device)
@@ -225,7 +219,6 @@ class Agent_ManualTemperature(Agent):
                                action_space_dimension=self.action_space_dimension, 
                                input_shape=self.input_shape, 
                                layer_neurons=self.layer_size, 
-                               agent_name=self.agent_name,
                                network_name='critic2',
                                checkpoint_directory_networks=self.checkpoint_directory_networks,
                                device=self.device)
@@ -233,7 +226,6 @@ class Agent_ManualTemperature(Agent):
         self.value = Value(lr_Q=self.lr_Q, 
                            input_shape=self.input_shape, 
                            layer_neurons=self.layer_size, 
-                           agent_name=self.agent_name,
                            network_name='value',
                            checkpoint_directory_networks=self.checkpoint_directory_networks,
                            device=self.device)
@@ -241,7 +233,6 @@ class Agent_ManualTemperature(Agent):
         self.target_value = Value(lr_Q=self.lr_Q, 
                                   input_shape=self.input_shape, 
                                   layer_neurons=self.layer_size, 
-                                  agent_name=self.agent_name,
                                   network_name='targetValue',
                                   checkpoint_directory_networks=self.checkpoint_directory_networks,
                                   device=self.device)
@@ -372,7 +363,6 @@ class Agent_AutomaticTemperature(Agent):
                                action_space_dimension=self.action_space_dimension,
                                input_shape=self.input_shape, 
                                layer_neurons=self.layer_size, 
-                               agent_name=self.agent_name,
                                network_name="critic1",
                                checkpoint_directory_networks=self.checkpoint_directory_networks,
                                device=self.device)
@@ -381,7 +371,6 @@ class Agent_AutomaticTemperature(Agent):
                                action_space_dimension=self.action_space_dimension, 
                                input_shape=self.input_shape, 
                                layer_neurons=self.layer_size, 
-                               agent_name=self.agent_name,
                                network_name="critic2",
                                checkpoint_directory_networks=self.checkpoint_directory_networks,
                                device=self.device)
@@ -390,7 +379,6 @@ class Agent_AutomaticTemperature(Agent):
                                       action_space_dimension=self.action_space_dimension, 
                                       input_shape=self.input_shape, 
                                       layer_neurons=self.layer_size, 
-                                      agent_name=self.agent_name,
                                       network_name="targetCritic1",
                                       checkpoint_directory_networks=self.checkpoint_directory_networks,
                                       device=self.device)
@@ -399,7 +387,6 @@ class Agent_AutomaticTemperature(Agent):
                                       action_space_dimension=self.action_space_dimension, 
                                       input_shape=self.input_shape, 
                                       layer_neurons=self.layer_size, 
-                                      agent_name=self.agent_name,
                                       network_name="targetCritic2",
                                       checkpoint_directory_networks=self.checkpoint_directory_networks,
                                       device=self.device)
@@ -534,7 +521,6 @@ class Distributional_Agent(Agent):
                                             log_sigma_max=4,
                                             input_shape=self.input_shape, 
                                             layer_neurons=self.layer_size, 
-                                            agent_name=self.agent_name,
                                             network_name="distCritic",
                                             checkpoint_directory_networks=self.checkpoint_directory_networks,
                                             device=self.device)
@@ -545,7 +531,6 @@ class Distributional_Agent(Agent):
                                                    log_sigma_max=4,
                                                    input_shape=self.input_shape, 
                                                    layer_neurons=self.layer_size, 
-                                                   agent_name=self.agent_name,
                                                    network_name="distTargetCritic",
                                                    checkpoint_directory_networks=self.checkpoint_directory_networks,
                                                    device=self.device)
@@ -555,7 +540,6 @@ class Distributional_Agent(Agent):
                                   max_actions=self.env.action_space.high,
                                   input_shape=self.input_shape, 
                                   layer_neurons=self.layer_size, 
-                                  agent_name=self.agent_name,
                                   network_name="targetActor",
                                   checkpoint_directory_networks=self.checkpoint_directory_networks,
                                   device=self.device)
@@ -654,7 +638,6 @@ def instanciate_agent(env: Environment,
         agent = Agent_AutomaticTemperature(lr_Q=args.lr_Q,
                                            lr_pi=args.lr_pi, 
                                            lr_alpha=args.lr_alpha,  
-                                           agent_name=args.agent_type, 
                                            input_shape=env.observation_space.shape, 
                                            tau=args.tau,
                                            env=env, 
@@ -671,7 +654,6 @@ def instanciate_agent(env: Environment,
         agent = Agent_ManualTemperature(lr_pi=args.lr_pi, 
                                         lr_Q=args.lr_Q, 
                                         gamma=args.gamma, 
-                                        agent_name=args.agent_type, 
                                         input_shape=env.observation_space.shape, 
                                         tau=args.tau,
                                         env=env, 
@@ -688,7 +670,6 @@ def instanciate_agent(env: Environment,
         agent = Distributional_Agent(lr_Q=args.lr_Q,
                                      lr_pi=args.lr_pi, 
                                      lr_alpha=args.lr_alpha,  
-                                     agent_name=args.agent_type, 
                                      input_shape=env.observation_space.shape, 
                                      tau=args.tau,
                                      env=env, 

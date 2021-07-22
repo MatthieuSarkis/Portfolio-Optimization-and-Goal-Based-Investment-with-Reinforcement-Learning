@@ -20,7 +20,6 @@ class Network(torch.nn.Module):
     def __init__(self,
                  input_shape: Tuple, 
                  layer_neurons: int, 
-                 agent_name: str,
                  network_name: str, 
                  checkpoint_directory_networks: str,
                  device: str = 'cpu',
@@ -38,7 +37,6 @@ class Network(torch.nn.Module):
         """
         
         super(Network, self).__init__()
-        self.agent_name = agent_name
         self.network_name = network_name
         self.checkpoint_directory_networks = checkpoint_directory_networks
         self.checkpoint_file_network = os.path.join(self.checkpoint_directory_networks, self.network_name)
