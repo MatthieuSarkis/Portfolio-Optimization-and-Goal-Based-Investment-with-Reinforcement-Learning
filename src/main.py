@@ -106,11 +106,11 @@ def main(args):
     
     initial_time = time.time()
     run.run()
-    #run.save_plots(checkpoint_directory_plots=checkpoint_directory_plots)
+    run.logger.generate_plots()
     run.logger.save_logs()
     
     final_time = time.time()
-    print('Total training duration: {:*^13.3f}'.format(final_time-initial_time))
+    print('\nTotal {}ing duration: {:*^13.3f}\n'.format(args.mode, final_time-initial_time))
 
 
 if __name__ == '__main__':

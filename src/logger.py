@@ -17,6 +17,8 @@ This class remains to be implemented to handles logging more efficiently.
 import numpy as np
 import os
 import time
+
+from src.utilities import plot_reward, plot_portfolio_value
 class Logger():
     
     def __init__(self,
@@ -56,4 +58,30 @@ class Logger():
         np.save(os.path.join(self.checkpoint_directory_logs, self.mode+"_reward_history.npy"), reward_history_array)
         np.save(os.path.join(self.checkpoint_directory_logs, self.mode+"_portfolio_value_history.npy"), portfolio_value_history_of_histories_array)
         
+    def generate_plots(self) -> None:
+        """Call a helper function to plot the reward history in train mode and the reward distribution in test mode."""
+        
+        checkpoint_directory_plots = os.path.join(self.checkpoint_directory, "plots")
+        
+        # define
+        reward_history_array = np.array(self.logs['reward_history'])
+        portfolio_value_history_of_histories_array = np.array(self.logs['portfolio_value_history_of_histories'])
+        
+        n_episodes = reward_history_array.shape[0]
+        n_days = portfolio_value_history_of_histories_array.shape[1]
+        
+        # define the abscisse axis
+        episodes = [i+1 for i in range(n_episodes)]
+        days = [i+1 for i in range(n_days)]
+        
+        plot_reward(x=episodes, 
+                    rewards=reward_history_array, 
+                    figure_file=os.path.join(checkpoint_directory_plots, self.mode+"_reward"), 
+                    mode=self.mode, 
+                    bins=np.sqrt(n_episodes).astype(int))
+        
+        if self.mode == 'test':
+            plot_portfolio_value(x=days, 
+                                values=portfolio_value_history_of_histories_array, 
+                                figure_file=os.path.join(checkpoint_directory_plots, self.mode+"_portfolioValue"))
       

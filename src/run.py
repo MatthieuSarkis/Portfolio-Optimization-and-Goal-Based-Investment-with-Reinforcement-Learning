@@ -86,7 +86,7 @@ class Run():
             no value
         """
         
-        print('>>>>> Running <<<<<')
+        print('>>>>> Running <<<<<\n')
         
         for _ in range(self.n_episodes):
             self._run_one_episode()
@@ -141,18 +141,4 @@ class Run():
             if self.mode == 'train':
                 self.agent.save_networks()
             
-    def save_plots(self,
-             checkpoint_directory_plots: str) -> None:
-        """Call a helper function to plot the reward history in train mode and the reward distribution in test mode.
-        
-        Args:
-            figure_file (str): hte filepath where to save the plot file
-            
-        Returns:
-            no value
-        """
-        
-        figure_file = os.path.join(checkpoint_directory_plots, self.mode)
-        x = [i+1 for i in range(self.n_episodes)]
-        plot_reward(x, self.reward_history, figure_file, self.mode, np.sqrt(self.n_episodes).astype(int))
         

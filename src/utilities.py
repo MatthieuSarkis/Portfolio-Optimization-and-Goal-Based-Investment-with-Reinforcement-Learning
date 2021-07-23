@@ -58,7 +58,17 @@ def plot_reward(x: np.ndarray,
         plt.title('Reward distribution')
     
     plt.savefig(figure_file) 
-
+    
+def plot_portfolio_value(x: np.ndarray, 
+                         values: np.ndarray, 
+                         figure_file: str, 
+                         ) -> None:
+    
+    plt.plot(x, values.T, linestyle='-', label='portfolio value')
+    plt.legend()
+    plt.title('Reward Portfolio value')
+    plt.savefig(figure_file) 
+        
 def instanciate_scaler(env: gym.Env,
                        mode: str,
                        checkpoint_directory: str) -> StandardScaler:

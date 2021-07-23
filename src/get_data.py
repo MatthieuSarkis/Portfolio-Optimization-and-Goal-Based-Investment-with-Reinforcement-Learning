@@ -117,7 +117,7 @@ def load_data(initial_date: str,
       
     if not os.path.exists('data/'):  
         
-        print('>>>>> Fetching the data <<<<<')
+        print('\n>>>>> Fetching the data <<<<<')
         
         fetcher = DataFetcher(stock_symbols=stocks_symbols,
                               start_date=initial_date,
@@ -138,7 +138,7 @@ def load_data(initial_date: str,
     
     else:
         
-        print('>>>>> Reading the data <<<<<')
+        print('\n>>>>> Reading the data <<<<<')
         
         df = pd.read_csv('data/close.csv', index_col=0)
         
