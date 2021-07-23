@@ -25,7 +25,6 @@ from pathlib import Path
 from src.run import Run
 from src.utilities import instanciate_scaler, prepare_initial_portfolio
 
-
 def main(args):
 
     # creating all the necessary directory tree structure for efficient logging
@@ -117,37 +116,52 @@ if __name__ == '__main__':
     
     parser = ArgumentParser()
 
-    parser.add_argument('--assets_to_trade',       type=str,            default='./portfolios_and_tickers/tickers_S&P500.txt', help='')
-    parser.add_argument('--initial_cash',          type=float,          default=None,                                          help='')
-    parser.add_argument('--initial_portfolio',     type=str,            default='./initial_portfolio.json',                    help='')
-    parser.add_argument('--buy_cost',              type=float,          default=0.001,                                         help='')
-    parser.add_argument('--sell_cost',             type=float,          default=0.001,                                         help='')
-    parser.add_argument('--bank_rate',             type=float,          default=0.5,                                           help='Annual bank rate')
-    parser.add_argument('--initial_date',          type=str,            default='2010-01-01',                                  help='')
-    parser.add_argument('--final_date',            type=str,            default='2020-12-31',                                  help='')
-    parser.add_argument('--limit_n_stocks',        type=int,            default=100,                                           help='')
-    parser.add_argument('--agent_type',            type=str,            default='automatic_temperature',                       help='Choose between: manual_temperature, automatic_temperature or distributional')
-    parser.add_argument('--buy_rule',              type=str,            default='most_first',                                  help='')
-    parser.add_argument('--sac_temperature',       type=float,          default=2.0,                                           help='')
-    parser.add_argument('--gamma',                 type=float,          default=0.99,                                          help='')
-    parser.add_argument('--lr_Q',                  type=float,          default=0.0003,                                        help='')
-    parser.add_argument('--lr_pi',                 type=float,          default=0.0003,                                        help='')
-    parser.add_argument('--lr_alpha',              type=float,          default=0.0003,                                        help='')
-    parser.add_argument('--tau',                   type=float,          default=0.005,                                         help='')
-    parser.add_argument('--batch_size',            type=int,            default=32,                                            help='')
-    parser.add_argument('--layer_size',            type=int,            default=256,                                           help='')
-    parser.add_argument('--n_episodes',            type=int,            default=1,                                             help='')
-    parser.add_argument('--delay',                 type=int,            default=1,                                             help='')
-    parser.add_argument('--memory_size',           type=int,            default=1000000,                                       help='')
-    parser.add_argument('--mode',                  type=str,            default='test',                                        help='')
-    parser.add_argument('--checkpoint_directory',  type=str,            default=None,                                          help='')
-    parser.add_argument('--seed',                  type=int,            default='42',                                          help='')
-    parser.add_argument('--gpu_devices',           type=int,            nargs='+', default=[0, 1, 2, 3],                       help='')
-    parser.add_argument('--grad_clip',             type=float,          default=1.0,                                           help='')
-    parser.add_argument('--window',                type=int,            default=20,                                            help='Window for correlation matrix computation.')
-    parser.add_argument('--number_of_eigenvalues', type=int,            default=10,                                            help='Number of largest eigenvalues to append to the close prices time series.')
-    parser.add_argument('--use_corr_eigenvalues',  action='store_true', default=False,                                         help='')
-    parser.add_argument('--use_corr_matrix',       action='store_true', default=False,                                         help='')
+    # parameters defining the trading environment
+    group1 = parser.add_mutually_exclusive_group()
+    group1.add_argument('--initial_cash',      type=float, default=None,         help='Initial cash in the bank, assuming no shares are owned')
+    group1.add_argument('--initial_portfolio', type=str,   default='./portfolios_and_tickers/initial_portfolio.json', help='Path to json file containing the content of an initial portfolio, including the cash in bank')
+    parser.add_argument('--assets_to_trade',   type=str,   default='./portfolios_and_tickers/tickers_S&P500.txt',     help='List of the tickers of the assets to be traded')
+    parser.add_argument('--buy_rule',          type=str,   default='most_first', help="In which order to buy the share: 'most_first' or 'cyclic' or 'random'")
+    parser.add_argument('--buy_cost',          type=float, default=0.001,        help='Cost for buying a share, prorata of the quantity being bought')
+    parser.add_argument('--sell_cost',         type=float, default=0.001,        help='Cost for selling a share, prorata of the quantity being sold')
+    parser.add_argument('--bank_rate',         type=float, default=0.5,          help='Annual bank rate')
+    parser.add_argument('--initial_date',      type=str,   default='2010-01-01', help='Initial date of the multidimensional time series of the assets price')
+    parser.add_argument('--final_date',        type=str,   default='2020-12-31', help='Final date of the multidimensional time series of the assets price')
+    parser.add_argument('--limit_n_stocks',    type=int,   default=100,          help='Maximal number of shares that can be bought or sell in one trade')
     
+    # type of agent
+    parser.add_argument('--agent_type',      type=str,   default='distributional', help="Type of agent: 'manual_temperature' or 'automatic_temperature' or 'distributional'")
+    parser.add_argument('--sac_temperature', type=float, default=2.0,              help="Coefficient of the entropy term in the loss function in case 'manual_temperature' agent is used")
+    
+    # hyperparameters for the training process
+    parser.add_argument('--gamma',       type=float, default=0.99,    help='Discount factor in the definition of the return')
+    parser.add_argument('--lr_Q',        type=float, default=0.0003,  help='Learning rate for the critic networks')
+    parser.add_argument('--lr_pi',       type=float, default=0.0003,  help='Learning rate for the actor networks')
+    parser.add_argument('--lr_alpha',    type=float, default=0.0003,  help='Learning rate for the automatic temperature optimization')
+    parser.add_argument('--tau',         type=float, default=0.005,   help='Hyperparameter for the smooth copy of the various networks to their target version')
+    parser.add_argument('--batch_size',  type=int,   default=32,      help='Batch size when sampling from the replay buffer')
+    parser.add_argument('--memory_size', type=int,   default=1000000, help='Size of the replay buffer, memory of the agent')
+    parser.add_argument('--grad_clip',   type=float, default=1.0,     help='Bound in case one decides to use gradient clipping in the training process')
+    parser.add_argument('--delay',       type=int,   default=1,       help='Delay between training of critic and actor')
+    
+    # hyperparameters for the architectures
+    parser.add_argument('--layer_size', type=int, default=256, help='Number of neurons in the various hidden layers')
+    
+    # Number of training or testing episodes and mode
+    parser.add_argument('--n_episodes', type=int, required=True, help='Number of training or testing episodes')
+    parser.add_argument('--mode',       type=str, required=True, help="Mode used: 'train' or 'test'")
+    
+    # random seed, logs directory and hardware
+    parser.add_argument('--checkpoint_directory', type=str, default=None,                    help='In test mode, specify the directory in which to find the weights of the trained networks')
+    parser.add_argument('--seed',                 type=int, default='42',                    help='Random seed for reproducibility')
+    parser.add_argument('--gpu_devices',          type=int, nargs='+', default=[0, 1, 2, 3], help='Specify the GPUs if any')
+    
+    # parameters concerning data preprocessing
+    group2 = parser.add_mutually_exclusive_group()
+    group2.add_argument('--use_corr_matrix',       action='store_true', default=False, help='To append the sliding correlation matrix to the time series')
+    group2.add_argument('--use_corr_eigenvalues',  action='store_true', default=False, help='To append the eigenvalues of the correlation matrix to the time series')
+    parser.add_argument('--window',                type=int,            default=20,    help='Window for correlation matrix computation')
+    parser.add_argument('--number_of_eigenvalues', type=int,            default=10,    help='Number of largest eigenvalues to append to the close prices time series')
+     
     args = parser.parse_args()
     main(args)
