@@ -107,7 +107,8 @@ def main(args):
     initial_time = time.time()
     run.run()
     run.logger.generate_plots()
-    run.logger.save_logs()
+    if args.plot:
+        run.logger.save_logs()
     final_time = time.time()
     print('\nTotal {}ing duration: {:*^13.3f}\n'.format(args.mode, final_time-initial_time))
 
@@ -151,9 +152,10 @@ if __name__ == '__main__':
     parser.add_argument('--n_episodes', type=int, required=True, help='Number of training or testing episodes')
     parser.add_argument('--mode',       type=str, required=True, help="Mode used: 'train' or 'test'")
     
-    # random seed, logs directory and hardware
-    parser.add_argument('--checkpoint_directory', type=str, default=None,                    help='In test mode, specify the directory in which to find the weights of the trained networks')
-    parser.add_argument('--seed',                 type=int, default='42',                    help='Random seed for reproducibility')
+    # random seed, logs information and hardware
+    parser.add_argument('--checkpoint_directory', type=str,            default=None,         help='In test mode, specify the directory in which to find the weights of the trained networks')
+    parser.add_argument('--plot',                 action='store_true', default=False,        help='Whether to automatically generate plots or not')
+    parser.add_argument('--seed',                 type=int,            default='42',         help='Random seed for reproducibility')
     parser.add_argument('--gpu_devices',          type=int, nargs='+', default=[0, 1, 2, 3], help='Specify the GPUs if any')
     
     # parameters concerning data preprocessing
