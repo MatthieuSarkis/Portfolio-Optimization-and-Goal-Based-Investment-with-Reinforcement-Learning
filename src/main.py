@@ -99,14 +99,15 @@ def main(args):
               agent=agent,
               n_episodes=args.n_episodes,
               agent_type=args.agent_type,
+              checkpoint_directory=checkpoint_directory,
               mode=args.mode,
               sac_temperature=args.sac_temperature,
               scaler=scaler)
     
     initial_time = time.time()
     run.run()
-    run.save_plots(checkpoint_directory_plots=checkpoint_directory_plots)
-    run.save_logs(checkpoint_directory_logs=checkpoint_directory_logs)
+    #run.save_plots(checkpoint_directory_plots=checkpoint_directory_plots)
+    run.logger.save_logs()
     
     final_time = time.time()
     print('Total training duration: {:*^13.3f}'.format(final_time-initial_time))

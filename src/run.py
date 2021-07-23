@@ -17,6 +17,7 @@ from sklearn.preprocessing import StandardScaler
 import time
 
 from src.agents import Agent
+from src.logger import Logger
 from src.utilities import plot_reward
 
 class Run():
@@ -28,6 +29,7 @@ class Run():
                  n_episodes: int,
                  agent_type: str,
                  scaler: StandardScaler,
+                 checkpoint_directory: str,
                  sac_temperature: float = 1.0,
                  mode: str = 'test',
                  ) -> None:
@@ -53,6 +55,7 @@ class Run():
         self.sac_temperature = sac_temperature
         self.mode = mode
         self.scaler = scaler
+        self.checkpoint_directory = checkpoint_directory
         
         if self.mode == 'test':
             self.agent.load_networks()
@@ -61,9 +64,8 @@ class Run():
         self.episode = None
         self.best_reward = None
         
-        # for logs
-        self.reward_history = None
-        self.portfolio_value_history_of_histories = None
+        self.logger = Logger(mode=self.mode,
+                             checkpoint_directory=self.checkpoint_directory)
         
         self._reset()
         
@@ -73,8 +75,6 @@ class Run():
         self.step = 0
         self.episode = 0
         self.best_reward = float('-Inf')
-        self.reward_history = []
-        self.portfolio_value_history_of_histories = []
         
     def run(self) -> None:
         """Run the training or the testing during a certain number of steps.
@@ -94,7 +94,8 @@ class Run():
     def _run_one_episode(self) -> None:
         """Agent takes one step in the environment, and learns if in train mode."""
         
-        initial_time = time.time()
+        self.logger.set_time_stamp(1)
+        
         reward: float = 0
         done: bool = False
         observation = self.env.reset()
@@ -125,16 +126,16 @@ class Run():
                 
             observation = observation_
              
-        self.reward_history.append(reward)
-        self.portfolio_value_history_of_histories.append(portfolio_value_history)
+        self.logger.logs["reward_history"].append(reward)
+        self.logger.logs["portfolio_value_history_of_histories"].append(portfolio_value_history)
         
-        average_reward = np.mean(self.reward_history[-50:])
+        average_reward = np.mean(self.logger.logs["reward_history"][-50:])
         
         self.episode += 1
-        final_time = time.time()
         
-        print('    episode: {:<13d} | reward: {:<13.1f} | duration: {:<13.2f}'.format(self.episode, reward, final_time-initial_time))
-
+        self.logger.set_time_stamp(2)
+        self.logger.print_status(self.episode)
+        
         if average_reward > self.best_reward:
             self.best_reward = average_reward
             if self.mode == 'train':
@@ -154,16 +155,4 @@ class Run():
         figure_file = os.path.join(checkpoint_directory_plots, self.mode)
         x = [i+1 for i in range(self.n_episodes)]
         plot_reward(x, self.reward_history, figure_file, self.mode, np.sqrt(self.n_episodes).astype(int))
-        
-    def save_logs(self,
-                  checkpoint_directory_logs: str,
-                  ) -> None:
-        """Saves all the necessary logs to 'checkpoint_directory_logs' directory."""
-        
-        reward_history_array = np.array(self.reward_history)
-        portfolio_value_history_of_histories_array = np.array(self.portfolio_value_history_of_histories)
-        
-        np.save(os.path.join(checkpoint_directory_logs, self.mode+"_reward_history.npy"), reward_history_array)
-        np.save(os.path.join(checkpoint_directory_logs, self.mode+"_portfolio_value_history.npy"), portfolio_value_history_of_histories_array)
-        
         

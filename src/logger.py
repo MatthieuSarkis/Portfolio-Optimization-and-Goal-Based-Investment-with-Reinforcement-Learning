@@ -14,37 +14,46 @@
 This class remains to be implemented to handles logging more efficiently.
 """
 
-from typing import List
-
+import numpy as np
+import os
+import time
 class Logger():
     
     def __init__(self,
-                 list_assets: List[str],
                  mode: str,
+                 checkpoint_directory: str,
                  ) -> None:
         
-        self.list_assets = list_assets
+        self.mode = mode
+        self.checkpoint_directory = checkpoint_directory
+        self.checkpoint_directory_logs = os.path.join(self.checkpoint_directory, "logs")
+        self.checkpoint_directory_plots = os.path.join(self.checkpoint_directory, "plots")
+        
         self.logs: dict = {}
-        self.number_epochs: int = None
-        
         self.logs['reward_history'] = []
-        
-        if mode == 'test':
-            self.logs['portfolio_histories'] = []
-            
-        if mode == 'train':
-            self.logs['reward_running_average'] = []
-                          
-    def set_number_epochs(self,
-                           number_epochs: int,
-                           ) -> None:
-        
-        self.number_epochs = number_epochs
-        
-    def print_status(self) -> None:
-        pass
+        self.logs['portfolio_value_history_of_histories'] = []
     
-    def append_to_portfolio_history(self,
-                                    epoch,
-                                    ) -> None:
-        pass
+        self.time_stamp = [0, 0]
+            
+    def set_time_stamp(self,
+                   i: int,
+                   ) -> None:
+        
+        self.time_stamp[i-1] = time.time()
+                            
+    def print_status(self,
+                     episode: int,
+                     ) -> None:
+        
+        print('    episode: {:<13d} | reward: {:<13.1f} | duration: {:<13.2f}'.format(episode, self.logs["reward_history"][-1], self.time_stamp[1]-self.time_stamp[0]))
+    
+    def save_logs(self) -> None:
+        """Saves all the necessary logs to 'checkpoint_directory_logs' directory."""
+        
+        reward_history_array = np.array(self.logs['reward_history'])
+        portfolio_value_history_of_histories_array = np.array(self.logs['portfolio_value_history_of_histories'])
+        
+        np.save(os.path.join(self.checkpoint_directory_logs, self.mode+"_reward_history.npy"), reward_history_array)
+        np.save(os.path.join(self.checkpoint_directory_logs, self.mode+"_portfolio_value_history.npy"), portfolio_value_history_of_histories_array)
+        
+      
