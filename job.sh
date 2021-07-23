@@ -17,12 +17,12 @@
 
 #srun --unbuffered 
 python src/main.py \
---mode test \
+--mode train \
 --initial_portfolio portfolios_and_tickers/initial_portfolio_subset.json \
 --n_episodes 2 \
 --agent_type distributional \
 --assets_to_trade portfolios_and_tickers/tickers_S\&P500_subset.txt \
---checkpoint_directory saved_outputs/2021.07.23.18.38.10 \
+#--checkpoint_directory saved_outputs/2021.07.23.18.38.10 \
 #--use_corr_eigenvalues \
 
 

@@ -104,11 +104,11 @@ def main(args):
               sac_temperature=args.sac_temperature,
               scaler=scaler)
     
+    # running the training or testing, saving some logs and plots
     initial_time = time.time()
     run.run()
     run.logger.generate_plots()
     run.logger.save_logs()
-    
     final_time = time.time()
     print('\nTotal {}ing duration: {:*^13.3f}\n'.format(args.mode, final_time-initial_time))
 

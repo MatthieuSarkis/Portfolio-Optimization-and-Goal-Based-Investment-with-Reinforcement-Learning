@@ -12,13 +12,10 @@
 
 import gym
 import numpy as np
-import os
 from sklearn.preprocessing import StandardScaler
-import time
 
 from src.agents import Agent
 from src.logger import Logger
-from src.utilities import plot_reward
 
 class Run():
     """Main class to run the training or the testing."""

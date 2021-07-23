@@ -22,8 +22,7 @@ import seaborn as sns
 sns.set_theme()
 from sklearn.preprocessing import StandardScaler
 from typing import List, Union
-
-            
+          
 def plot_reward(x: np.ndarray, 
                 rewards: np.ndarray, 
                 figure_file: str, 
