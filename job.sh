@@ -19,11 +19,12 @@
 python src/main.py \
 --mode train \
 --initial_portfolio portfolios_and_tickers/initial_portfolio_subset.json \
---n_episodes 1 \
+--n_episodes 2 \
 --agent_type distributional \
 --assets_to_trade portfolios_and_tickers/tickers_S\&P500_subset.txt \
-#--checkpoint_directory saved_outputs/2021.07.22.21.15.17 \
 #--use_corr_eigenvalues \
+#--checkpoint_directory saved_outputs/2021.07.22.21.15.17 \
+
 
 
 # Detailed command line: In case you want to tune each param/hyperparam manually

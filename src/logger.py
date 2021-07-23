@@ -10,7 +10,10 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-import pandas as pd
+"""
+This class remains to be implemented to handles logging more efficiently.
+"""
+
 from typing import List
 
 class Logger():

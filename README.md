@@ -77,8 +77,7 @@ python src/main.py \
 
 ## To do
 
-* mother class network with save and load methods implemented
-* Possibility to start from a non-trivial portfolio
+* Think about how to improve the reward
 * Donnees fondamentales des entreprises, news
 * More generally, better data engineering. Dimensionality reduction along stock space dimension instead of simply plugging in the correlation matrix?
 * Leverage, lower bound on bank account
@@ -89,16 +88,5 @@ python src/main.py \
 * How about redefining what we call an observation in the environment? An observation could be a sequence of n time steps for instance. We could use a wrapper for that.
 * Improve command line arguments parsing
 * Benchmark
-* Generate better logs, define some Log class
+* Generate better logs, define some Logger class
 * Distributed algorithms
-
-## Done
-
-* Two-timescale update: update the policy and temperature every m>1 iterations (cf. https://arxiv.org/pdf/1802.09477.pdf)
-* Implement Distributional Soft Actor Critic
-* Implement new buying strategy: random, cyclic
-* Use GELU instead of RELU activation? (cf. https://arxiv.org/pdf/1606.08415.pdf)
-* Save hyperparameters in json file
-* Add correlation matrix (defined by a sliding window) to the data. It is just a time dependent matrix
-* Possibility to append a certain number of eigenvalues of the correlation matrix
-* Commenter le code en details

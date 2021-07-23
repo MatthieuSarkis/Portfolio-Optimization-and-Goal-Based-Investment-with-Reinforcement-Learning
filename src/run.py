@@ -13,7 +13,6 @@
 import gym
 import numpy as np
 import os
-import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import time
 
@@ -29,7 +28,6 @@ class Run():
                  n_episodes: int,
                  agent_type: str,
                  scaler: StandardScaler,
-                 checkpoint_directory_logs: str,
                  sac_temperature: float = 1.0,
                  mode: str = 'test',
                  ) -> None:
@@ -55,7 +53,6 @@ class Run():
         self.sac_temperature = sac_temperature
         self.mode = mode
         self.scaler = scaler
-        self.checkpoint_directory_logs = checkpoint_directory_logs
         
         if self.mode == 'test':
             self.agent.load_networks()
@@ -63,8 +60,10 @@ class Run():
         self.step = None
         self.episode = None
         self.best_reward = None
+        
+        # for logs
         self.reward_history = None
-        self.portfolio_history_of_histories = None
+        self.portfolio_value_history_of_histories = None
         
         self._reset()
         
@@ -75,6 +74,7 @@ class Run():
         self.episode = 0
         self.best_reward = float('-Inf')
         self.reward_history = []
+        self.portfolio_value_history_of_histories = []
         
     def run(self) -> None:
         """Run the training or the testing during a certain number of steps.
@@ -90,8 +90,6 @@ class Run():
         
         for _ in range(self.n_episodes):
             self._run_one_episode()
-                   
-        np.save(os.path.join(self.checkpoint_directory_logs, self.mode), np.array(self.reward_history))
                  
     def _run_one_episode(self) -> None:
         """Agent takes one step in the environment, and learns if in train mode."""
@@ -102,17 +100,23 @@ class Run():
         observation = self.env.reset()
         observation = self.scaler.transform([observation])[0]
         
+        # initializing a list to keep track of the porfolio value during the episode
+        portfolio_value_history = [self.env._get_portfolio_value()]
+        
         while not done:
             
             action = self.agent.choose_action(observation)
             observation_, reward, done, _ = self.env.step(action)
             observation_ = self.scaler.transform([observation_])[0]
             
+            # rescale the reward to account for the relative normalization between the 
+            # expected return and the entropy term in the loss function
             if self.agent_type == 'manual_temperature':
                 reward *= self.sac_temperature
                 
             self.step += 1
             reward += reward
+            portfolio_value_history.append(self.env._get_portfolio_value())
             
             self.agent.remember(observation, action, reward, observation_, done)
             
@@ -120,8 +124,10 @@ class Run():
                 self.agent.learn(self.step)
                 
             observation = observation_
-            
+             
         self.reward_history.append(reward)
+        self.portfolio_value_history_of_histories.append(portfolio_value_history)
+        
         average_reward = np.mean(self.reward_history[-50:])
         
         self.episode += 1
@@ -134,7 +140,7 @@ class Run():
             if self.mode == 'train':
                 self.agent.save_networks()
             
-    def plot(self,
+    def save_plots(self,
              checkpoint_directory_plots: str) -> None:
         """Call a helper function to plot the reward history in train mode and the reward distribution in test mode.
         
@@ -148,3 +154,16 @@ class Run():
         figure_file = os.path.join(checkpoint_directory_plots, self.mode)
         x = [i+1 for i in range(self.n_episodes)]
         plot_reward(x, self.reward_history, figure_file, self.mode, np.sqrt(self.n_episodes).astype(int))
+        
+    def save_logs(self,
+                  checkpoint_directory_logs: str,
+                  ) -> None:
+        """Saves all the necessary logs to 'checkpoint_directory_logs' directory."""
+        
+        reward_history_array = np.array(self.reward_history)
+        portfolio_value_history_of_histories_array = np.array(self.portfolio_value_history_of_histories)
+        
+        np.save(os.path.join(checkpoint_directory_logs, self.mode+"_reward_history.npy"), reward_history_array)
+        np.save(os.path.join(checkpoint_directory_logs, self.mode+"_portfolio_value_history.npy"), portfolio_value_history_of_histories_array)
+        
+        
