@@ -74,14 +74,7 @@ class Run():
         self.best_reward = float('-Inf')
         
     def run(self) -> None:
-        """Run the training or the testing during a certain number of steps.
-        
-        Args:
-            log_directory (str): filepath where to save the reward history as a numpy array
-            
-        Returns:
-            no value
-        """
+        """Run the training or the testing during a certain number of steps."""
         
         print('>>>>> Running <<<<<\n')
         
@@ -115,7 +108,9 @@ class Run():
                 
             self.step += 1
             reward += reward
-            portfolio_value_history.append(self.env._get_portfolio_value())
+            
+            if self.mode == 'test':
+                portfolio_value_history.append(self.env._get_portfolio_value())
             
             self.agent.remember(observation, action, reward, observation_, done)
             
