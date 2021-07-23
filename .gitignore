@@ -1,14 +1,11 @@
 .vscode/
 .DS_Store
 .env/
-data/
-logs/
-plots/
-saved_networks/
 __pycache__/
 *egg-info/
 build/
 dist/
 *.err
 *.out
+saved_outputs/
 PER.py

@@ -17,12 +17,12 @@
 
 #srun --unbuffered 
 python src/main.py \
---mode test \
---initial_portfolio ./initial_portfolio_subset.json \
+--mode train \
+--initial_portfolio portfolios_and_tickers/initial_portfolio_subset.json \
 --n_episodes 1 \
 --agent_type distributional \
---assets_to_trade src/tickers_S\&P500_subset.txt \
---checkpoint_directory saved_outputs/2021.07.22.21.15.17 \
+--assets_to_trade portfolios_and_tickers/tickers_S\&P500_subset.txt \
+#--checkpoint_directory saved_outputs/2021.07.22.21.15.17 \
 #--use_corr_eigenvalues \
 
 
@@ -30,7 +30,7 @@ python src/main.py \
 
 #srun --unbuffered 
 #python src/main.py \
-#--assets_to_trade src/tickers_S&P500_subset.txt \
+#--assets_to_trade ./portfolios_and_tickers/tickers_S&P500_subset.txt \
 #--initial_cash 10000000 \
 #--buy_cost 0.0001 \
 #--sell_cost 0.0001 \

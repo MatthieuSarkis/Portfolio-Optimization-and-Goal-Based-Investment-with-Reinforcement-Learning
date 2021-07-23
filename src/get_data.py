@@ -112,7 +112,7 @@ def load_data(initial_date: str,
         df (pd.DataFrame): multidimensional time series containing the close price of the relevant assets
     """
     
-    with open('src/tickers_S&P500.txt') as f:
+    with open('portfolios_and_tickers/tickers_S&P500.txt') as f:
         stocks_symbols = f.read().splitlines()
       
     if not os.path.exists('data/'):  

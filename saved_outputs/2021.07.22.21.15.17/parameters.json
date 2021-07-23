@@ -1,5 +1,5 @@
 {
-    "assets_to_trade": "src/tickers_S&P500_subset.txt",
+    "assets_to_trade": "./tickers_S&P500_subset.txt",
     "initial_cash": null,
     "initial_portfolio": "./initial_portfolio_subset.json",
     "buy_cost": 0.001,
