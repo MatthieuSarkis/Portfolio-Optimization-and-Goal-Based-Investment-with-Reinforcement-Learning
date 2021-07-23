@@ -99,7 +99,8 @@ class Run():
         observation = self.scaler.transform([observation])[0]
         
         # initializing a list to keep track of the porfolio value during the episode
-        portfolio_value_history = [self.env._get_portfolio_value()]
+        if self.mode == 'test':
+            portfolio_value_history = [self.env._get_portfolio_value()]
         
         while not done:
             
@@ -124,9 +125,10 @@ class Run():
             observation = observation_
              
         self.logger.logs["reward_history"].append(reward)
-        self.logger.logs["portfolio_value_history_of_histories"].append(portfolio_value_history)
-        
         average_reward = np.mean(self.logger.logs["reward_history"][-50:])
+        
+        if self.mode == 'test':
+            self.logger.logs["portfolio_value_history_of_histories"].append(portfolio_value_history)
         
         self.episode += 1
         
