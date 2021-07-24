@@ -129,7 +129,7 @@ class Run():
         self.episode += 1
         
         self.logger.set_time_stamp(2)
-        self.logger.print_status(self.episode)
+        self.logger.print_status(episode=self.episode)
         
         if average_reward > self.best_reward:
             self.best_reward = average_reward
