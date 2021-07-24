@@ -134,5 +134,3 @@ class Run():
             self.best_reward = average_reward
             if self.mode == 'train':
                 self.agent.save_networks()
-            
-        
