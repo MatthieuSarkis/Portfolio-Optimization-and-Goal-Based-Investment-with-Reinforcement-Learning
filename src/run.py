@@ -91,6 +91,7 @@ class Run():
         done: bool = False
         observation = self.env.reset()
         observation = self.scaler.transform([observation])[0]
+        self.logger._store_initial_value_portfolio(self.env._get_portfolio_value())
         
         # initializing a list to keep track of the porfolio value during the episode
         if self.mode == 'test':

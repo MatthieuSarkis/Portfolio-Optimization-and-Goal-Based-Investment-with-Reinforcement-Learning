@@ -23,7 +23,7 @@ sns.set_theme()
 from sklearn.preprocessing import StandardScaler
 from typing import List, Union
           
-def plot_reward(x: np.ndarray, 
+def plot_reward(x: List[int], 
                 rewards: np.ndarray, 
                 figure_file: str, 
                 mode: str,
@@ -58,14 +58,14 @@ def plot_reward(x: np.ndarray,
     
     plt.savefig(figure_file) 
     
-def plot_portfolio_value(x: np.ndarray, 
+def plot_portfolio_value(x: List[int], 
                          values: np.ndarray, 
                          figure_file: str, 
                          ) -> None:
     
-    plt.plot(x, values.T, linestyle='-', label='portfolio value')
-    plt.legend()
-    plt.title('Reward Portfolio value')
+    plt.plot(x, values.T, linestyle='-', linewidth=0.5)
+    plt.xlim((0, len(x)))
+    plt.title('Portfolio value')
     plt.savefig(figure_file) 
         
 def instanciate_scaler(env: gym.Env,

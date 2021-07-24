@@ -171,14 +171,14 @@ class Agent():
     def save_networks(self) -> None:
         """Save checkpoint for the weights of the various nets, used in training mode."""
         
-        print(' *** SAVING NETWORK WEIGHTS *** ')    
+        print('\n *** SAVING NETWORK WEIGHTS *** \n')    
         for network in self._network_list:
             network.save_network_weights()
         
     def load_networks(self) -> None:
         """Loading checkpoint for the weights of the various nets, used in test mode."""
         
-        print(' *** LOADING NETWORK WEIGHTS *** ')
+        print('\n *** LOADING NETWORK WEIGHTS *** \n')
         for network in self._network_list:
             network.load_network_weights()
    
