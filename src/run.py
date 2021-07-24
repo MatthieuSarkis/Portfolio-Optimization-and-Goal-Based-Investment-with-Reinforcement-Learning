@@ -80,6 +80,7 @@ class Run():
         
         for _ in range(self.n_episodes):
             self._run_one_episode()
+            self.logger.save_logs()
                  
     def _run_one_episode(self) -> None:
         """Agent takes one step in the environment, and learns if in train mode."""

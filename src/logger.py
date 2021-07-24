@@ -80,6 +80,6 @@ class Logger():
             n_days = portfolio_value_history_of_histories_array.shape[1]
             days = [i+1 for i in range(n_days)]
             plot_portfolio_value(x=days, 
-                                values=portfolio_value_history_of_histories_array, 
-                                figure_file=os.path.join(checkpoint_directory_plots, self.mode+"_portfolioValue"))
+                                 values=portfolio_value_history_of_histories_array, 
+                                 figure_file=os.path.join(checkpoint_directory_plots, self.mode+"_portfolioValue"))
       
