@@ -12,6 +12,7 @@
 
 import gym
 import numpy as np
+import os
 import torch
 from typing import Tuple
 
@@ -617,7 +618,7 @@ class Distributional_Agent(Agent):
             
 def instanciate_agent(env: Environment, 
                       device: str, 
-                      checkpoint_directory_networks: str,
+                      checkpoint_directory: str,
                       args: tuple,
                       ) -> Tuple[Agent, str]:
     """Instanciate the correct type of agent, according to args.agent_type.
@@ -632,6 +633,8 @@ def instanciate_agent(env: Environment,
         Agent instance
         file path for the training of testing plots
     """
+      
+    checkpoint_directory_networks = os.path.join(checkpoint_directory, 'networks')
         
     if args.agent_type == 'automatic_temperature':
         

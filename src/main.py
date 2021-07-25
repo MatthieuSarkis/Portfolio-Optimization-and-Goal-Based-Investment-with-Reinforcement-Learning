@@ -11,7 +11,6 @@
 # that they have been altered from the originals.
 
 from argparse import ArgumentParser
-from datetime import datetime
 import json 
 import numpy as np
 import os
@@ -21,29 +20,16 @@ import torch
 from src.agents import instanciate_agent
 from src.environment import Environment
 from src.get_data import load_data
-from pathlib import Path
 from src.run import Run
-from src.utilities import instanciate_scaler, prepare_initial_portfolio
+from src.utilities import create_directory_tree, instanciate_scaler, prepare_initial_portfolio
 
 def main(args):
 
     # creating all the necessary directory tree structure for efficient logging
-    date: str = datetime.now().strftime("%Y.%m.%d.%H.%M.%S")
-    if args.experimental:
-        checkpoint_directory = os.path.join("saved_outputs", "experimental")
-    else:
-        checkpoint_directory = os.path.join("saved_outputs", date) if args.mode=='train' else args.checkpoint_directory
-    checkpoint_directory_networks = os.path.join(checkpoint_directory, "networks")
-    checkpoint_directory_logs = os.path.join(checkpoint_directory, "logs")
-    checkpoint_directory_plots = os.path.join(checkpoint_directory, "plots")
-    Path(checkpoint_directory_networks).mkdir(parents=True, exist_ok=True)
-    Path(checkpoint_directory_logs).mkdir(parents=True, exist_ok=True)
-    Path(checkpoint_directory_plots).mkdir(parents=True, exist_ok=True)
-    # write the checkpoint directory name in a file for quick access when testing
-    if args.mode == 'train':
-        with open(os.path.join(checkpoint_directory, "checkpoint_directory.txt"), "w") as f:
-            f.write(checkpoint_directory) 
-
+    checkpoint_directory = create_directory_tree(mode=args.mode,
+                                                 experimental=args.experimental,
+                                                 checkpoint_directory=args.checkpoint_directory)
+    
     # saving the (hyper)parameters used for future reference
     params_dict = vars(args)
     with open(os.path.join(checkpoint_directory, args.mode+"_parameters.json"), "w") as f: 
@@ -88,12 +74,12 @@ def main(args):
     # instanciating the data standard scaler
     scaler = instanciate_scaler(env=env, 
                                 mode=args.mode,
-                                checkpoint_directory=checkpoint_directory_networks)
+                                checkpoint_directory=checkpoint_directory)
     
     # instanciating the trading agent
     agent = instanciate_agent(env=env, 
                               device=device, 
-                              checkpoint_directory_networks=checkpoint_directory_networks,
+                              checkpoint_directory=checkpoint_directory,
                               args=args)
     
     # running the whole training or testing process   

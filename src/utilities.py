@@ -10,6 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+from datetime import datetime
 import gym
 import itertools
 import json
@@ -17,12 +18,39 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
+from pathlib import Path
 import pickle
 import seaborn as sns
 sns.set_theme()
 from sklearn.preprocessing import StandardScaler
 from typing import List, Union
-          
+ 
+def create_directory_tree(mode: str,
+                          experimental: bool,
+                          checkpoint_directory: str):
+
+    date: str = datetime.now().strftime("%Y.%m.%d.%H.%M.%S")
+    
+    if experimental:
+        checkpoint_directory = os.path.join("saved_outputs", "experimental")
+    else:
+        checkpoint_directory = os.path.join("saved_outputs", date) if mode=='train' else checkpoint_directory
+        
+    # Create various subdirectories
+    checkpoint_directory_networks = os.path.join(checkpoint_directory, "networks")
+    checkpoint_directory_logs = os.path.join(checkpoint_directory, "logs")
+    checkpoint_directory_plots = os.path.join(checkpoint_directory, "plots")
+    Path(checkpoint_directory_networks).mkdir(parents=True, exist_ok=True)
+    Path(checkpoint_directory_logs).mkdir(parents=True, exist_ok=True)
+    Path(checkpoint_directory_plots).mkdir(parents=True, exist_ok=True)
+    
+    # write the checkpoint directory name in a file for quick access when testing
+    if mode == 'train':
+        with open(os.path.join(checkpoint_directory, "checkpoint_directory.txt"), "w") as f:
+            f.write(checkpoint_directory) 
+
+    return checkpoint_directory
+
 def plot_reward(x: List[int], 
                 rewards: np.ndarray, 
                 figure_file: str, 
@@ -99,11 +127,11 @@ def instanciate_scaler(env: gym.Env,
                 observations.append(observation_)
 
         scaler.fit(observations)
-        with open(os.path.join(checkpoint_directory,'scaler.pkl'), 'wb') as f:
+        with open(os.path.join(checkpoint_directory, 'networks', 'scaler.pkl'), 'wb') as f:
             pickle.dump(scaler, f)
     
     if mode == 'test':
-        with open(os.path.join(checkpoint_directory,'scaler.pkl'), 'rb') as f:
+        with open(os.path.join(checkpoint_directory, 'networks', 'scaler.pkl'), 'rb') as f:
             scaler = pickle.load(f)
     
     return scaler

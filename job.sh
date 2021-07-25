@@ -17,7 +17,7 @@
 python src/main.py \
 --mode train \
 --n_episodes 2 \
---assets_to_trade portfolios_and_tickers/tickers_S\&P500_dummy.txt \
+--assets_to_trade portfolios_and_tickers/tickers_S\&P500_subset.txt \
 --initial_portfolio portfolios_and_tickers/initial_portfolio_subset.json \
 --plot \
 --experimental \
