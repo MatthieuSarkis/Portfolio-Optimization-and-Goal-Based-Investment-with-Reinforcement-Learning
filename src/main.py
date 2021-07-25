@@ -25,16 +25,6 @@ from src.utilities import create_directory_tree, instanciate_scaler, prepare_ini
 
 def main(args):
 
-    # creating all the necessary directory tree structure for efficient logging
-    checkpoint_directory = create_directory_tree(mode=args.mode,
-                                                 experimental=args.experimental,
-                                                 checkpoint_directory=args.checkpoint_directory)
-    
-    # saving the (hyper)parameters used for future reference
-    params_dict = vars(args)
-    with open(os.path.join(checkpoint_directory, args.mode+"_parameters.json"), "w") as f: 
-        json.dump(params_dict, f, indent=4)
-    
     # specifying the hardware
     gpu_devices = ','.join([str(id) for id in args.gpu_devices])
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
@@ -47,7 +37,17 @@ def main(args):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
-   
+
+    # creating all the necessary directory tree structure for efficient logging
+    checkpoint_directory = create_directory_tree(mode=args.mode,
+                                                 experimental=args.experimental,
+                                                 checkpoint_directory=args.checkpoint_directory)
+    
+    # saving the (hyper)parameters used for future reference
+    params_dict = vars(args)
+    with open(os.path.join(checkpoint_directory, args.mode+"_parameters.json"), "w") as f: 
+        json.dump(params_dict, f, indent=4)
+    
     # downloading, preprocessing and loading the multidimensional time series into a dataframe
     df = load_data(initial_date=args.initial_date, 
                    final_date=args.final_date, 

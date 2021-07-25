@@ -16,11 +16,22 @@ import time
 
 from src.utilities import plot_reward, plot_portfolio_value
 class Logger():
+    """A helper class to better handle the saving of outputs."""
     
     def __init__(self,
                  mode: str,
                  checkpoint_directory: str,
                  ) -> None:
+        """Constructor method for the Logger class.
+        
+        Args:
+            mode (bool): 'train' of 'test'
+            checkpoint_directory: path to the main checkpoint directory, in which the logs
+                                  and plots subdirectories are located
+                                  
+        Returns:
+            no value
+        """
         
         self.mode = mode
         self.checkpoint_directory = checkpoint_directory
@@ -39,19 +50,22 @@ class Logger():
     def _store_initial_value_portfolio(self,
                                        initial_value_portfolio: float,
                                        ) -> None:
+        """Setter method for the initial_portfolio_value attribute"""
         
         self.initial_value_portfolio = initial_value_portfolio
             
     def set_time_stamp(self,
                        i: int,
                        ) -> None:
+        """Method to keep track of time stamps for monitoring job progress"""
         
         self.time_stamp[i-1] = time.time()
                             
     def print_status(self,
                      episode: int,
                      ) -> None:
- 
+        """Method to print on the status of the run on the standard output"""
+        
         print('    episode: {:<13d} | reward: {:<13.2f}% | duration: {:<13.2f}'.format(episode, 
                                                                                       (self.logs["reward_history"][-1] / self.initial_value_portfolio) * 100, 
                                                                                       self.time_stamp[1]-self.time_stamp[0]))
@@ -68,15 +82,13 @@ class Logger():
         
     def generate_plots(self) -> None:
         """Call a helper function to plot the reward history in train mode and the reward distribution in test mode."""
-        
-        checkpoint_directory_plots = os.path.join(self.checkpoint_directory, "plots")
-        
+            
         reward_history_array = np.array(self.logs['reward_history'])
         n_episodes = reward_history_array.shape[0]
         episodes = [i+1 for i in range(n_episodes)]
         plot_reward(x=episodes, 
                     rewards=(reward_history_array/self.initial_value_portfolio)*100, 
-                    figure_file=os.path.join(checkpoint_directory_plots, self.mode+"_reward"), 
+                    figure_file=os.path.join(self.checkpoint_directory_plots, self.mode+"_reward"), 
                     mode=self.mode, 
                     bins=np.sqrt(n_episodes).astype(int))
         
@@ -87,5 +99,5 @@ class Logger():
             idx = np.random.choice(n_episodes, min(n_episodes, 5))
             plot_portfolio_value(x=days, 
                                  values=portfolio_value_history_of_histories_array[idx], 
-                                 figure_file=os.path.join(checkpoint_directory_plots, self.mode+"_portfolioValue"))
+                                 figure_file=os.path.join(self.checkpoint_directory_plots, self.mode+"_portfolioValue"))
       

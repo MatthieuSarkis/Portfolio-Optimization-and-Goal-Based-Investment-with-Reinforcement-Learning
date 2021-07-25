@@ -84,7 +84,6 @@ python src/main.py \
 * tests unitaires: https://www.youtube.com/watch?v=6tNS--WetLI
 * Implement Prioritized Experience Replay, or even better: https://arxiv.org/abs/1906.04009
 * Cosine annealing for learning rates?
-* Different types of deep neural nets? 
 * How about redefining what we call an observation in the environment? An observation could be a sequence of n time steps for instance. We could use a wrapper for that.
 * Benchmark
 * Distributed algorithms
