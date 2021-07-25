@@ -29,7 +29,10 @@ def main(args):
 
     # creating all the necessary directory tree structure for efficient logging
     date: str = datetime.now().strftime("%Y.%m.%d.%H.%M.%S")
-    checkpoint_directory = os.path.join("saved_outputs", date) if args.mode=='train' else args.checkpoint_directory
+    if args.experimental:
+        checkpoint_directory = os.path.join("saved_outputs", "experimental")
+    else:
+        checkpoint_directory = os.path.join("saved_outputs", date) if args.mode=='train' else args.checkpoint_directory
     checkpoint_directory_networks = os.path.join(checkpoint_directory, "networks")
     checkpoint_directory_logs = os.path.join(checkpoint_directory, "logs")
     checkpoint_directory_plots = os.path.join(checkpoint_directory, "plots")
@@ -41,9 +44,9 @@ def main(args):
         with open(os.path.join(checkpoint_directory, "checkpoint_directory.txt"), "w") as f:
             f.write(checkpoint_directory) 
 
-    # saving the (hyper)parameters used 
+    # saving the (hyper)parameters used for future reference
     params_dict = vars(args)
-    with open(os.path.join(checkpoint_directory, "parameters.json"), "w") as f: 
+    with open(os.path.join(checkpoint_directory, args.mode+"_parameters.json"), "w") as f: 
         json.dump(params_dict, f, indent=4)
     
     # specifying the hardware
@@ -148,8 +151,9 @@ if __name__ == '__main__':
     parser.add_argument('--layer_size', type=int, default=256, help='Number of neurons in the various hidden layers')
     
     # Number of training or testing episodes and mode
-    parser.add_argument('--n_episodes', type=int, required=True, help='Number of training or testing episodes')
-    parser.add_argument('--mode',       type=str, required=True, help="Mode used: 'train' or 'test'")
+    parser.add_argument('--n_episodes',   type=int, required=True, help='Number of training or testing episodes')
+    parser.add_argument('--mode',         type=str, required=True, help="Mode used: 'train' or 'test'")
+    parser.add_argument('--experimental', action='store_true',     help='Saves all outputs in an overwritten directory, used simple experiments and tuning')
     
     # random seed, logs information and hardware
     parser.add_argument('--checkpoint_directory', type=str,            default=None,         help='In test mode, specify the directory in which to find the weights of the trained networks')

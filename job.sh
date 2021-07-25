@@ -16,8 +16,9 @@
 #srun --unbuffered 
 python src/main.py \
 --mode train \
---n_episodes 15 \
+--n_episodes 2 \
 --assets_to_trade portfolios_and_tickers/tickers_S\&P500_dummy.txt \
 --initial_portfolio portfolios_and_tickers/initial_portfolio_subset.json \
 --plot \
+--experimental \
 #--checkpoint_directory saved_outputs/2021.07.23.22.47.36 \
