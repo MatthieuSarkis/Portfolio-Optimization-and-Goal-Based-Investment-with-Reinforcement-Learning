@@ -77,6 +77,7 @@ python src/main.py \
 
 ## To do
 
+* Improve Logger class: keep track of the history of portfolio content
 * Think about how to improve the reward
 * Donnees fondamentales des entreprises, news
 * More generally, better data engineering. Dimensionality reduction along stock space dimension instead of simply plugging in the correlation matrix?
