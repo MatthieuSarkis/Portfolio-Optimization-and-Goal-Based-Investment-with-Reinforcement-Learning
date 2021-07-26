@@ -120,7 +120,7 @@ if __name__ == '__main__':
     parser.add_argument('--bank_rate',         type=float, default=0.5,          help='Annual bank rate')
     parser.add_argument('--initial_date',      type=str,   default='2014-12-31', help="Initial date of the multidimensional time series of the assets price: str, larger or equal to '2019-07-03'")
     parser.add_argument('--final_date',        type=str,   default='2020-12-30', help="Final date of the multidimensional time series of the assets price: str, smaller or equal to '2020-12-30'")
-    parser.add_argument('--limit_n_stocks',    type=int,   default=100,          help='Maximal number of shares that can be bought or sell in one trade')
+    parser.add_argument('--limit_n_stocks',    type=int,   default=20,          help='Maximal number of shares that can be bought or sell in one trade')
     
     # type of agent
     parser.add_argument('--agent_type',      type=str,   default='distributional', help="Type of agent: 'manual_temperature' or 'automatic_temperature' or 'distributional'")
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr_alpha',    type=float, default=0.0003,  help='Learning rate for the automatic temperature optimization')
     parser.add_argument('--tau',         type=float, default=0.005,   help='Hyperparameter for the smooth copy of the various networks to their target version')
     parser.add_argument('--batch_size',  type=int,   default=32,      help='Batch size when sampling from the replay buffer')
-    parser.add_argument('--memory_size', type=int,   default=1000000, help='Size of the replay buffer, memory of the agent')
+    parser.add_argument('--memory_size', type=int,   default=100, help='Size of the replay buffer, memory of the agent')
     parser.add_argument('--grad_clip',   type=float, default=1.0,     help='Bound in case one decides to use gradient clipping in the training process')
     parser.add_argument('--delay',       type=int,   default=1,       help='Delay between training of critic and actor')
     

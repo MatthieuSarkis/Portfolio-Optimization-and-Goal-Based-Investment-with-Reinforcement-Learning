@@ -61,7 +61,6 @@ class Environment(gym.Env):
         # attributes related to the financial time series
         self.stock_market_history = stock_market_history
         self.assets_list = self.stock_market_history.columns
-        self.time_horizon = self.stock_market_history.shape[0]
         self.stock_space_dimension = stock_market_history.shape[1]
         
         # if asked, append the sliding correlation matrix of the time series
@@ -74,6 +73,10 @@ class Environment(gym.Env):
             self.stock_market_history = append_corr_matrix_eigenvalues(df=self.stock_market_history,
                                                                        window=window,
                                                                        number_of_eigenvalues = number_of_eigenvalues)
+        
+        # We define the time horizon after appending the correlation matrix or its eigenvalues because 
+        # the definition of the sliding correlation matrix forces to get rid of a few time points
+        self.time_horizon = self.stock_market_history.shape[0]
         
         # defining the observation and action space, once all preprocessing has been done
         self.observation_space_dimension = 1 + self.stock_space_dimension + self.stock_market_history.shape[1]
