@@ -59,7 +59,7 @@ def main(args):
                                                   tickers=df.columns.to_list())
      
     # instanciating the trading environment   
-    env = Environment(stock_market_history=df,
+    env = Environment(stock_market_history=df.loc[args.initial_date:args.final_date],
                       initial_portfolio=initial_portfolio,
                       buy_cost=args.buy_cost,
                       sell_cost=args.sell_cost,
@@ -114,8 +114,8 @@ if __name__ == '__main__':
     parser.add_argument('--buy_cost',          type=float, default=0.001,        help='Cost for buying a share, prorata of the quantity being bought')
     parser.add_argument('--sell_cost',         type=float, default=0.001,        help='Cost for selling a share, prorata of the quantity being sold')
     parser.add_argument('--bank_rate',         type=float, default=0.5,          help='Annual bank rate')
-    parser.add_argument('--initial_date',      type=str,   default='2010-01-01', help='Initial date of the multidimensional time series of the assets price')
-    parser.add_argument('--final_date',        type=str,   default='2020-12-31', help='Final date of the multidimensional time series of the assets price')
+    parser.add_argument('--initial_date',      type=str,   default='2014-12-31', help="Initial date of the multidimensional time series of the assets price: str, larger or equal to '2019-07-03'")
+    parser.add_argument('--final_date',        type=str,   default='2020-12-30', help="Final date of the multidimensional time series of the assets price: str, smaller or equal to '2020-12-30'")
     parser.add_argument('--limit_n_stocks',    type=int,   default=100,          help='Maximal number of shares that can be bought or sell in one trade')
     
     # type of agent
