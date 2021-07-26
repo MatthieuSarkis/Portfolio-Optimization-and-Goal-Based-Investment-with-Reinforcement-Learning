@@ -12,6 +12,7 @@
 
 import numpy as np
 import os
+import pandas as pd
 import time
 
 from src.utilities import plot_reward, plot_portfolio_value
@@ -43,16 +44,10 @@ class Logger():
         
         if self.mode =='test':
             self.logs['portfolio_value_history_of_histories'] = []
+            self.logs['portfolio_content_history_of_histories'] = []
     
         self.time_stamp = [0, 0]
         self.initial_value_portfolio = None
-     
-    def _store_initial_value_portfolio(self,
-                                       initial_value_portfolio: float,
-                                       ) -> None:
-        """Setter method for the initial_portfolio_value attribute"""
-        
-        self.initial_value_portfolio = initial_value_portfolio
             
     def set_time_stamp(self,
                        i: int,
@@ -79,6 +74,9 @@ class Logger():
         if self.mode =='test':
             portfolio_value_history_of_histories_array = np.array(self.logs['portfolio_value_history_of_histories'])
             np.save(os.path.join(self.checkpoint_directory_logs, self.mode+"_portfolio_value_history.npy"), portfolio_value_history_of_histories_array)
+            
+            portfolio_content_history_of_histories_array = np.array(self.logs['portfolio_content_history_of_histories'])
+            np.save(os.path.join(self.checkpoint_directory_logs, self.mode+"_portfolio_content_history.npy"), portfolio_content_history_of_histories_array)
         
     def generate_plots(self) -> None:
         """Call a helper function to plot the reward history in train mode and the reward distribution in test mode."""
@@ -101,3 +99,20 @@ class Logger():
                                  values=portfolio_value_history_of_histories_array[idx], 
                                  figure_file=os.path.join(self.checkpoint_directory_plots, self.mode+"_portfolioValue"))
       
+    def _store_initial_value_portfolio(self,
+                                       initial_value_portfolio: float,
+                                       ) -> None:
+        """Setter method for the initial_portfolio_value attribute"""
+        
+        self.initial_value_portfolio = initial_value_portfolio
+        
+    def portfolio_content_to_dataframe(self,
+                                       tickers: str,
+                                       i: int,
+                                       ) -> None:
+        
+        portfolio_content_history_array = np.array(self.logs['portfolio_content_history_of_histories'])[i]
+        df = pd.DataFrame(data=portfolio_content_history_array, columns=tickers)
+        
+        return df
+        

@@ -54,12 +54,16 @@ def main(args):
                    tickers_subset=args.assets_to_trade,
                    mode=args.mode)
     
+    if args.mode == 'test' and args.initial_date is not None and args.final_date is not None:
+        df = df.loc[args.initial_date:args.final_date]
+        dates = df.index
+    
     # preparing the initial portfolio to pass it to the constructor of the environment 
     initial_portfolio = prepare_initial_portfolio(initial_portfolio=args.initial_cash if args.initial_cash is not None else args.initial_portfolio,
                                                   tickers=df.columns.to_list())
      
     # instanciating the trading environment   
-    env = Environment(stock_market_history=df.loc[args.initial_date:args.final_date],
+    env = Environment(stock_market_history=df,
                       initial_portfolio=initial_portfolio,
                       buy_cost=args.buy_cost,
                       sell_cost=args.sell_cost,

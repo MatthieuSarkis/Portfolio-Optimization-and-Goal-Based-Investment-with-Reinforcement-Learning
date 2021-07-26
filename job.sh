@@ -19,10 +19,6 @@ python src/main.py \
 --n_episodes 10 \
 --assets_to_trade portfolios_and_tickers/tickers_S\&P500_subset.txt \
 --initial_portfolio portfolios_and_tickers/initial_portfolio_subset.json \
---plot \
---experimental \
---initial_date 2019-07-03 \
---final_date 2020-07-02 \
-#--checkpoint_directory saved_outputs/2021.07.23.22.47.36 \
+--checkpoint_directory saved_outputs/2021.07.23.22.47.36 \
 
 

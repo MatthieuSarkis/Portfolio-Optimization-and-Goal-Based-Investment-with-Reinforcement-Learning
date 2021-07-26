@@ -96,6 +96,7 @@ class Run():
         # initializing a list to keep track of the porfolio value during the episode
         if self.mode == 'test':
             portfolio_value_history = [self.env._get_portfolio_value()]
+            portfolio_content_history = [self.env.number_of_shares]
         
         while not done:
             
@@ -113,6 +114,7 @@ class Run():
             
             if self.mode == 'test':
                 portfolio_value_history.append(self.env._get_portfolio_value())
+                portfolio_content_history.append(self.env.number_of_shares)
             
             self.agent.remember(observation, action, reward, observation_, done)
             
@@ -126,6 +128,7 @@ class Run():
         
         if self.mode == 'test':
             self.logger.logs["portfolio_value_history_of_histories"].append(portfolio_value_history)
+            self.logger.logs["portfolio_content_history_of_histories"].append(portfolio_content_history)
         
         self.episode += 1
         
