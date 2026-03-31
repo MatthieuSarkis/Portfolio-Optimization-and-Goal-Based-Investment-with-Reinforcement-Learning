@@ -4,6 +4,6 @@ jupyter==1.0.0
 scikit-learn==0.24.2
 matplotlib==3.4.2
 seaborn==0.11.1
-torch==1.8.1
+torch>=2.8.0
 yfinance==0.1.59
 gym==0.18.3
